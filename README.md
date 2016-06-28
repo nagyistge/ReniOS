@@ -7,11 +7,20 @@ pictures of demo in issues
 -working on group messaging
 
 Total Functionality/Features:
+
 One to one messaging
+
 One to many messaging 
+
 Notifications for Statuses/Messages
+
 Geolocation for Statuses/messages
+
 Location update pinging
+
 Geolocation vicinity suggestions
+
 Autocomplete suggestions
+
 Contact Sync
+
