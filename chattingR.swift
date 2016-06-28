@@ -65,6 +65,20 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
     }
     
+    override func viewDidAppear(animated: Bool) {
+        super.viewDidAppear(true)
+        
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        //print(friendname)
+        self.messagesArray.removeAll()
+        //   let statuslist = delegate.theWozMap[friendname]!
+        //   let rendez = statuslist.allDeesRendez
+        self.messagesArray.appendContentsOf(delegate.theWozMap[friendname]!.allDeesChat! )
+        updateTableview()
+        NSLog("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
+        
+    }
+    
 
 
 
@@ -77,8 +91,9 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         print("is the update in rendezChat even called??")
         
         //get the friend param and set it
-        let postparam:Dictionary<String, Chat!> = notification.userInfo as! Dictionary<String, Chat!>
-        let friendNotif:Chat = postparam["chatstatus"]!
+        let postparam = notification.userInfo as? [String: AnyObject]
+        print(postparam)
+        let friendNotif:Chat = postparam!["chatstatus"]! as! Chat
         
         if(friendNotif.username == friendname){
             self.messagesArray.append(friendNotif)

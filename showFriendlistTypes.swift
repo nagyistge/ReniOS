@@ -114,18 +114,26 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 
                 NSLog("Response ==> %@", responseData);
                 
-                let jsonData:NSArray = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSArray
+                let jsonData1:NSDictionary = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSDictionary
+                
+                let jsonData:NSArray = jsonData1.valueForKey("friends") as! NSArray
                 
                 
                 for(var index = 0; index < jsonData.count; index++ ){
                     
                     let username1:NSString = jsonData[index].valueForKey("username") as! NSString
-                    let title1:NSString = jsonData[index].valueForKey("friendname") as! NSString
+                    
+                    var title2:NSString = ""
+                    if let title1:NSString = jsonData[index].valueForKey("friendname") as? NSString{
+                        title2 = (jsonData[index].valueForKey("friendname") as? NSString)!
+                    }else{
+                        title2 = username1
+                    }
 
                     let status1:Int = jsonData[index].valueForKey("status") as! Int
                     
-                    print(title1)
-                    let status = Friend(username: username1 as String, friendname: title1 as String, phone: "", email: "", status: status1)
+                    print(title2)
+                    let status = Friend(username: username1 as String, friendname: title2 as String, phone: "", email: "", status: status1)
                     
                     someInts.append(status)
                     print("Friend Entity: " + status.friendname)

@@ -23,9 +23,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //tempfriend array to be able to EMIT PROPERLY
     internal var friendarr = [AnyObject]()
     internal var chatarr = [AnyObject]()
+    internal var grouparr = [AnyObject]()
     
-    
-    
+    var badgeCount = 0
+    var statusNotification:UILocalNotification = UILocalNotification()
+    var rendezNotification:UILocalNotification = UILocalNotification()
+    var chatNotification:UILocalNotification = UILocalNotification()
     
     var window: UIWindow?
     var timer: NSTimer?
@@ -40,7 +43,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             .time (last instance of when you last check notificaitons from them.  Should only he referenced on login since prefs will keep these values updated on the device afterwards, and later updated to a sql table on logout)
     */
     internal var yourFriends = [Friend]()
-    
+    internal var yourGroups = [Groups]()
+    internal var yourLocs = Dictionary<String, [FromLocation]!>()
     /*
                                         -=Xxx> theWozMap <xxX=-
                         Essentially the holy grail data structure for the app
@@ -56,6 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     */
     internal var theWozMap = Dictionary<String,rendezChatDictionary!>()
     internal var newfeed = [Status]()
+    internal var theNotifHelper = NotificationHelper()
     
     
     //EVENT MANAGER CAUSE SOCKETS BEING CHEEKY
@@ -83,8 +88,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         
         
-        
-        
+        UIApplication.sharedApplication().setMinimumBackgroundFetchInterval(UIApplicationBackgroundFetchIntervalMinimum)
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
         
         //self.FriendsActivity.go
         return true
@@ -106,13 +111,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.\
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
         
-        let username = prefs.valueForKey("USERNAME") as! String
-        if(self.theWozMap[username] == nil){
-            starting()
+        UIApplication.sharedApplication().applicationIconBadgeNumber = 0
+        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let isLoggedIn:Int = prefs.integerForKey("ISLOGGEDIN") as Int
+        if (isLoggedIn != 1) {
+
+       
+        }else{
+            let username = prefs.valueForKey("USERNAME") as! String
+            if(self.theWozMap[username] == nil){
+                starting()
+            }
         }
     }
+    
+  
+    
 
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
@@ -137,7 +152,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         NSNotificationCenter.defaultCenter().postNotificationName(rendezChatNotifKey, object: self, userInfo: post)
     }
     
-    func notifyChatting(chatStatus: ChatStatus){
+    func notifyChatting(chatStatus: Chat){
         //chatstatus should be perfectly contructed and passed along with no changed from the parameter
         let post:[NSObject : AnyObject] = ["chatstatus": chatStatus]
         NSNotificationCenter.defaultCenter().postNotificationName(chattingNotifKey, object: self, userInfo: post)
@@ -189,13 +204,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             {
                 let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
                 NSLog("Response ==> %@", responseData);
-                let jsonData:NSArray = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSArray
+                let jsonData1:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+               // let jsonData:NSArray = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSArray
+                let jsonData:NSArray = jsonData1.valueForKey("friends") as! NSArray
+                let jsonData2:NSArray = jsonData1.valueForKey("groups") as! NSArray
+                
                 for(var index = 0; index < jsonData.count; index++ ){
                     let username1:NSString = jsonData[index].valueForKey("username") as! NSString
-                    let title1:NSString = jsonData[index].valueForKey("friendname") as! NSString
-                    let status = Friend(username: username1 as String, showname: title1 as String, timestamp: NSDate())
+                    var title2:NSString = ""
+                    if let title1 =  jsonData[index].valueForKey("friendname") as? NSString{
+                        title2 = jsonData[index].valueForKey("friendname") as! NSString
+                    }
+                    else{
+                        title2 = username1
+                    }
+                    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: NSDate())
                     self.yourFriends.append(status)
                     print("Friend Entity added: " + status.friendname)
+                }
+                for(var index = 0; index < jsonData2.count; index++ ){
+                    let groupname:NSString = jsonData2[index].valueForKey("groupname") as! NSString
+                    let groupdetail:NSString = jsonData2[index].valueForKey("groupdetail") as! NSString
+                    let groupid: Int = jsonData2[index].valueForKey("id") as! Int
+                    let members:NSArray = jsonData2[index].valueForKey("members") as! NSArray
+                    let member = Groups(id: groupid, groupname: groupname as String, groupdetail: groupdetail as String, members: members as! [Friend])
+                    self.yourGroups.append(member)
+                    print("group Entity added:")
+                    print(member)
+                
                 }
             } else {
                 let alertView:UIAlertView = UIAlertView()
@@ -220,6 +256,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     }
     
+    /*
+    *   Default call to allocate all the rendez and whatnot, is called whenever the app starts
+    *   again but the user is logged in but the phone terminates it or something
+    */
     func starting(){
     
     let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
@@ -244,38 +284,124 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     for(var i = 0; i < initRendezChatD.allDeesRendez.count; i++){
     //theWozMap is a map of string names to rendezdictionaries so need to make sure that the correct stuff maps to the right names
-    if( initRendezChatD.allDeesRendez[i].username == username){
-    if( self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] == nil ){
-    self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] = rendezChatDictionary()
-    }
-    self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
+        var name:String = initRendezChatD.allDeesRendez[i].fromuser
+        var uname:String = initRendezChatD.allDeesRendez[i].username
+        var showname:String = initRendezChatD.allDeesRendez[i].showname
+        if( initRendezChatD.allDeesRendez[i].username == username){
+            //setting the variable since using index and whatnot is so long and confusing
+            
+            if( self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] == nil ){
+                self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] = rendezChatDictionary()
+            }
+            if(!self.theNotifHelper.isInNotifMap(name))
+            {
+                self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname))
+            }
+           
+           // self.theNotifHelper.incrementRendez(name)
+            
+            self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
     
-    }else{
-    if( self.theWozMap[initRendezChatD.allDeesRendez[i].username] == nil ){
-    self.theWozMap[initRendezChatD.allDeesRendez[i].username] = rendezChatDictionary()
-    }
-    self.theWozMap[initRendezChatD.allDeesRendez[i].username]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
+        }else{
+            if( self.theWozMap[initRendezChatD.allDeesRendez[i].username] == nil ){
+                self.theWozMap[initRendezChatD.allDeesRendez[i].username] = rendezChatDictionary()
+            }
+            if(!self.theNotifHelper.isInNotifMap(uname))
+            {
+                self.theNotifHelper.addToNotfifs(NotificationNode(username: uname, showname: showname))
+                var timeS:String = initRendezChatD.allDeesRendez[i].timeset
+                if(timeS.characters.count < 18){
+                    timeS += ":00"
+                }
+                
+                //self.theNotifHelper.incrementRendez(uname)
+                let dateFormatter = NSDateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                var timefor = dateFormatter.dateFromString(timeS as String)
+                
+                if( (prefs.valueForKey(uname) as! NSDate ).compare(timefor!) == NSComparisonResult.OrderedAscending ){
+                    self.theNotifHelper.incrementRendez(uname)
+
+                }
+                
+            
+                self.theNotifHelper.setMaxtime(uname, time: timefor!)
+            }
+            
+            
+            self.theWozMap[initRendezChatD.allDeesRendez[i].username]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
     
-    }
+        }
     }
     
+        //allocate all the chats send and recieved by you
     for(var i = 0; i < initRendezChatD.allDeesChat.count; i++){
-    //theWozMap is a map of string names to rendezdictionaries so need to make sure that the correct stuff maps to the right names
-    if( initRendezChatD.allDeesChat[i].username == username){
-    
-    if( self.theWozMap[initRendezChatD.allDeesChat[i].toUser] == nil ){
-    self.theWozMap[initRendezChatD.allDeesChat[i].toUser] = rendezChatDictionary()
-    }
-    self.theWozMap[initRendezChatD.allDeesChat[i].toUser]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
-    print(initRendezChatD.allDeesChat[i])
-    
-    }else{
-    if( self.theWozMap[initRendezChatD.allDeesChat[i].username] == nil ){
-    self.theWozMap[initRendezChatD.allDeesChat[i].username] = rendezChatDictionary()
-    }
-    self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
-    print(initRendezChatD.allDeesChat[i])
-    }
+        let uname = initRendezChatD.allDeesChat[i].username
+        let touser = initRendezChatD.allDeesChat[i].toUser
+        var showname: String!
+        //IF THE USERNAME IS YOUR USERNAME, THEN THE TOUSER IS THE SENDER
+        if( initRendezChatD.allDeesChat[i].username == username){
+            for x in self.yourFriends{
+                if(x.username == touser){
+                showname = x.friendname
+                }
+            }
+            if( self.theWozMap[initRendezChatD.allDeesChat[i].toUser] == nil ){
+                    self.theWozMap[initRendezChatD.allDeesChat[i].toUser] = rendezChatDictionary()
+            }
+            
+            if(!self.theNotifHelper.isInNotifMap(touser))
+            {
+                self.theNotifHelper.addToNotfifs(NotificationNode(username: touser, showname: showname))
+            // print(initRendezChatD.allDeesChat[i])
+            }
+            let timeS = initRendezChatD.allDeesChat[i].time
+            self.theWozMap[initRendezChatD.allDeesChat[i].toUser]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
+        }else{//ELSE THE USERNAME IS THE SENDER
+            if( self.theWozMap[initRendezChatD.allDeesChat[i].username] == nil ){
+                self.theWozMap[initRendezChatD.allDeesChat[i].username] = rendezChatDictionary()
+            }
+            for x in self.yourFriends{
+                if(x.username == uname){
+                    showname = x.friendname
+                }
+            }
+            if(!self.theNotifHelper.isInNotifMap(uname))
+            {
+                self.theNotifHelper.addToNotfifs(NotificationNode(username: uname, showname: showname))
+                // print(initRendezChatD.allDeesChat[i])
+            }
+            let timeS = initRendezChatD.allDeesChat[i].time
+            if( (prefs.valueForKey(uname) as! NSDate ).compare(timeS) == NSComparisonResult.OrderedAscending ){
+                self.theNotifHelper.incrementChat(uname)
+            }
+            self.theNotifHelper.setMaxtime(uname, time: timeS)
+            self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
+    //print(initRendezChatD.allDeesChat[i])
+        }
+        }
+        print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
+         print(initRendezChatD.allDeezLoc.count)
+        for(var i = 0; i < initRendezChatD.allDeezLoc.count; i++){
+            if( initRendezChatD.allDeezLoc[i].id != username){
+                if( yourLocs[initRendezChatD.allDeezLoc[i].id] == nil){
+                    yourLocs[initRendezChatD.allDeezLoc[i].id] = [initRendezChatD.allDeezLoc[i]]
+                }else{
+                    yourLocs[initRendezChatD.allDeezLoc[i].id]!.append(initRendezChatD.allDeezLoc[i])
+                    print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
+                    print(yourLocs[initRendezChatD.allDeezLoc[i].id]!.count)
+                }
+            }else{
+                if( yourLocs[initRendezChatD.allDeezLoc[i].username] == nil){
+                    yourLocs[initRendezChatD.allDeezLoc[i].username] = [initRendezChatD.allDeezLoc[i]]
+                }else{
+                    yourLocs[initRendezChatD.allDeezLoc[i].username]!.append(initRendezChatD.allDeezLoc[i])
+                    print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
+                print(yourLocs[initRendezChatD.allDeezLoc[i].username]!.count)
+                }
+            }
+        
     }
 }
     
@@ -293,6 +419,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
     }
+    
     
     
     func onStart(username:String ) -> rendezChatDictionary{
@@ -336,6 +463,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let jsonDataStatus: NSArray = jsonData.valueForKey("Status") as! NSArray
                 let jsonDataRendez: NSArray = jsonData.valueForKey("RendezStatus") as! NSArray
                 let jsonDataChat: NSArray = jsonData.valueForKey("RendezChat") as! NSArray
+                let jsonLoc: NSArray = jsonData.valueForKey("RendezLoc") as! NSArray
+
                 
                 
                 
@@ -405,6 +534,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         let type:Int = jsonDataRendez[index].valueForKey("type") as! Int
                         let response:Int = jsonDataRendez[index].valueForKey("response") as! Int
                         let fromuser:String = jsonDataRendez[index].valueForKey("fromuser") as! NSString as String
+                        var showname1:String = ""
+                        if let showname:String = jsonDataRendez[index].valueForKey("showname") as?String!{
+                           showname1 = jsonDataRendez[index].valueForKey("showname") as! String!
+                        }else{
+                            showname1 = fromuser
+                        }
                         let dateFormatter = NSDateFormatter()
                         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                         dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
@@ -413,7 +548,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         
                         var date2 = dateFormatter.dateFromString(timefor as String)
                         date2 = dateFormatter.dateFromString(timefor as String)
-                        let status = RendezStatus(id: id, username: username1 as String, title: title1 as String, details: detail1 as String, location: location1 as String, timeset: timeset as String, timefor: timefor as String, type: type, response:response, fromuser:fromuser)
+                        let status = RendezStatus(id: id, username: username1 as String, title: title1 as String, details: detail1 as String, location: location1 as String, timeset: timeset as String, timefor: timefor as String, type: type, response:response, fromuser:fromuser, showname:showname1)
                      //   print("ADDED TO RENDEZ")
                       //  print(jsonDataRendez[index])
                         someRendez.append(status)
@@ -437,10 +572,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                         //print("ADDED TO CHAT")
                         someChat.append(status)
                     }
+                
+                let dateFormatter = NSDateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                
+                for(var index = 0; index < jsonLoc.count; index++){
+                    //let id:NSString = jsonDataChat[index].valueForKey("user") as! NSString
+                    let idloc:NSString = jsonLoc[index].valueForKey("id") as! NSString
+                    let usernameloc:NSString = jsonLoc[index].valueForKey("username") as! NSString
+                    let locationloc:NSString = jsonLoc[index].valueForKey("location") as! NSString
+                    let time:NSString = jsonLoc[index].valueForKey("time") as! NSString
+                     let date1 = dateFormatter.dateFromString(time as String)
+                    returnDic.allDeezLoc.append(FromLocation( username: usernameloc as String, id:idloc as String, location: locationloc as String, time: date1!))
+                }
                 //this marks the end of the forloop.  someRendez and someChat SHOULD be populated by now...
                 returnDic.allDeesRendez = someRendez
                 returnDic.allDeesChat = someChat
                 returnDic.allDeesStatus = someStatus
+                //returnDic.allDeezLoc.appendContentsOf(<#T##newElements: CollectionType##CollectionType#>)
                // self.theWozMap[friendname] = returnDic
             } else {
                 let alertView:UIAlertView = UIAlertView()
@@ -516,6 +666,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             {
                 let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
                 NSLog("Response ==> %@", responseData);
+                print(responseData)
                 let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
                 //this is the forloop of every single rendez and chat in the table
                 //They are looped through and sorted and put into their respected containers
@@ -673,10 +824,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func letsGetDatSocketRollin(username1:String, showname1:String){
         let username = username1
         
+        //default initial connection to the socket server
         self.mSocket.on("connect") {data, ack in
             print("socket connected")
             self.mSocket.emit("joinserver", username, showname1)
             
+            //emit listener that is set to emit a rendez once it has been made and sent off
             self.events.listenTo("emitRendez", action: {
                 print("friend array count")
                 print(self.friendarr.count)
@@ -694,6 +847,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.friendarr.removeAll()
             })
             
+            //same as earlier, but for chats this time
             self.events.listenTo("emitChat", action: {
                 let detail = self.chatarr[0].valueForKey("detail") as! String
                 print("detail: " + detail)
@@ -706,9 +860,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
         
+        //LISTENERS TO RECIEVE EMITS THAT HAVE BEEN SENT BY FRIENDS, HANDLES RENDEZ AND CHATS, NEEDS TO
+        //IMPLEMENT RESPONSES AS WELL?
         //When or if the user is logged in, turn on the socket listeners here
         self.mSocket.on("new chat"){data, ack in
             if let cur:NSDictionary = data?[0] as? NSDictionary {
+                
+                UIApplication.sharedApplication().applicationIconBadgeNumber = ++self.badgeCount
                 
                let friendname = cur.objectForKey("username") as! String
                 let message = cur.objectForKey("detail") as! String
@@ -732,7 +890,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
                 let friend = Friend(username: friendname as String, showname: showname1 as String, timestamp: NSDate())
                 self.notifyFriendsActivity(friend)
-                let rendezChat = ChatStatus(username: friendname, detail: message, time: NSDate())
+                let rendezChat = Chat(username: friendname, details: message, time: NSDate(), toUser: username)
                 self.notifyChatting(rendezChat)
             }
             else{
@@ -744,6 +902,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let whatisit = data?[0]
             print(whatisit)
             if let cur:NSDictionary = data?[0] as? NSDictionary {
+                 UIApplication.sharedApplication().applicationIconBadgeNumber = ++self.badgeCount
                 let id = cur.objectForKey("id") as! Int
                 let friendname = cur.objectForKey("username") as! NSString
                 let showname1 = cur.objectForKey("showname") as! NSString
@@ -778,6 +937,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let localNotification: UILocalNotification = UILocalNotification()
                 localNotification.alertAction = "YO BOI GOT THAT MUTHA FUCKIN SOCKET EMIT WOOOOOOOOOOO"
                 localNotification.alertBody = "Woww it works!!"
+
                 localNotification.fireDate = NSDate(timeIntervalSinceNow: 5)
                 //this should fire off the update in friends activity...
                 UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
