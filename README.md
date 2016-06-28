@@ -6,5 +6,12 @@ pictures of demo in issues
 -added updating as well as centralizing the data on start
 -working on group messaging
 
-
-pic
+Total Functionality/Features:
+One to one messaging
+One to many messaging 
+Notifications for Statuses/Messages
+Geolocation for Statuses/messages
+Location update pinging
+Geolocation vicinity suggestions
+Autocomplete suggestions
+Contact Sync
