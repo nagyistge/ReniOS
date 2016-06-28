@@ -33,7 +33,7 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        userLabel.text = showuser
+        userLabel.text = "Me"
         friendLabel.text = showfriend
         
         //lets assume we need all this bs for now
@@ -216,11 +216,11 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         else{
             let friendarray = ["array": friendarr]
             arr.append(friendarray)
-            let fuckingNSArray:NSArray = arr
-            let fuckingfinal:NSDictionary = ["json": fuckingNSArray]
-            NSLog("PostData: %@",fuckingfinal);
+            let aNSArray:NSArray = arr
+            let final:NSDictionary = ["json": aNSArray]
+            NSLog("PostData: %@",final);
             let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/sendChatRSwift.php")!
-            let da:NSData = try! NSJSONSerialization.dataWithJSONObject(fuckingfinal, options: [])
+            let da:NSData = try! NSJSONSerialization.dataWithJSONObject(final, options: [])
             print(da)
             let postLength:NSString = String( da.length )
             let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
