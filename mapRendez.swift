@@ -195,24 +195,19 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     for y in someFriendInts{
                         if y.username == username{
                             let z = "From " + (y.username as String)
-                        let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0]
+                        let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
                         celler.addObject(fcell)
                         }else{
                             let z = "To " + (y.username as String)
-                            let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0]
+                            let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
                             celler.addObject(fcell)
                         }
-                    
                     }
-                    
                 }
-
-            
-            
-            
                 cellDescriptors.addObject(celler)
-                
+            if(!someInts.isEmpty){
                 getIndicesOfVisibleRows()
+            }
                 tblExpandable.reloadData()
             
         }
@@ -224,7 +219,6 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
             //print(cellDescriptors)
             for currentSectionCells in cellDescriptors {
                 var visibleRows = [Int]()
-                
                 for row in 0...((currentSectionCells as! [[String: AnyObject]]).count - 1) {
                     if let v = currentSectionCells[row]["isVisible"]as? Bool {
                         if v == true {
@@ -233,7 +227,6 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     }else{
                     }
                 }
-                
                 visibleRowsPerSection.append(visibleRows)
             }
         }
@@ -259,8 +252,12 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         
         func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return visibleRowsPerSection[section].count
-        }
+            if(!visibleRowsPerSection.isEmpty){
+                return visibleRowsPerSection[section].count
+            }else{
+                return 0
+            }
+    }
         
         
         func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
@@ -334,7 +331,16 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
             let indexOfTappedRow = visibleRowsPerSection[indexPath.section][indexPath.row]
             
             if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpandable"] as! Bool == false && cellDescriptors[indexPath.section][indexOfTappedRow]["primaryTitle"] as! String! != ""{
-                NSNotificationCenter.defaultCenter().postNotificationName("refresh", object: someFriendInts[indexOfTappedRow])
+                //var returnRendezStatus:RendezStatus!
+                for x in self.someFriendInts{
+                    if x.id == cellDescriptors[indexPath.section][indexOfTappedRow]["id"] as! Int{
+                         NSNotificationCenter.defaultCenter().postNotificationName("refresh", object: x)
+                    }
+                
+                }
+                
+                
+               
                 self.dismissViewControllerAnimated(true, completion: nil)
                 
             
