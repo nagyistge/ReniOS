@@ -28,7 +28,7 @@ var locationCoords:String!
     var vc: showRRendez!
     var toViewController:chattingR!
     var temp:rendezChatDictionary!
-    
+     var vm: showRMap!
     
     ///operator that handles the custom side effect when presenting the chat view
     var transitionOperator = TransitionOperator()
@@ -202,7 +202,7 @@ override func viewWillAppear(animated: Bool) {
     @IBAction func onSendLocClicked(sender: UIButton) {
         //send current location to the relational in the database
         
-        let post:NSString = "id=\(friendname)&username=\(username)&location=\(self.locationCoords)"
+        let post:NSString = "friendname=\(friendname)&username=\(username)&location=\(self.locationCoords)"
         NSLog("PostData: %@",post);
         
         let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/onLocationUpdate.php")!
@@ -286,4 +286,86 @@ override func viewWillAppear(animated: Bool) {
         }
         
     }
+    
+    @IBAction func onMapLoc(sender: UIButton) {
+        
+        let post:NSString = "friendname=\(friendname)&username=\(username)"
+        NSLog("PostData: %@",post);
+        
+        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/fetchFriendLoc.php")!
+        
+        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        
+        let postLength:NSString = String( postData.length )
+        
+        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.HTTPBody = postData
+        request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        
+        var reponseError: NSError?
+        var response: NSURLResponse?
+        
+        var urlData: NSData?
+        do {
+            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+        } catch let error as NSError {
+            reponseError = error
+            urlData = nil
+        }
+        
+        if ( urlData != nil ) {
+            let res = response as! NSHTTPURLResponse
+            
+            NSLog("Response code: %ld", res.statusCode);
+            
+            if (res.statusCode >= 200 && res.statusCode < 300)
+            {
+                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+                NSLog("Response ==> %@", responseData);
+                
+                //   var error: NSError?
+                vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
+                let coords = jsonData.valueForKey("location") as? String
+                let title = friendname
+                let detail = jsonData.valueForKey("loctime") as? String
+                vm.name = friendname
+                vm.coords = coords
+                vm.title1 = title
+                vm.detail = detail
+                
+                
+                self.presentViewController(vm, animated: true, completion: nil)
+
+                
+                
+            } else {
+                let alertView:UIAlertView = UIAlertView()
+                alertView.title = "Sign in Failed!"
+                alertView.message = "Connection Failed"
+                alertView.delegate = self
+                alertView.addButtonWithTitle("OK")
+                alertView.show()
+            }
+        } else {
+            let alertView:UIAlertView = UIAlertView()
+            alertView.title = "Sign in Failed!"
+            alertView.message = "Connection Failure"
+            if let error = reponseError {
+                alertView.message = (error.localizedDescription)
+            }
+            alertView.delegate = self
+            alertView.addButtonWithTitle("OK")
+            alertView.show()
+        }
+        
+        
+        
+            }
+    
+    
 }
