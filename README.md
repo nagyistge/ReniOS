@@ -24,3 +24,5 @@ Autocomplete suggestions
 
 Contact Sync
 
+UPDATE:
+Added quicktime current geolocation pings as well as ping requests for peer to peer as well as peer to many 
