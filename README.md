@@ -1,4 +1,8 @@
 # ReniOS
+Just an extension of work from a startup that went south
+
+Doing mostly experimental features on it on the fly
+
 pictures of demo in issues
 
 -changed viewcontrollers for 3 types of messages(Status, Rendez, Chat)
