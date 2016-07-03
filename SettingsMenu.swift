@@ -48,9 +48,19 @@ class SettingsMenu: UIViewController {
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
 
+        if(showname == "null"){
+            showname = "Choose a display name!"
+        }
+        if(phonenumber == "null"){
+            phonenumber = "Set your phonenumber!"
+        }
+        if(email == "null"){
+            email = "Set your email!"
+        }
         txtDisplayname.setTitle(showname, forState: .Normal)
         txtPhonenumber.setTitle(phonenumber, forState: .Normal)
         txtEmail.setTitle(email, forState: .Normal)
+        print(showname + "  "  + phonenumber + "  " + email )
     }
     /*
     // MARK: - Navigation
