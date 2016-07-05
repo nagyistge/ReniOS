@@ -95,34 +95,72 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
         // 3
 
         //NSLog("WHEN DOES THE TABLE REFRESH?  WHERE DO I NEED TO SET SOMEINTS")
-    let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-    let username = prefs.valueForKey("USERNAME") as! String
+  //  let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    //let username = prefs.valueForKey("USERNAME") as! String
     if tableView == self.tableView{
         let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "cell")
          cell.selectionStyle = UITableViewCellSelectionStyle.None
+        cell.textLabel!.font = UIFont.boldSystemFontOfSize(17)
         cell.textLabel!.text = self.someInts[indexPath.row].title
+        let status = self.someInts[indexPath.row]
         var v = ""
         if(self.someInts[indexPath.row].visable == 0){
             v += "private"
         }else{
             v += "public"
         }
+        v += "\n" + status.timefor
          cell.detailTextLabel!.text = v
+        
+        if(status.type == 0){
+            cell.imageView?.image = UIImage(named: "eat")
+        
+        }else if(status.type == 1){
+            cell.imageView?.image = UIImage(named: "party")
+
+        }else if(status.type == 2){
+            cell.imageView?.image = UIImage(named: "working")
+
+        
+        }else if(status.type == 3){
+            cell.imageView?.image = UIImage(named: "idle")
+
+        }
         return cell
     }
     else{
        // var friendcell:UITableViewCell = self.friendTableView.dequeueReusableCellWithIdentifier("cell1", forIndexPath: indexPath)
         //if friendcell != nil{
         //  friendcell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
-        
-        let friendcell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "cell1")
-         friendcell.selectionStyle = UITableViewCellSelectionStyle.None
-        
+                let friendcell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "cell1")
+        //if(someInts.count > indexPath.row){
+
+        friendcell.selectionStyle = UITableViewCellSelectionStyle.None
+        friendcell.textLabel?.font = UIFont.boldSystemFontOfSize(17)
         friendcell.textLabel!.text = self.someFriendInts[indexPath.row].title
-        print( self.someFriendInts[indexPath.row].username)
+       // print( self.someFriendInts[indexPath.row].username)
         
+           ///print( "size of someInts   " + String(someInts.count) + "  indexpath row "  + String(indexPath.row))
+        let status = self.someFriendInts[indexPath.row]
+
         
-        friendcell.detailTextLabel!.text = "from " + self.someFriendInts[indexPath.row].username
+        friendcell.detailTextLabel!.text = "from " + self.someFriendInts[indexPath.row].username + "\n" + status.timefor
+        
+        if(status.type == 0){
+            friendcell.imageView?.image = UIImage(named: "eat")
+            
+        }else if(status.type == 1){
+            friendcell.imageView?.image = UIImage(named: "party")
+            
+        }else if(status.type == 2){
+            friendcell.imageView?.image = UIImage(named: "working")
+            
+            
+        }else if(status.type == 3){
+            friendcell.imageView?.image = UIImage(named: "idle")
+            
+        }
+        //}
         return friendcell
     }
     }
@@ -133,7 +171,7 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
         let currentCell = self.someInts[indexPath.row] as Status
         statusToPass = currentCell
         
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        //let storyboard = UIStoryboard(name: "Main", bundle: nil)
         vc = self.storyboard?.instantiateViewControllerWithIdentifier("showR") as! showR
         vc.programVar = statusToPass
         vc.isStatusFromYou = true
@@ -148,11 +186,11 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
             statusToPass = currentCell
             
             
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            //let storyboard = UIStoryboard(name: "Main", bundle: nil)
             vc = self.storyboard?.instantiateViewControllerWithIdentifier("showR") as! showR
             vc.programVar = statusToPass
             vc.isStatusFromYou = false
-            vc.returnDelegate = self
+           // vc.returnDelegate = self
             
             self.presentViewController(vc, animated: true, completion: nil)
         }
@@ -167,14 +205,18 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
 
 
     func returnUpdate(status:Status){
+        print("the fuck")
+        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let username:String = prefs.valueForKey("USERNAME") as! String
         
-        for(var i = 0; i < self.delegate.newfeed.count; i++ ){
-            if((  self.delegate.newfeed[i] as Status) == status){
-                
-                self.delegate.newfeed[i].visable = 0
-                //self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
-            }
-        }
+        let delegate1 = UIApplication.sharedApplication().delegate as! AppDelegate
+        
+        self.someInts.removeAll()
+        self.someFriendInts.removeAll()
+        self.someInts.appendContentsOf( delegate1.theWozMap[username]!.allDeesStatus )
+        self.someFriendInts.appendContentsOf(delegate1.newfeed)
+        self.tableView.reloadData()
+        self.friendTableView.reloadData()
         
     
     }
