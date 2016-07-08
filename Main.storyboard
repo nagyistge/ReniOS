@@ -629,7 +629,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="7HH-8l-exK">
-                                <rect key="frame" x="0.0" y="28" width="320" height="520"/>
+                                <rect key="frame" x="0.0" y="84" width="320" height="464"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
@@ -637,6 +637,17 @@
                                     <outlet property="delegate" destination="0nG-5V-k2v" id="0sY-q5-JAj"/>
                                 </connections>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" id="cfI-jc-Nqw">
+                                <rect key="frame" x="32" y="29" width="49" height="30"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" red="1" green="0.036273747671340062" blue="0.086063209327094548" alpha="1" colorSpace="calibratedRGB"/>
+                                <state key="normal" title="Back">
+                                    <color key="titleColor" red="1" green="0.96010351780000003" blue="0.99613411480000003" alpha="1" colorSpace="calibratedRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="onBackPressed:" destination="0nG-5V-k2v" eventType="touchUpInside" id="99R-EO-43x"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     </view>
@@ -1481,7 +1492,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="FqY-6e-fbR">
-                                <rect key="frame" x="22" y="349" width="107" height="21"/>
+                                <rect key="frame" x="22" y="349" width="255" height="21"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -1910,7 +1921,7 @@
         <image name="working" width="240" height="240"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="SQx-bN-SKa"/>
-        <segue reference="nh6-7E-8MR"/>
+        <segue reference="ZbC-1A-ir3"/>
+        <segue reference="a4x-Zu-fYf"/>
     </inferredMetricsTieBreakers>
 </document>

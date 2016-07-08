@@ -7,30 +7,28 @@
 //
 
 import UIKit
+import CoreLocation
 
 
 
-class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDataSource, UIPickerViewDelegate {
-    
+class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPickerViewDataSource, UIPickerViewDelegate, CLLocationManagerDelegate {
+     var manager: OneShotLocationManager = OneShotLocationManager()
+    let locationManager = CLLocationManager()
     @IBOutlet weak var deleteB: UIButton!
     var isStatusFromYou:Bool!
-    
     @IBOutlet weak var responseName: UILabel!
     @IBOutlet weak var responsePicker: UIPickerView!
     var programVar : Status!
     var programVar1 : RendezStatus!
-    
+
     @IBOutlet weak var friendResponses: UITableView!
-    //@IBOutlet weak var friendScroll: UIScrollView!
+    @IBOutlet weak var sendLocButton: UIButton!
     @IBOutlet weak var timeTxt: UILabel!
     @IBOutlet weak var typeImg: UIImageView!
     @IBOutlet weak var txtTitle: UILabel!
     @IBOutlet weak var txtDetail: UILabel!
     @IBOutlet weak var txtLocation: UILabel!
     var vc: sendToFriends!
-    
-    //var returnDelegate: showRDelegate!
-    
     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     var vm: showRMap!
@@ -40,18 +38,14 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     var showuser: String!
     var showfriend: String!
     var responses = ["Seen!", "Interested!", "Available"]
-    
     var transitionOperator = TransitionOperator()
-    
     @IBOutlet weak var visableIndicator: UISwitch!
-    
     @IBOutlet weak var visabl: UILabel!
-    
+    var locationCoords:String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         self.friendResponses.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        
         // Do any additional setup after loading the view.
     }
     
@@ -62,7 +56,6 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
-        
         
             txtTitle.text = self.programVar1.title as NSString as String
             txtDetail.text = self.programVar1.details as NSString as String
@@ -79,13 +72,23 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
             if self.programVar1.type == 3{
                 typeImg.image = UIImage(named: "idle")
             }
-            self.timeTxt.text = "at " + self.programVar1.timefor
+            self.timeTxt.text = " at " + self.programVar1.timefor
             
             if(self.isStatusFromYou == true){
-                self.responseName.text = self.programVar1.fromuser + "is "
-                responsePicker.selectRow(self.programVar1.response, inComponent: 0, animated: true)
+                if(self.programVar1.response == 0){
+                    self.responseName.text = self.programVar1.fromuser + " has recieved."
+                }else if(self.programVar1.response == 1){
+                    self.responseName.text = self.programVar1.fromuser + " is interested! "
+                }else{
+                    self.responseName.text = self.programVar1.fromuser + " is available!! "
+                }
+                
+                //responsePicker.selectRow(self.programVar1.response, inComponent: 0, animated: true)
                 responsePicker.delegate = nil
-                friendResponses.removeFromSuperview()
+                if(friendResponses != nil){
+                    friendResponses.removeFromSuperview()
+                    responsePicker.removeFromSuperview()
+                }
             }else{
                 if(self.programVar1.response == 0){
                 self.responseName.text = "You have "
@@ -93,33 +96,19 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                     self.responseName.text = "You are "
                 }
                 responsePicker.selectRow(self.programVar1.response, inComponent: 0, animated: true)
+                if(deleteB != nil){
                 deleteB.removeFromSuperview()
                 friendResponses.removeFromSuperview()
-            
-            
-            
+                }
         }
     }
     
-    
     @IBAction func deleteR(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        
-        let username:String = prefs.stringForKey("USERNAME") as String!
-        
-        let title:String = txtTitle.text as String!
-        let detail:String = txtDetail.text as String!
-        let location: String = txtLocation.text as String!
-        
         let post:NSString = "id=\(self.programVar1.id)&flag=\(0)"
         NSLog("PostData: %@",post);
-        
         let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateRendez.php")!
-        
         let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        
         let postLength:NSString = String( postData.length )
-        
         let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "POST"
         request.HTTPBody = postData
@@ -127,10 +116,8 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
-        
         var reponseError: NSError?
         var response: NSURLResponse?
-        
         var urlData: NSData?
         do {
             urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
@@ -141,17 +128,10 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         
         if ( urlData != nil ) {
             let res = response as! NSHTTPURLResponse
-            
             NSLog("Response code: %ld", res.statusCode);
-            
-            if (res.statusCode >= 200 && res.statusCode < 300)
-            {
+            if (res.statusCode >= 200 && res.statusCode < 300){
                 let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
-                
                 NSLog("Response ==> %@", responseData);
-                
-                var error: NSError?
-                
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
@@ -174,30 +154,21 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         }
     }
     
-    
-    
-
-    
-    
-    
     @IBAction func showOnMapTapped(sender: UIButton) {
-        
         vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
         let coords = txtLocation.text
         let title = txtTitle.text
         let detail = txtDetail.text
+        vm.name = friendname
         vm.coords = coords
         vm.title1 = title
         vm.detail = detail
-        
+        vm.flag = 1
         
         self.presentViewController(vm, animated: true, completion: nil)
-        
     }
     
     @IBAction func backTapped(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
         //if this value is 0, that means that need to check the response and if it is not the same as it was initially then got to update it
         if self.isStatusFromYou == false{
             if(self.programVar1.response != self.responsePicker.selectedRowInComponent(0)){
@@ -206,42 +177,26 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 for(var i = 0; i < self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez.count; i++ ){
                     if((self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez[i] as RendezStatus) == self.programVar1 as RendezStatus){
                         self.delegate.newfeed[i].response = self.responsePicker.selectedRowInComponent(0)
-                        
-                        //self.returnDelegate.returnUpdate(self.delegate.theWozMap[username]!.allDeesStatus[i])
                     }
                 }
-                
-                
             }
         }
-        
         self.dismissViewControllerAnimated(true, completion: nil)
-        
     }
     
-    
-    
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        // 1
         return 1
     }
     
     func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 2
         if (self.programVar == nil){
             return 0
         }else{
             return self.programVar.fromuser.count
-        }}
-    
+        }
+    }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        // 3
-        
-        
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username = prefs.valueForKey("USERNAME") as! String
-        
         let cell:UITableViewCell = self.friendResponses.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
@@ -254,7 +209,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
             r = " is available!"
         }
         
-        var resp:String = programVar.fromuser[indexPath.row].username + r
+        let resp:String = programVar.fromuser[indexPath.row].username + r
         cell.textLabel!.text = resp
         return cell
         
@@ -269,43 +224,25 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         return self.responses.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String?{
         return self.responses[row]
     }
-    
-    
-    
-    
-    
+
     func updateStatus(id:Int, flag:Int, response:Int) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        
-        let username:String = prefs.stringForKey("USERNAME") as String!
-        
-        let title:String = txtTitle.text as String!
-        let detail:String = txtDetail.text as String!
-        let location: String = txtLocation.text as String!
-        
+
         let post:NSString = "id=\(id)&response=\(response)&flag=\(flag)"
         NSLog("PostData: %@",post);
-        
         let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateRendez.php")!
-        
         let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        
         let postLength:NSString = String( postData.length )
-        
         let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
         request.HTTPMethod = "POST"
         request.HTTPBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
-        
         var reponseError: NSError?
         var response: NSURLResponse?
-        
         var urlData: NSData?
         do {
             urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
@@ -313,20 +250,13 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
             reponseError = error
             urlData = nil
         }
-        
         if ( urlData != nil ) {
             let res = response as! NSHTTPURLResponse
-            
             NSLog("Response code: %ld", res.statusCode);
-            
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
                 let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
-                
                 NSLog("Response ==> %@", responseData);
-                
-                var error: NSError?
-                
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
@@ -348,9 +278,4 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
             alertView.show()
         }
     }
-    
-    
-    
-    
-    
 }

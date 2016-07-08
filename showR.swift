@@ -17,10 +17,15 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     
     var isStatusFromYou:Bool!
 
+    //pickerview spinner for seeing your response and being able to change it
     @IBOutlet weak var responsePicker: UIPickerView!
+    //send button that should not show unless it is a status by you
+    @IBOutlet weak var sendB: UIButton!
+    
     var programVar : Status!
     var programVar1 : RendezStatus!
 
+    @IBOutlet weak var labelForResponseNames: UILabel!
     @IBOutlet weak var friendResponses: UITableView!
     //@IBOutlet weak var friendScroll: UIScrollView!
     @IBOutlet weak var timeTxt: UILabel!
@@ -45,6 +50,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     var transitionOperator = TransitionOperator()
 
     @IBOutlet weak var visableIndicator: UISwitch!
+    var switchBool:Bool!
 
     @IBOutlet weak var visabl: UILabel!
 
@@ -64,6 +70,8 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         
+        //switchBool = self.programVar.visable
+        
         if self.programVar != nil{
             txtTitle.text = self.programVar.title as NSString as String
             txtDetail.text = self.programVar.detail as NSString as String
@@ -82,9 +90,8 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
             }
             if  self.programVar.timefor != "0000-00-00 00:00"{
                 let dateFormatter = NSDateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss" //format style. Browse online to get a format that fits your needs.
-                //let dateString = dateFormatter.stringFromDate(self.programVar.timefor)
-                timeTxt.text = self.programVar.timefor
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                timeTxt.text = "Set for " + self.programVar.timefor
             }else{
                 timeTxt.text = "No Starting Time Set!"
             }
@@ -95,28 +102,20 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 self.visableIndicator.removeFromSuperview()
                 self.friendResponses.removeFromSuperview()
                 self.responsePicker.selectRow(self.programVar.response, inComponent: 0, animated: true)
-                
-                //self.programVar.fromuser.append(fromUser(username: self.programVar.username, response: self.programVar.response))
-                //self.friendResponses.reloadData()
+                self.sendB.removeFromSuperview()
+                    self.labelForResponseNames.text = "You have "
+
                 }
             }else{
+                if(self.responsePicker != nil){
                 self.responsePicker.removeFromSuperview()
                 if self.programVar.visable == 1{
                     self.visableIndicator.setOn(true, animated: true)
                 }else{
                     self.visableIndicator.setOn(false, animated: true)
                 }
-                
-            
-            
+                }
             }
-            
-            
-            
-            
-        
-        
-            
         }
         else{
             txtTitle.text = self.programVar1.title as NSString as String
@@ -175,7 +174,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 
                 NSLog("Response ==> %@", responseData);
                 
-                var error: NSError?
+                //var error: NSError?
                 
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {
@@ -223,10 +222,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         self.presentViewController(vc, animated: true, completion: nil)
     }
     
-    
-    
     @IBAction func showOnMapTapped(sender: UIButton) {
-        
         vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
         let coords = txtLocation.text
         let title = txtTitle.text
@@ -234,10 +230,9 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         vm.coords = coords
         vm.title1 = title
         vm.detail = detail
+        vm.flag = 1
         
-
         self.presentViewController(vm, animated: true, completion: nil)
-        
     }
     
     @IBAction func backTapped(sender: UIButton) {
@@ -251,49 +246,38 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 for(var i = 0; i < self.delegate.newfeed.count; i++ ){
                     if((self.delegate.newfeed[i] as Status) == self.programVar as Status){
                         self.delegate.newfeed[i].response = self.responsePicker.selectedRowInComponent(0)
-                        
-                         //self.returnDelegate.returnUpdate(self.delegate.theWozMap[username]!.allDeesStatus[i])
                     }
                 }
-            
-            
             }
         }else{
         //else need to check to see if you need to change if you updated the visability of the status
-            if( self.programVar.visable == 0 && visableIndicator.selected){
+            print("back tapped for status that is yours")
+            print(self.programVar.visable)
+            print(visableIndicator.on)
+            if( self.programVar.visable == 0 && visableIndicator.on){
+                print("changing visable to true after toggle in showR")
                 updateStatus( self.programVar.id, flag: 1, response: 1)
                 
                   for(var i = 0; i < self.delegate.theWozMap[username]!.allDeesStatus.count; i++ ){
                     if((  self.delegate.theWozMap[username]!.allDeesStatus[i] as Status) == self.programVar as Status){
-                            self.delegate.newfeed[i].visable = 1
-                           // self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
+                           self.delegate.theWozMap[username]!.allDeesStatus[i].visable = 1
+                        self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
                     }
                 }
 
-            }else if( self.programVar.visable == 1 && !visableIndicator.selected){
+            }else if( self.programVar.visable == 1 && !visableIndicator.on){
                 updateStatus(self.programVar.id, flag: 1, response: 0)
                 
                 for(var i = 0; i < self.delegate.theWozMap[username]!.allDeesStatus.count; i++ ){
                     if((  self.delegate.theWozMap[username]!.allDeesStatus[i] as Status) == self.programVar as Status){
                         self.delegate.theWozMap[username]!.allDeesStatus[i].visable = 0
-                        
-                        //self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
-                        
+                        self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
                     }
                 }
 
             }
-            
-            
         }
-
-        
-        
-        
-        
-        
         self.dismissViewControllerAnimated(true, completion: nil)
-        
     }
     
     
@@ -317,7 +301,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         
  
         let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username = prefs.valueForKey("USERNAME") as! String
+        //let username = prefs.valueForKey("USERNAME") as! String
         
             let cell:UITableViewCell = self.friendResponses.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
             cell.selectionStyle = UITableViewCellSelectionStyle.None
@@ -331,7 +315,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
             r = " is available!"
         }
         
-        var resp:String = programVar.fromuser[indexPath.row].username + r
+        let resp:String = programVar.fromuser[indexPath.row].username + r
             cell.textLabel!.text = resp
             return cell
         
@@ -346,22 +330,18 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         return self.responses.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String! {
+    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return self.responses[row]
     }
-    
-    
-    
-    
     
     func updateStatus(id:Int, flag:Int, response:Int) {
         let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
         
         let username:String = prefs.stringForKey("USERNAME") as String!
         
-        let title:String = txtTitle.text as String!
-        let detail:String = txtDetail.text as String!
-        let location: String = txtLocation.text as String!
+       // let title:String = txtTitle.text as String!
+        //let detail:String = txtDetail.text as String!
+       // let location: String = txtLocation.text as String!
         
         let post:NSString = "id=\(id)&username=\(username)&response=\(response)&flag=\(flag)"
         NSLog("PostData: %@",post);
@@ -402,7 +382,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 
                 NSLog("Response ==> %@", responseData);
                 
-                var error: NSError?
+                //var error: NSError?
                 
                 self.dismissViewControllerAnimated(true, completion: nil)
             } else {

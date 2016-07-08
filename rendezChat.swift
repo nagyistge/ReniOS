@@ -117,8 +117,9 @@ override func viewWillAppear(animated: Bool) {
         print("is the update in rendezChat even called??")
         
         //get the friend param and set it
-        let postparam:Dictionary<String, RendezStatus!> = notification.userInfo as! Dictionary<String, RendezStatus!>
-        let friendNotif:RendezStatus = postparam["chatstatus"]!
+        let postparam = notification.userInfo as! Dictionary<String, AnyObject>
+        //let postparam:Dictionary<String, RendezStatus!> = notification.userInfo as! Dictionary<String, RendezStatus!>
+        let friendNotif:RendezStatus = postparam["chatstatus"]! as! RendezStatus
         
         if(friendNotif.username == friendname){
             self.someInts.insert(friendNotif, atIndex: 0)

@@ -146,7 +146,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     }
     
-    func notifyRendezChat(chatStatus: ChatStatus){
+    func notifyRendezChat(chatStatus: RendezStatus){
         //chatstatus should be perfectly contructed and passed along with no changed from the parameter
         let post:[NSObject : AnyObject] = ["chatstatus": chatStatus]
         NSNotificationCenter.defaultCenter().postNotificationName(rendezChatNotifKey, object: self, userInfo: post)
@@ -293,6 +293,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             if( self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] == nil ){
                 self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] = rendezChatDictionary()
             }
+            
             if(!self.theNotifHelper.isInNotifMap(name))
             {
                 self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname))
@@ -373,11 +374,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 // print(initRendezChatD.allDeesChat[i])
             }
             let timeS = initRendezChatD.allDeesChat[i].time
-            if( (prefs.valueForKey(uname) as! NSDate ).compare(timeS) == NSComparisonResult.OrderedAscending ){
-                self.theNotifHelper.incrementChat(uname)
+            if let a = prefs.valueForKey(uname) as? NSDate{
+                if( (prefs.valueForKey(uname) as! NSDate ).compare(timeS) == NSComparisonResult.OrderedAscending ){
+                    self.theNotifHelper.incrementChat(uname)
+                }
+                self.theNotifHelper.setMaxtime(uname, time: timeS)
+                self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
+            }else{
+            
+                self.theNotifHelper.setMaxtime(uname, time: timeS)
+                self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
             }
-            self.theNotifHelper.setMaxtime(uname, time: timeS)
-            self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
     //print(initRendezChatD.allDeesChat[i])
         }
         }
@@ -463,7 +470,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let jsonDataStatus: NSArray = jsonData.valueForKey("Status") as! NSArray
                 let jsonDataRendez: NSArray = jsonData.valueForKey("RendezStatus") as! NSArray
                 let jsonDataChat: NSArray = jsonData.valueForKey("RendezChat") as! NSArray
-                let jsonLoc: NSArray = jsonData.valueForKey("RendezLoc") as! NSArray
+               // let jsonLoc: NSArray = jsonData.valueForKey("RendezLoc") as! NSArray
 
                 
                 
@@ -576,7 +583,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let dateFormatter = NSDateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-                
+                /*
                 for(var index = 0; index < jsonLoc.count; index++){
                     //let id:NSString = jsonDataChat[index].valueForKey("user") as! NSString
                     let idloc:NSString = jsonLoc[index].valueForKey("id") as! NSString
@@ -585,7 +592,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let time:NSString = jsonLoc[index].valueForKey("time") as! NSString
                      let date1 = dateFormatter.dateFromString(time as String)
                     returnDic.allDeezLoc.append(FromLocation( username: usernameloc as String, id:idloc as String, location: locationloc as String, time: date1!))
-                }
+                }*/
                 //this marks the end of the forloop.  someRendez and someChat SHOULD be populated by now...
                 returnDic.allDeesRendez = someRendez
                 returnDic.allDeesChat = someChat
@@ -935,7 +942,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 temp.putInRendez(RendezStatus(id: id, username: friendname as String, title: title1 as String, details: message as String, location: location1 as String, timeset: timeset, timefor: time as String, type: type, response: response, fromuser: fromuser as String))
                 self.theWozMap[friendname as String] = temp
                 let localNotification: UILocalNotification = UILocalNotification()
-                localNotification.alertAction = "YO BOI GOT THAT MUTHA FUCKIN SOCKET EMIT WOOOOOOOOOOO"
+                localNotification.alertAction = "YO BOI GOT THAT MUTHA SOCKET EMIT WOOOOOOOOOOO"
                 localNotification.alertBody = "Woww it works!!"
 
                 localNotification.fireDate = NSDate(timeIntervalSinceNow: 5)
@@ -943,7 +950,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
                 let friend = Friend(username: friendname as String, showname: showname1 as String, timestamp: NSDate())
                 self.notifyFriendsActivity(friend)
-                let rendezChat = ChatStatus(username: friendname, title: title1, detail: message, location: location1, time: NSDate())
+                //$$$$$$$ YOU LEFT OFF HERE BECAUSE IT WAS CHATSTATUS BEFORE BUT NEEDS TO BE
+                // RENDEZSTATUS NOW WHICH REQUIRES THE ID AND STUFF
+                let rendezChat = RendezStatus(username: friendname, title: title1, detail: message, location: location1, time: NSDate())
                 self.notifyRendezChat(rendezChat)
                 
             }
@@ -969,8 +978,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("is the update in rendezChat even called??")
         
         //get the friend param and set it
-        let postparam:Dictionary<String, ChatStatus!> = notification.userInfo as! Dictionary<String, ChatStatus!>
+        let postparam:Dictionary<String, RendezStatus!> = notification.userInfo as! Dictionary<String, RendezStatus!>
         let friendNotif:ChatStatus = postparam["chatstatus"]!
+        
+    }
+    
+    internal func logoutSocket(){
+        self.mSocket.disconnect(fast: true)
         
     }
 
