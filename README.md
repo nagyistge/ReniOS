@@ -30,3 +30,7 @@ Contact Sync
 
 UPDATE:
 Added quicktime current geolocation pings as well as ping requests for peer to peer as well as peer to many 
+
+::Serverside::
+
+I have not been updating the backend work since it contains sensitive information, but it uses Websocket technology with js as well as PHP for db management.
