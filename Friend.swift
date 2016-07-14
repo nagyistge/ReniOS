@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Friend:NSObject{
+class Friend:NSObject, Comparable{
     var username: String!
     var friendname: String!
     var phone: String!
@@ -17,11 +17,24 @@ class Friend:NSObject{
     var selected: Bool = false
     var notification:Bool = false
     var time: NSDate!
+    var rendezCount: Int!//simple counters to see notification numbers
+    var chatCount: Int!
+    var loctime:String!
+    var location:String!
+    
     
     init(username: String, showname: String, timestamp: NSDate){
         self.username = username
         self.friendname = showname
         self.time = timestamp
+    }
+    
+    init(username: String, showname: String, timestamp: NSDate, loctime:String, location:String){
+        self.username = username
+        self.friendname = showname
+        self.time = timestamp
+        self.loctime = loctime
+        self.location = location
     }
     
     init(username: String, friendname: String, phone: String, email: String, status: Int){
@@ -30,6 +43,8 @@ class Friend:NSObject{
         self.phone = phone
         self.email =  email
         self.status = status
+        self.rendezCount = 0
+        self.chatCount = 0
     }
     
     func getUsername()-> String! {
@@ -46,8 +61,41 @@ class Friend:NSObject{
     func isSelected()-> Bool! {
         return selected
     }
+}
 
+
+func <(lhs: Friend, rhs: Friend) -> Bool {
+    let notifFlag = lhs.time.compare(rhs.time)
+    //print(notifFlag)
     
+    if notifFlag == .OrderedAscending{
+        return true
+    }else{
+       return false
+    }
     
+}
+
+func >(lhs: Friend, rhs: Friend) -> Bool {
+    let notifFlag = lhs.time.compare(rhs.time)
+    //print(notifFlag)
+    
+    if notifFlag == .OrderedDescending{
+        return true
+    }else{
+        return false
+    }
+    
+}
+
+func ==(lhs: Friend, rhs: Friend) -> Bool {
+    let notifFlag = lhs.time.compare(rhs.time)
+    //print(notifFlag)
+    
+    if notifFlag == .OrderedSame{
+        return true
+    }else{
+        return false
+    }
     
 }
