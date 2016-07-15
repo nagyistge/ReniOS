@@ -284,6 +284,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
                 var timefor = dateFormatter.dateFromString(timeS as String)
+                if let t = (prefs.valueForKey(name) as? NSDate ){
+                    print("APP DELEGATE new on click prefs time set for " + name)
+                }else{
+                    prefs.setObject(NSDate(), forKey: name)
+                }
                 
                 if( (prefs.valueForKey(name) as! NSDate ).compare(timefor!) == NSComparisonResult.OrderedAscending ){
                     self.theNotifHelper.incrementRendez(name)
@@ -348,11 +353,37 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
         //allocate all the chats send and recieved by you
     for(var i = 0; i < initRendezChatD.allDeesChat.count; i++){
-        let uname = initRendezChatD.allDeesChat[i].username
-        let touser = initRendezChatD.allDeesChat[i].toUser
+        let uname = initRendezChatD.allDeesChat[i].username//SENDER
+        let touser = initRendezChatD.allDeesChat[i].toUser//RECIEVER
+        let name = initRendezChatD.allDeesChat[i].toUser
         var showname: String!
         //IF THE USERNAME IS YOUR USERNAME, THEN THE TOUSER IS THE SENDER
-        if( initRendezChatD.allDeesChat[i].username == username){
+        if( uname != username && name != username){
+            //IT MUST BE A GROUP RENDEZ
+            //this means that someone in the group sent one to the group, thus fromuser is the
+            //groupname and username is the name of the member of the group that sent it
+            if( self.theWozMap[name] == nil ){
+                self.theWozMap[name] = rendezChatDictionary()
+            }
+            
+            if(!self.theNotifHelper.isInNotifMap(name))
+            {
+                self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname,g: true))
+            }
+            
+            let timeS = initRendezChatD.allDeesChat[i].time
+            if let a = prefs.valueForKey(name) as? NSDate{
+                if( (prefs.valueForKey(name) as! NSDate ).compare(timeS) == NSComparisonResult.OrderedAscending ){
+                    self.theNotifHelper.incrementChat(name)
+                }
+                self.theNotifHelper.setMaxtime(name, time: timeS)
+                self.theWozMap[name]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
+            }else{
+                self.theNotifHelper.setMaxtime(name, time: timeS)
+                self.theWozMap[name]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
+            }
+        }//END OF GROUP CHECKING
+        else if( initRendezChatD.allDeesChat[i].username == username){
             for x in self.yourFriends{
                 if(x.username == touser){
                     showname = x.friendname
