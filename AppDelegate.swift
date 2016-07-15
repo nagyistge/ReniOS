@@ -144,6 +144,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.yourFriends.appendContentsOf( friendlist)
     }
     
+    func getGroup(name:String)->Groups{
+        for(var i = 0; i < yourGroups.count; i++){
+            if(yourGroups[i].groupname == name){
+                return yourGroups[i]
+            }
+        }
+        return Groups()
+    }
+    
     //need to get your friends from somewhere, should be called when you login or mainactivity crashes/restarts
     func queryFriends(username:String){
         let post:NSString = "username=\(username)"
@@ -248,10 +257,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
         for(var i = 0; i < initRendezChatD.allDeesRendez.count; i++){
                 //theWozMap is a map of string names to rendezdictionaries so need to make sure that the correct stuff maps to the right names
-            let name:String = initRendezChatD.allDeesRendez[i].fromuser
-            let uname:String = initRendezChatD.allDeesRendez[i].username
+            let name:String = initRendezChatD.allDeesRendez[i].fromuser//RECIEVER
+            let uname:String = initRendezChatD.allDeesRendez[i].username//SENDER
             let showname:String = initRendezChatD.allDeesRendez[i].showname
-            if( initRendezChatD.allDeesRendez[i].username == username){
+            
+            
+            if( uname != username && name != username){
+                //IT MUST BE A GROUP RENDEZ
+                //this means that someone in the group sent one to the group, thus fromuser is the
+                //groupname and username is the name of the member of the group that sent it
+                if( self.theWozMap[name] == nil ){
+                    self.theWozMap[name] = rendezChatDictionary()
+                }
+                
+                if(!self.theNotifHelper.isInNotifMap(name))
+                {
+                    self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname,g: true))
+                }
+                
+                var timeS:String = initRendezChatD.allDeesRendez[i].timeset
+                if(timeS.characters.count < 18){
+                    timeS += ":00"
+                }
+                
+                let dateFormatter = NSDateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                var timefor = dateFormatter.dateFromString(timeS as String)
+                
+                if( (prefs.valueForKey(name) as! NSDate ).compare(timefor!) == NSComparisonResult.OrderedAscending ){
+                    self.theNotifHelper.incrementRendez(name)
+                }
+                
+                self.theNotifHelper.setMaxtime(name, time: timefor!)
+                self.theWozMap[name]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
+                
+            }
+            else if( uname == username){
                 //setting the variable since using index and whatnot is so long and confusing
                 if( self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] == nil ){
                     self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser] = rendezChatDictionary()
@@ -259,20 +301,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             
                 if(!self.theNotifHelper.isInNotifMap(name))
                 {
+                    var flag = false
+                    for(var g = 0; g < initRendezChatD.allDeesGroups.count; g++){
+                        if( initRendezChatD.allDeesGroups[g].groupname == name){
+                            flag = true
+                        }
+                    }
+                    
+                    //is a group
+                    if( flag){
+                    self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname, g: true))
+                    }else{//not a group
                     self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname))
+                    }
                 }
+                
                 self.theWozMap[initRendezChatD.allDeesRendez[i].fromuser]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
             }else{
                 if( self.theWozMap[initRendezChatD.allDeesRendez[i].username] == nil ){
                     self.theWozMap[initRendezChatD.allDeesRendez[i].username] = rendezChatDictionary()
                 }
+                
                 if(!self.theNotifHelper.isInNotifMap(uname))
                 {
                     self.theNotifHelper.addToNotfifs(NotificationNode(username: uname, showname: showname))
+                }
                     var timeS:String = initRendezChatD.allDeesRendez[i].timeset
                     if(timeS.characters.count < 18){
                         timeS += ":00"
                     }
+                
                     let dateFormatter = NSDateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                     dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
@@ -283,7 +341,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     }
                 
                     self.theNotifHelper.setMaxtime(uname, time: timefor!)
-                }
+                
                 self.theWozMap[initRendezChatD.allDeesRendez[i].username]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
             }
         }
@@ -338,7 +396,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
         }
-        print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
          print(initRendezChatD.allDeezLoc.count)
         for(var i = 0; i < initRendezChatD.allDeezLoc.count; i++){
             if( initRendezChatD.allDeezLoc[i].id != username){
@@ -346,7 +403,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     yourLocs[initRendezChatD.allDeezLoc[i].id] = [initRendezChatD.allDeezLoc[i]]
                 }else{
                     yourLocs[initRendezChatD.allDeezLoc[i].id]!.append(initRendezChatD.allDeezLoc[i])
-                    print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
                     print(yourLocs[initRendezChatD.allDeezLoc[i].id]!.count)
                 }
             }else{
@@ -354,11 +410,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     yourLocs[initRendezChatD.allDeezLoc[i].username] = [initRendezChatD.allDeezLoc[i]]
                 }else{
                     yourLocs[initRendezChatD.allDeezLoc[i].username]!.append(initRendezChatD.allDeezLoc[i])
-                    print("THE MOFFNWCWLCNWIOECWKEFW ALL DEEZ LOC COUNT %^&*(*&^%$%^&*(")
                 print(yourLocs[initRendezChatD.allDeezLoc[i].username]!.count)
                 }
             }
         }
+        
         self.yourGroups.appendContentsOf(initRendezChatD.allDeesGroups)
         
 }
@@ -532,6 +588,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     
                     let friend = Friend(username: u as String,showname: f as String,timestamp: date!,loctime: lt as! String,location: l as! String)
                     
+                    print( "friendMap1; " + (u as String) )
                     friendMap1[u as String] = friend
                 }
                 
@@ -543,6 +600,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let touser = jsonDataGroups[index].valueForKey("friends") as! NSArray
                     
                     for(var i = 0; i < touser.count; i++ ){
+                        print(touser[i] as! String)
                         somef.append( friendMap1[touser[i] as! String]!);
                     }
                     
@@ -558,6 +616,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 returnDic.allDeesRendez = someRendez
                 returnDic.allDeesChat = someChat
                 returnDic.allDeesStatus = someStatus
+                returnDic.allDeesFriendsMap = friendMap1
                 returnDic.allDeesGroups = someGroups
             } else {
                 let alertView:UIAlertView = UIAlertView()

@@ -15,6 +15,9 @@ var locationCoords:String!
     @IBOutlet weak var userLabel: UILabel!
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var chatButton: UIButton!
+    
+    @IBOutlet weak var deets: UIButton!
+    
     let locationManager = CLLocationManager()
     var username: String!
     var friendname: String!
@@ -28,7 +31,14 @@ var locationCoords:String!
     var vc: showRRendez!
     var toViewController:chattingR!
     var temp:rendezChatDictionary!
+    
+    var groupdeet:GroupDeets!
      var vm: showRMap!
+    
+    var ffriend:Friend!
+    var ggroup:Groups!
+    
+    var flag:Int = -1
     
     ///operator that handles the custom side effect when presenting the chat view
     var transitionOperator = TransitionOperator()
@@ -53,7 +63,12 @@ var locationCoords:String!
 override func viewWillAppear(animated: Bool) {
     super.viewWillAppear(true)
     //set the user display names in the respective labels
-    friendLabel.text = showfriend
+    if(flag == -1){
+        friendLabel.text = showfriend
+    }else{
+        friendLabel.text = friendname
+    }
+    
     userLabel.text = "Me"
 
 }
@@ -141,42 +156,62 @@ override func viewWillAppear(animated: Bool) {
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         // 3
-        let cell:UITableViewCell = self.tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) 
-        
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.locale = NSLocale.currentLocale()
+        dateFormatter.dateStyle = NSDateFormatterStyle.FullStyle
+        //let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+        let datee = self.someInts[indexPath.row].timeset as NSString as String
+        let showdate = datee.stringByReplacingOccurrencesOfString("-", withString: "/")
         //SETS THEE RENDEZ THAT IS FROM YOU
         if(self.someInts[indexPath.row].username == username){
-            cell.textLabel?.textAlignment = .Right
-            cell.textLabel?.textColor = UIColor.redColor()
-            cell.textLabel!.text = self.someInts[indexPath.row].title as NSString as String
+            var cell1 = self.tableView.dequeueReusableCellWithIdentifier("rightcell", forIndexPath: indexPath) as! RightView
+            cell1.title.text = self.someInts[indexPath.row].title as NSString as String
+            let date = self.someInts[indexPath.row].timeset as NSString as String
+            let showdate = date.stringByReplacingOccurrencesOfString("-", withString: "/")
+             cell1.detail.text = showdate
+            return cell1
         }
         else{//ELSE THE RENDEZ IS FROM THE FRIEND
-            cell.textLabel?.textAlignment = .Left
-            cell.textLabel?.textColor = UIColor.blueColor()
-            cell.textLabel!.text = self.someInts[indexPath.row].title as NSString as String
-            //if(self.someInts[indexPath.row].time)
+            if(flag == -1){
+                
+                let cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+                cell.textLabel?.textAlignment = .Left
+                cell.detailTextLabel?.textAlignment = .Left
+                cell.textLabel?.textColor = UIColor.blueColor()
+                cell.detailTextLabel?.textColor = UIColor.blueColor()
+                cell.textLabel!.text = self.someInts[indexPath.row].title as NSString as String
+                
+                cell.detailTextLabel?.text = showdate
             //check with the LAST TIME THAT FRIEND WAS CHECKED TIME with the time of the redenz from the friend to see if it is new and should be highlighted or not
             
-            let dateFormatter = NSDateFormatter()
-            if self.someInts[indexPath.row].timeset.characters.count == 19 {
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            }else{
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            }
-            dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-            var date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
-            date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
-            print(self.someInts[indexPath.row].timeset)
-            print(date)
-            let notifFlag = rendezNotifTimeFlag.compare(date!)
+                let dateFormatter = NSDateFormatter()
+                if self.someInts[indexPath.row].timeset.characters.count == 19 {
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                }else{
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+                }
+                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                var date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
+                date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
+                print(self.someInts[indexPath.row].timeset)
+                print(date)
+                let notifFlag = rendezNotifTimeFlag.compare(date!)
             
-            if notifFlag == .OrderedAscending{
-                cell.backgroundColor = UIColor.yellowColor()
+                if notifFlag == .OrderedAscending{
+                    cell.backgroundColor = UIColor.yellowColor()
+                }
+                    return cell
             }else{
-
+                var cell2 = self.tableView.dequeueReusableCellWithIdentifier("lefter", forIndexPath: indexPath) as! LeftRendez
+                
+                cell2.from.text = self.someInts[indexPath.row].title as NSString as String
+                cell2.fromtime.text = showdate
+                cell2.fromfrom.text = self.someInts[indexPath.row].username as NSString as String
+                return cell2
             }
          
         }
-        return cell
+        //return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -202,7 +237,15 @@ override func viewWillAppear(animated: Bool) {
     
     @IBAction func onSendLocClicked(sender: UIButton) {
         //send current location to the relational in the database
-        
+        if(self.locationCoords == nil){
+            let alertView:UIAlertView = UIAlertView()
+            alertView.title = "Location not found!"
+            alertView.message = "Connection is faulty. Try another area."
+            alertView.delegate = self
+            alertView.addButtonWithTitle("OK")
+            alertView.show()
+            
+        }else{
         let post:NSString = "friendname=\(friendname)&username=\(username)&location=\(self.locationCoords)"
         NSLog("PostData: %@",post);
         
@@ -263,6 +306,7 @@ override func viewWillAppear(animated: Bool) {
             alertView.delegate = self
             alertView.addButtonWithTitle("OK")
             alertView.show()
+        }
         }
     }
     
@@ -363,10 +407,20 @@ override func viewWillAppear(animated: Bool) {
             alertView.addButtonWithTitle("OK")
             alertView.show()
         }
+    }
+    
+    
+    @IBAction func onDeetsPressed(sender: UIButton) {
+        
+        groupdeet = self.storyboard?.instantiateViewControllerWithIdentifier("groupdeet") as! GroupDeets
+        
+        groupdeet.name = friendname
+        groupdeet.deet = showfriend
+        groupdeet.someInts = ggroup.members
+        self.presentViewController(groupdeet, animated: true, completion: nil)
         
         
-        
-            }
+    }
     
     
 }

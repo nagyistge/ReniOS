@@ -11,9 +11,6 @@ import Foundation
 class Friend:NSObject, Comparable{
     var username: String!
     var friendname: String!
-    var phone: String!
-    var email: String!
-    var status: Int!
     var selected: Bool = false
     var notification:Bool = false
     var time: NSDate!
@@ -21,12 +18,21 @@ class Friend:NSObject, Comparable{
     var chatCount: Int!
     var loctime:String!
     var location:String!
+    var isGroup:Bool = false
     
     
     init(username: String, showname: String, timestamp: NSDate){
         self.username = username
         self.friendname = showname
         self.time = timestamp
+        self.isGroup = false
+    }
+    
+    init(username: String, showname: String, timestamp: NSDate,g:Bool){
+        self.username = username
+        self.friendname = showname
+        self.time = timestamp
+        self.isGroup = true
     }
     
     init(username: String, showname: String, timestamp: NSDate, loctime:String, location:String){
@@ -35,17 +41,9 @@ class Friend:NSObject, Comparable{
         self.time = timestamp
         self.loctime = loctime
         self.location = location
+        self.isGroup = false
     }
     
-    init(username: String, friendname: String, phone: String, email: String, status: Int){
-        self.username = username
-        self.friendname = friendname
-        self.phone = phone
-        self.email =  email
-        self.status = status
-        self.rendezCount = 0
-        self.chatCount = 0
-    }
     
     func getUsername()-> String! {
     return self.username
@@ -56,7 +54,6 @@ class Friend:NSObject, Comparable{
     func getTime()->NSDate{
         return self.time
     }
-    
     
     func isSelected()-> Bool! {
         return selected

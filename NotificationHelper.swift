@@ -25,8 +25,10 @@ class NotificationHelper {
     func setMaxtime(username:String, time:NSDate){
         let notifFlag = self.NotifMap[username]!.maxtime.compare(time)
         if notifFlag == .OrderedAscending{
+        //if notifFlag == .OrderedDescending{
             self.NotifMap[username]!.maxtime = (time)
         }
+        
     }
     
     func incrementRendez(username:String){
@@ -45,10 +47,18 @@ class NotificationHelper {
     func returnFriendNotif()->[Friend]{
         var friends = [Friend]()
         for (x,y) in self.NotifMap{
-            let friend = Friend(username: y.username, showname: y.showname, timestamp: y.maxtime)
-            friend.chatCount = y.chatCount
-            friend.rendezCount = y.rendezCount
-            friends.append(friend)
+            if(y.isGroup == true){
+                let friend = Friend(username: y.username, showname: y.showname, timestamp: y.maxtime,g: true)
+                friend.chatCount = y.chatCount
+                friend.rendezCount = y.rendezCount
+                friends.append(friend)
+
+            }else{
+                let friend = Friend(username: y.username, showname: y.showname, timestamp: y.maxtime)
+                friend.chatCount = y.chatCount
+                friend.rendezCount = y.rendezCount
+                friends.append(friend)
+            }
         }
         friends.sortInPlace()
         return friends.reverse()

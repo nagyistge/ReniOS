@@ -16,6 +16,7 @@ class NotificationNode: Comparable {
     var rendezCount: Int!
     var chatCount:Int!
     var maxtime:NSDate!
+    var isGroup: Bool!
     
     init(username:String, showname:String){
         self.username = username
@@ -27,7 +28,21 @@ class NotificationNode: Comparable {
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
         dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
         var date1 = dateFormatter.dateFromString("2000-01-01 01:01:01")
-
+        self.isGroup = false
+        self.maxtime = date1
+    }
+    
+    init(username:String, showname:String, g:Bool){
+        self.username = username
+        self.showname = showname
+        self.notif = false
+        self.rendezCount = 0
+        self.chatCount = 0
+        let dateFormatter = NSDateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+        dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+        var date1 = dateFormatter.dateFromString("2000-01-01 01:01:01")
+        self.isGroup = true
         self.maxtime = date1
     }
 }

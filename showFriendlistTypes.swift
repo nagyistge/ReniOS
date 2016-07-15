@@ -133,7 +133,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                     let status1:Int = jsonData[index].valueForKey("status") as! Int
                     
                     print(title2)
-                    let status = Friend(username: username1 as String, friendname: title2 as String, phone: "", email: "", status: status1)
+                    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: NSDate(), loctime: "", location: "")
                     
                     someInts.append(status)
                     print("Friend Entity: " + status.friendname)
