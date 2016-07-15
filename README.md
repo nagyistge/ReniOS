@@ -34,3 +34,9 @@ Added quicktime current geolocation pings as well as ping requests for peer to p
 ::Serverside::
 
 I have not been updating the backend work since it contains sensitive information, but it uses Websocket technology with js as well as PHP for db management.
+
+
+
+TODO
+
+Just finished the basis for group messaging, but there is a big problem regarding unique identifiers for groupnames which should be dealt with in accordance to database, needs to be fixed
