@@ -5,38 +5,43 @@ Doing mostly experimental features on it on the fly
 
 pictures of demo in issues
 
--changed viewcontrollers for 3 types of messages(Status, Rendez, Chat)
--added the newsfeed statuses
--added updating as well as centralizing the data on start
--working on group messaging
+-----------------------------------
 
 Total Functionality/Features:
 
-One to one messaging
+-One to one messaging
 
-One to many messaging 
+-One to many messaging 
 
-Notifications for Statuses/Messages
+-Notifications for Statuses/Messages
 
-Geolocation for Statuses/messages
+-Geolocation for Statuses/messages
 
-Location update pinging
+-Location update pinging
 
-Geolocation vicinity suggestions
+-Geolocation vicinity suggestions
 
-Autocomplete suggestions
+-Autocomplete suggestions
 
-Contact Sync
+-News Feed based statuses when Rendezes are made public
+
+-Typing of Rendezes (4 so far, with more could apply more machine learning in order to learn behavioral patterns/trends/etc)
+
+-Unique response updating (as in you can show interest in public/private rendezes, availability, non availability, etc)
+
+-Contact Sync
+
 
 UPDATE:
 Added quicktime current geolocation pings as well as ping requests for peer to peer as well as peer to many 
+
+
 
 ::Serverside::
 
 I have not been updating the backend work since it contains sensitive information, but it uses Websocket technology with js as well as PHP for db management.
 
 
+In Process:
+-Location based events whenever in vicinity of a Rendez location/person that is a friend??
 
-TODO
-
-Just finished the basis for group messaging, but there is a big problem regarding unique identifiers for groupnames which should be dealt with in accordance to database, needs to be fixed
