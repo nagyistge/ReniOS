@@ -38,7 +38,7 @@ var locationCoords:String!
     var ffriend:Friend!
     var ggroup:Groups!
     
-    var flag:Int = -1
+    var flag:Int = -1//IF THIS IS -1 IT IS NORMAL, ELSE IT IS A GROUPCHAT
     
     ///operator that handles the custom side effect when presenting the chat view
     var transitionOperator = TransitionOperator()
@@ -206,7 +206,8 @@ override func viewWillAppear(animated: Bool) {
                 
                 cell2.from.text = self.someInts[indexPath.row].title as NSString as String
                 cell2.fromtime.text = showdate
-                cell2.fromfrom.text = self.someInts[indexPath.row].username as NSString as String
+                cell2.fromfrom.text = "from " + (self.someInts[indexPath.row].username as NSString as String)
+                //cell2.fromfrom.text += self.someInts[indexPath.row].username as NSString as String
                 return cell2
             }
          
@@ -225,6 +226,10 @@ override func viewWillAppear(animated: Bool) {
         vc.friendname = friendname
         vc.showuser = showuser
         vc.showfriend = showfriend
+        if(flag != -1){
+            vc.flag = 1
+        }
+        vc.id = currentCell.id
         print (statusToPass.username + "  " + username)
         if(statusToPass.username == username){
             vc.isStatusFromYou = true

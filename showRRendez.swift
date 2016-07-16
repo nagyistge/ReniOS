@@ -22,6 +22,8 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     var programVar1 : RendezStatus!
 
     @IBOutlet weak var friendResponses: UITableView!
+    var friendRespArray:[GResps]! = Array<GResps>()
+    
     @IBOutlet weak var sendLocButton: UIButton!
     @IBOutlet weak var timeTxt: UILabel!
     @IBOutlet weak var typeImg: UIImageView!
@@ -39,10 +41,9 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     var showfriend: String!
     var responses = ["Seen!", "Interested!", "Available"]
     var transitionOperator = TransitionOperator()
-    @IBOutlet weak var visableIndicator: UISwitch!
-    @IBOutlet weak var visabl: UILabel!
     var locationCoords:String!
-    
+     var flag:Int = -1//IF THIS IS -1 IT IS NORMAL, ELSE IT IS A GROUPCHAT
+    var id:Int!
     override func viewDidLoad() {
         super.viewDidLoad()
         self.friendResponses.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
@@ -56,6 +57,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
+        
         
             txtTitle.text = self.programVar1.title as NSString as String
             txtDetail.text = self.programVar1.details as NSString as String
@@ -86,7 +88,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 //responsePicker.selectRow(self.programVar1.response, inComponent: 0, animated: true)
                 responsePicker.delegate = nil
                 if(friendResponses != nil){
-                    friendResponses.removeFromSuperview()
+                    //friendResponses.removeFromSuperview()
                     responsePicker.removeFromSuperview()
                 }
             }else{
@@ -98,9 +100,21 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 responsePicker.selectRow(self.programVar1.response, inComponent: 0, animated: true)
                 if(deleteB != nil){
                 deleteB.removeFromSuperview()
-                friendResponses.removeFromSuperview()
+                //friendResponses.removeFromSuperview()
                 }
         }
+        let delegate1 = UIApplication.sharedApplication().delegate as! AppDelegate
+        print("id: " + String(id))
+        if let a = delegate1.groupResponses[id]{
+            print("succ")
+            friendRespArray.appendContentsOf(delegate1.groupResponses[id]!)
+            print(friendRespArray.count)
+        }else{
+            print("fuafomkclqm")
+            //friendRespArray = Array<GResps>()
+        }
+        friendResponses.reloadData()
+        
     }
     
     @IBAction func deleteR(sender: UIButton) {
@@ -172,7 +186,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         //if this value is 0, that means that need to check the response and if it is not the same as it was initially then got to update it
         if self.isStatusFromYou == false{
             if(self.programVar1.response != self.responsePicker.selectedRowInComponent(0)){
-                updateStatus( self.programVar1.id, flag: 1, response: self.responsePicker.selectedRowInComponent(0))
+                updateStatus( self.programVar1.id, flag: 2, response: self.responsePicker.selectedRowInComponent(0))
                 
                 for(var i = 0; i < self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez.count; i++ ){
                     if((self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez[i] as RendezStatus) == self.programVar1 as RendezStatus){
@@ -189,11 +203,9 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     }
     
     func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if (self.programVar == nil){
-            return 0
-        }else{
-            return self.programVar.fromuser.count
-        }
+
+            return self.friendRespArray.count
+        
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -201,19 +213,17 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         cell.selectionStyle = UITableViewCellSelectionStyle.None
         
         var r = ""
-        if programVar.fromuser[indexPath.row].response == 0{
+        if friendRespArray[indexPath.row].resp == 0{
             r = " has seen!"
-        }else if programVar.fromuser[indexPath.row].response == 1{
+        }else if friendRespArray[indexPath.row].resp == 1{
             r = " is interested!"
-        }else if programVar.fromuser[indexPath.row].response == 2{
+        }else if friendRespArray[indexPath.row].resp == 2{
             r = " is available!"
         }
         
-        let resp:String = programVar.fromuser[indexPath.row].username + r
+        let resp:String = friendRespArray[indexPath.row].name + r
         cell.textLabel!.text = resp
         return cell
-        
-        
     }
     
     func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
@@ -229,10 +239,15 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     }
 
     func updateStatus(id:Int, flag:Int, response:Int) {
-
-        let post:NSString = "id=\(id)&response=\(response)&flag=\(flag)"
+        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let username:String = prefs.stringForKey("USERNAME") as String!
+        //check the flag here, if it is -1 we are in a 1 to 1 rendez, else
+        //we need to set some sort of indicator to update a response
+        //to the correct rendezresponse that related to the groupchat....
+        
+        let post:NSString = "id=\(id)&response=\(response)&flag=\(flag)&username=\(username)"
         NSLog("PostData: %@",post);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateRendez.php")!
+        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateStatusResponse.php")!
         let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
         let postLength:NSString = String( postData.length )
         let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)

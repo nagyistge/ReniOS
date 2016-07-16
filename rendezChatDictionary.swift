@@ -12,14 +12,23 @@ public class rendezChatDictionary: NSObject{
     var allDeesStatus: Array<Status>!
     var allDeesRendez: Array<RendezStatus>!
     var allDeesChat: Array<Chat>!
+    var allDeezLoc: Array<FromLocation>!
+    var allDeesFriends: Array<Friend>!
+    var allDeesFriendsMap:  Dictionary<String, Friend!> = Dictionary<String, Friend!>()
+    var allDeesGroups: Array<Groups>!
+    //when will it end
+    var allDeesReps: Array<GResps>!
+
     
-
-
     
     override init(){
         self.allDeesRendez = Array<RendezStatus>()
         self.allDeesChat = Array<Chat>()
         self.allDeesStatus = Array<Status>()
+        self.allDeezLoc = Array<FromLocation>()
+        self.allDeesFriends = Array<Friend>()
+        self.allDeesGroups = Array<Groups>()
+        self.allDeesReps = Array<GResps>()
     }
     
     func rendezChatDictionary(status: Array<Status>, rendez:Array<RendezStatus>, chat: Array<Chat>){
@@ -57,5 +66,11 @@ public class rendezChatDictionary: NSObject{
         return self.allDeesStatus
     }
     
-
+    func getDemFriends() -> Array<Friend>{
+        return self.allDeesFriends
+    }
+    
+    func getDemGroups() -> Array<Groups>{
+        return self.allDeesGroups
+    }
 }

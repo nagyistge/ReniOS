@@ -43,6 +43,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     internal var yourGroups = [Groups]()
     internal var yourLocs = Dictionary<String, [FromLocation]!>()
     internal var friendMap = Dictionary<String, Friend!>()
+    internal var groupResponses = Dictionary<Int, [GResps]!>()
+    
     /*
                                         -=Xxx> theWozMap <xxX=-
                         Essentially the holy grail data structure for the app
@@ -447,7 +449,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         
         self.yourGroups.appendContentsOf(initRendezChatD.allDeesGroups)
-        
+        //initRendezChatD.allDeesReps
+        for(var i = 0; i < initRendezChatD.allDeesReps.count; i++){
+            //check each response.  if it exists as a key, append to key->values arr
+            //else create the key as well as the array value
+            let id = initRendezChatD.allDeesReps[i].id
+            let name = initRendezChatD.allDeesReps[i].name
+            let resp = initRendezChatD.allDeesReps[i].resp
+
+            let sid = String(id)
+            let sresp = String(resp)
+            print("===allDeesReps at iteration: " + String(i) + " id/name/resp ")
+            print( sid + "/" + name + "/" + sresp )
+            //key exists, append to the value array
+            if let check = groupResponses[initRendezChatD.allDeesReps[i].id]{
+                
+                self.groupResponses[initRendezChatD.allDeesReps[i].id]!.append(GResps(id: id,name: name,resp: resp ))
+            }else{
+                //groupResponses.
+                
+                self.groupResponses[initRendezChatD.allDeesReps[i].id] = Array<GResps>()
+                self.groupResponses[initRendezChatD.allDeesReps[i].id]!.append(GResps(id: id,name: name,resp: resp ))
+            }
+        }
 }
     
     //parameter should be the username of the friend that you are checking
@@ -463,6 +487,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return true
         }
     }
+    
+    // on START on STARTon STARTon STARTon STARTon STARTon STARTon STARTon STARTon STARTon START
+    //on STARTon STARTon STARTon STARTon STARTon STARTon STARTon STARTon START
+    //
     
     func onStart(username:String ) -> rendezChatDictionary{
         //initialize the rendez and chat arrays that will be stored in the rendezChatDictionary later
@@ -507,6 +535,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 let jsonDataChat: NSArray = jsonData.valueForKey("RendezChat") as! NSArray
                 let jsonDataFriends: NSArray = jsonData.valueForKey("Friends") as! NSArray
                 let jsonDataGroups: NSArray = jsonData.valueForKey("Groups") as! NSArray
+                let jsonDataGroupsR: NSArray = jsonData.valueForKey("GResponses") as! NSArray
                // let jsonLoc: NSArray = jsonData.valueForKey("RendezLoc") as! NSArray
 
                 for(var index = 0; index < jsonDataStatus.count; index++ ){
@@ -636,9 +665,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     }
                     
                     someGroups.append(Groups(id: id,groupname: status1 as String, groupdetail: detail1 as String, members: somef))
-                    
                 }
-                
+                for(var i = 0; i < jsonDataGroupsR.count; i++ ){
+                    
+                    let id = jsonDataGroupsR[i].valueForKey("id") as! Int
+                    let name = jsonDataGroupsR[i].valueForKey("username") as! NSString
+                    let resp = jsonDataGroupsR[i].valueForKey("response") as! Int
+                    
+                    returnDic.allDeesReps.append(GResps(id: id,name: name as String,resp: resp))
+                }
                 
                 let dateFormatter = NSDateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
