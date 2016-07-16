@@ -1,4 +1,5 @@
-# ReniOS (old repo got corrupted somehow, shifted to here)
+# ReniOS 0.2
+(old repo got corrupted somehow, shifted to here)
 Just an extension of work from a startup that went south
 
 Doing mostly experimental features on it on the fly
