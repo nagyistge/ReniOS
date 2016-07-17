@@ -706,6 +706,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return returnDic
     }
     
+    func isGroup(name:String)->Bool{
+        for(var i = 0; i < self.yourGroups.count; i++){
+            if(self.yourGroups[i].groupname == name){
+                return true
+            }
+        }
+        return false
+    }
+    
+    
     //should be called whenever a rendez is sent to ALL selected recipients
     func emitRendez(information: Any?){
         let postparam:Dictionary<String, String!> = information as! Dictionary<String, String!>
@@ -743,6 +753,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             self.mSocket.emit("joinserver", username, showname1)
             
             //emit listener that is set to emit a rendez once it has been made and sent off
+            //THIS IS TRIGGERED IN sendToFriends.swift 
             self.events.listenTo("emitRendez", action: {
                 
                 for friend in self.friendarr{
@@ -751,23 +762,73 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let title = friend.valueForKey("title") as! String
                     let detail = friend.valueForKey("detail") as! String
                     let location = friend.valueForKey("location") as! String
+                    let timefor = friend.valueForKey("timefor") as! String
+                    let type = friend.valueForKey("type") as! Int
+    
                     print("title: " + title)
                     print("detail: " + detail)
                     print("locaiton: "  + location)
                     
                     let name = friend.valueForKey("friend") as! String
-                    self.mSocket.emit("send", name, title, detail, location, "0")
+                    if(self.isGroup(name)){
+                        let members = self.getGroup(name)
+                        
+                        for m in members.members{
+                            self.mSocket.emit("send", name, title, detail, location, "0",timefor, type, 0, m.username)
+                        }
+                    }
+                    else{
+                        self.mSocket.emit("send", name, title, detail, location, "0",timefor, type, 0, "")
+                    }
+                }
+                
+                for friend in self.grouparr{
+                    print("friend array count")
+                    print(self.friendarr.count)
+                    let title = friend.valueForKey("title") as! String
+                    let detail = friend.valueForKey("detail") as! String
+                    let location = friend.valueForKey("location") as! String
+                    let timefor = friend.valueForKey("timefor") as! String
+                    let type = friend.valueForKey("type") as! Int
+                    
+                    print("title: " + title)
+                    print("detail: " + detail)
+                    print("locaiton: "  + location)
+                    
+                    let name = friend.valueForKey("friend") as! String
+                    if(self.isGroup(name)){
+                        let members = self.getGroup(name)
+                        
+                        for m in members.members{
+                            self.mSocket.emit("send", name, title, detail, location, "0",timefor, type, 0, m.username)
+                        }
+                    }
+                    else{
+                        self.mSocket.emit("send", name, title, detail, location, "0",timefor, type, 0, "")
+                    }
                 }
                 self.friendarr.removeAll()
+                self.grouparr.removeAll()
             })
             
             //same as earlier, but for chats this time
             self.events.listenTo("emitChat", action: {
-                let detail = self.chatarr[0].valueForKey("detail") as! String
-                print("detail: " + detail)
-                let name = self.chatarr[0].valueForKey("friend") as! String
-                self.mSocket.emit("send chat", name, detail, "00")
-                self.friendarr.removeAll()
+                for cfriend in self.chatarr{
+                    let detail = cfriend.valueForKey("detail") as! String//actual message
+                    print("detail: " + detail)
+                    let name = cfriend.valueForKey("friend") as! String//person its goin to
+                    if(self.isGroup(name)){
+                        //if we are sending a group message, we cant use the group's name, thus we
+                        //are required to fetch the members of the group and from there do our emits
+                        let members = self.getGroup(name)
+                        for m in members.members{
+                             self.mSocket.emit("send chat", name, detail, "00", m.username)
+                        }
+                    }else{
+                        self.mSocket.emit("send chat", name, detail, "00", "")
+                    }
+                }
+                self.chatarr.removeAll()
             })
         }
         
@@ -776,26 +837,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //When or if the user is logged in, turn on the socket listeners here
         self.mSocket.on("new chat"){data, ack in
             if let cur:NSDictionary = data?[0] as? NSDictionary {
+                print("----=== NEW CHAT INTERCEPTED ===----")
                 UIApplication.sharedApplication().applicationIconBadgeNumber = ++self.badgeCount
                let friendname = cur.objectForKey("username") as! String
                 let message = cur.objectForKey("detail") as! String
+                let pgm = cur.objectForKey("pgm") as! String
+                
                 let touser = username
-                if(!self.isTheFriendInTheWoz(friendname)){
-                    self.makeFriendsWithWoz(username, friendname: friendname)
+                var theReal = ""
+                if(pgm.isEmpty){
+                    theReal = friendname
+                }else{
+                    theReal = pgm
+                }
+                if(!self.isTheFriendInTheWoz(theReal)){
+                    self.makeFriendsWithWoz(username, friendname: theReal)
                 }
                 
-                let temp:rendezChatDictionary = self.theWozMap[friendname]!
+                
+                let temp:rendezChatDictionary = self.theWozMap[theReal]!
                 temp.putInChat(Chat(username: friendname, details: message, time: NSDate(),toUser: touser))
-                self.theWozMap[friendname] = temp
+                self.theWozMap[theReal] = temp
                 let localNotification: UILocalNotification = UILocalNotification()
                 localNotification.alertAction = "YO BOI GOT THAT MUTHA FUCKIN SOCKET EMIT WOOOOOOOOOOO"
                 localNotification.alertBody = "YA GOT A CHAT CHICO"
                 localNotification.fireDate = NSDate(timeIntervalSinceNow: 5)
                 //this should fire off the update in friends activity...
                 UIApplication.sharedApplication().scheduleLocalNotification(localNotification)
-                let friend = Friend(username: friendname as String, showname: showname1 as String, timestamp: NSDate())
+                let friend = Friend(username: theReal as String, showname: showname1 as String, timestamp: NSDate())
                 self.notifyFriendsActivity(friend)
-                let rendezChat = Chat(username: friendname, details: message, time: NSDate(), toUser: username)
+                let rendezChat = Chat(username: theReal, details: message, time: NSDate(), toUser: username)
                 self.notifyChatting(rendezChat)
             }
             else{
@@ -824,6 +895,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 var timefor = dateFormatter.dateFromString(time as String)
                 var timeset = dateFormatter.stringFromDate(NSDate())
                 print(friendname, title1, message, location1)
+                
                 if(!self.isTheFriendInTheWoz(friendname as String)){
                     self.makeFriendsWithWoz(username, friendname: friendname as String)
                 }
