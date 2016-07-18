@@ -120,7 +120,7 @@ override func viewWillAppear(animated: Bool) {
         toViewController.showfriend = showfriend
         self.modalPresentationStyle = UIModalPresentationStyle.Custom
         toViewController.transitioningDelegate = self.transitionOperator
-        
+        toViewController.flag = flag
         self.presentViewController(toViewController, animated: true, completion: nil)
     }
     
@@ -236,6 +236,7 @@ override func viewWillAppear(animated: Bool) {
         }else{
             vc.isStatusFromYou = false
         }
+        
         self.presentViewController(vc, animated: true, completion: nil)
     }
     
@@ -380,16 +381,30 @@ override func viewWillAppear(animated: Bool) {
                 
                 //   var error: NSError?
                 vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
-                let coords = jsonData.valueForKey("location") as? String
-                let title = friendname
-                let detail = jsonData.valueForKey("loctime") as? String
-                vm.name = friendname
-                vm.coords = coords
-                vm.title1 = title
-                vm.detail = detail
+                if(flag == -1){
+                    if let coords1 = jsonData.valueForKey("location") as? String{
+                        let coords = jsonData.valueForKey("location") as? String
+                        let title = friendname
+                        let detail = jsonData.valueForKey("loctime") as? String
+                        vm.name = friendname
+                        vm.coords = coords
+                        vm.title1 = title
+                        vm.detail = detail
+                        vm.gflag = flag
                 
-                
-                self.presentViewController(vm, animated: true, completion: nil)
+                        self.presentViewController(vm, animated: true, completion: nil)
+                    }
+                }else{
+                    let coords = jsonData.valueForKey("location") as? String
+                    let title = friendname
+                    let detail = jsonData.valueForKey("loctime") as? String
+                    vm.name = friendname
+                    vm.coords = coords
+                    vm.title1 = title
+                    vm.detail = detail
+                    vm.gflag = flag
+                    self.presentViewController(vm, animated: true, completion: nil)
+                }
 
                 
                 
