@@ -55,7 +55,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         //NSNOTIFICATION OBSERVER INITILIZER
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateFriendNotif:", name: FriendActivityNotifKey, object: nil)
-        if true{
+        if false{
             //init param for the initial list from msqli~~~~~~~~~~~~~~~~~~~~
             let username:String = prefs.valueForKey("USERNAME") as! String
             let post:NSString = "username=\(username)"
@@ -132,7 +132,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 alertView.show()
             }
         }else{
-            //someInts = self.delegate.yourFriends
+            
         }
             // Do any additional setup after loading the view, typically from a nib.
         }
@@ -140,7 +140,10 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         override func viewWillAppear(animated: Bool) {
             super.viewWillAppear(animated)
-            
+            self.someInts.removeAll()
+            self.someInts.appendContentsOf(self.delegate.theNotifHelper.returnFriendNotif())
+            print(someInts)
+            //self.tableView.reloadData()
             configureTableView()
             
             loadCellDescriptors()
@@ -336,15 +339,8 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     if x.id == cellDescriptors[indexPath.section][indexOfTappedRow]["id"] as! Int{
                          NSNotificationCenter.defaultCenter().postNotificationName("refresh", object: x)
                     }
-                
                 }
-                
-                
-               
                 self.dismissViewControllerAnimated(true, completion: nil)
-                
-            
-            
             }
             
             
@@ -443,10 +439,16 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
             
             tblExpandable.reloadSections(NSIndexSet(index: 2), withRowAnimation: UITableViewRowAnimation.None)
         }
-        
+
+    @IBAction func onBackPressed(sender: UIButton) {
+         self.dismissViewControllerAnimated(true, completion: nil)
+    }
+
+
 }
 
-    
+
+
     /*
 
 var username: String!
