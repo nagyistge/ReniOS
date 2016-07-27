@@ -46,3 +46,5 @@ I have not been updating the backend work since it contains sensitive informatio
 In Process:
 -Location based events whenever in vicinity of a Rendez location/person that is a friend??
 
+-Begin refactoring of lifecycle activies/basically everything and run an optimizations check... been getting too caught up in features o_o
+
