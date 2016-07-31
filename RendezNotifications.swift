@@ -21,8 +21,13 @@ class RendezNotifications: UIViewController {
     var someChat = [Chat]()
     var someStatus = [Status]()
     
-
+    @IBOutlet weak var statusB: UIButton!
+    @IBOutlet weak var rendezB: UIButton!
+    @IBOutlet weak var chatB: UIButton!
     
+    var statusflag:Int!
+    var rendezflag:Int!
+    var chatflag:Int!
     
     var pageViewController: UIPageViewController!
     var pageTitles: NSArray = ["Status","Rendez", "Messages"]
@@ -64,6 +69,11 @@ class RendezNotifications: UIViewController {
         let recognizerR: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: "swipeRight:")
         recognizerR.direction = .Right
         
+        statusflag = 1
+        rendezflag = 0
+        chatflag = 0
+        statusB.selected = true
+        
         self.view.addGestureRecognizer(recognizerL)
         self.view.addGestureRecognizer(recognizerR)
         
@@ -71,7 +81,7 @@ class RendezNotifications: UIViewController {
         let viewControllers = NSArray(object: startVC)
         self.pageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("PageViewController") as! UIPageViewController
         self.pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .Forward, animated: true, completion: nil)
-        self.pageViewController.view.frame = CGRectMake(0, 85, self.view.frame.width, self.view.frame.size.height-85)
+        self.pageViewController.view.frame = CGRectMake(0, 150, self.view.frame.width, self.view.frame.size.height-85)
         self.addChildViewController(self.pageViewController)
         self.view.addSubview(self.pageViewController.view)
         self.pageViewController.didMoveToParentViewController(self)
@@ -108,6 +118,7 @@ class RendezNotifications: UIViewController {
             self.index += 1
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
             self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            setButtons()
             
         }
         
@@ -119,9 +130,76 @@ class RendezNotifications: UIViewController {
             self.index -= 1
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
             self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+            setButtons()
         }
     }
     
+    func setButtons(){
+        if(self.index == 0){
+            rendezflag = 0
+            chatflag = 0
+            rendezB.selected = false
+            chatB.selected = false
+            
+            statusflag = 1
+            statusB.selected = true
+        }else if(self.index == 1){
+            rendezflag = 1
+            chatflag = 0
+            rendezB.selected = true
+            chatB.selected = false
+            
+            statusflag = 0
+            statusB.selected = false
+        }else{
+            rendezflag = 0
+            chatflag = 1
+            rendezB.selected = false
+            chatB.selected = true
+            
+            statusflag = 0
+            statusB.selected = false
+        }
+    }
+    
+    @IBAction func onStatus(sender: UIButton) {
+        if(self.index != 0){
+            self.index = 0
+            let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+            setButtons()
+        }
+    }
+    @IBAction func onRendez(sender: UIButton) {
+        if(self.index != 1){
+            
+            
+            if(self.index < 1){
+                self.index = 1
+                let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            }else{
+                self.index = 1
+                let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
+                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+            }
+            
+            setButtons()
+        }
+        
+    }
+    @IBAction func onChat(sender: UIButton) {
+        if(self.index != 2){
+             self.index = 2
+            let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            
+           
+            
+            setButtons()
+            
+        }
+    }
     
     @IBAction func onBackPressed(sender: UIButton) {
         self.dismissViewControllerAnimated(true, completion: nil)

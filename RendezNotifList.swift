@@ -53,11 +53,20 @@ class RendezNotifList: UIViewController ,UITableViewDelegate, UITableViewDataSou
         let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
         //f(!self.someInts[indexPath.row].isGroup){
         if(listType == 0){//status
-           cell.textLabel?.text = "Status: " + self.someStatus[indexPath.row].title
+           //cell.textLabel?.text = "Status: " + self.someStatus[indexPath.row].title
+            cell.textLabel?.text = self.someStatus[indexPath.row].username + " did some sorta something with a status."
         }else if(listType == 1){//rendezes
-             cell.textLabel?.text = "Rendez: " + self.someRendez[indexPath.row].title
+             cell.textLabel?.text = self.someRendez[indexPath.row].username + " sent ya a Rendez at " + self.someRendez[indexPath.row].timeset
         }else{//chat
-             cell.textLabel?.text = "Chat: " + self.someChat[indexPath.row].details
+            let dateFormatter = NSDateFormatter()
+            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+            dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+            
+            var timefor = dateFormatter.stringFromDate(self.someChat[indexPath.row].time)
+            
+            cell.textLabel?.text = self.someChat[indexPath.row].username + " sent ya a message at " + timefor
+
+            
         }
         
         return cell
