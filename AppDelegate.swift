@@ -45,6 +45,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     internal var friendMap = Dictionary<String, Friend!>()
     internal var groupResponses = Dictionary<Int, [GResps]!>()
     
+    //for now ill just have these to store in order of time recieved for notifications
+    internal var status = [Status]()
+    internal var rendezstatus = [RendezStatus]()
+    internal var chat = [Chat]()
+    
     /*
                                         -=Xxx> theWozMap <xxX=-
                         Essentially the holy grail data structure for the app
@@ -157,82 +162,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     //need to get your friends from somewhere, should be called when you login or mainactivity crashes/restarts
     func queryFriends(username:String){
-        let post:NSString = "username=\(username)"
-        NSLog("PostData: %@",post);
-        var php:String = ""
-        php = "showFriendlist.php"
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/" + php)!
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        let postLength:NSString = String( postData.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
-        request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
-        do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
-        } catch let error as NSError {
-            reponseError = error
-            urlData = nil
-        }
-        if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
-            NSLog("Response code: %ld", res.statusCode);
-            if (res.statusCode >= 200 && res.statusCode < 300)
-            {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
-                NSLog("Response ==> %@", responseData);
-                let jsonData1:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
-               // let jsonData:NSArray = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSArray
-                let jsonData:NSArray = jsonData1.valueForKey("friends") as! NSArray
-                let jsonData2:NSArray = jsonData1.valueForKey("groups") as! NSArray
-                
-                for(var index = 0; index < jsonData.count; index++ ){
-                    let username1:NSString = jsonData[index].valueForKey("username") as! NSString
-                    var title2:NSString = ""
-                    if let title1 =  jsonData[index].valueForKey("friendname") as? NSString{
-                        title2 = jsonData[index].valueForKey("friendname") as! NSString
-                    }
-                    else{
-                        title2 = username1
-                    }
-                    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: NSDate())
-                    self.yourFriends.append(status)
-                    print("Friend Entity added: " + status.friendname)
-                }
-                for(var index = 0; index < jsonData2.count; index++ ){
-                    let groupname:NSString = jsonData2[index].valueForKey("groupname") as! NSString
-                    let groupdetail:NSString = jsonData2[index].valueForKey("groupdetail") as! NSString
-                    let groupid: Int = jsonData2[index].valueForKey("id") as! Int
-                    let members:NSArray = jsonData2[index].valueForKey("members") as! NSArray
-                    let member = Groups(id: groupid, groupname: groupname as String, groupdetail: groupdetail as String, members: members as! [Friend])
-                    self.yourGroups.append(member)
-                    print("group Entity added:")
-                    print(member)
-                }
-            } else {
-                let alertView:UIAlertView = UIAlertView()
-                alertView.title = "Sign in Failed!"
-                alertView.message = "Connection Failed"
-                alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
-                alertView.show()
-            }
-        } else {
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Sign in Failed!"
-            alertView.message = "Connection Failure"
-            if let error = reponseError {
-                alertView.message = (error.localizedDescription)
-            }
-            alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
-            alertView.show()
-        }
+            //depreciated, moved down south
     }
     
     /*
@@ -299,6 +229,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.theNotifHelper.setMaxtime(name, time: timefor!)
                 self.theWozMap[name]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
                 
+                //added to notification
+                self.rendezstatus.append(initRendezChatD.allDeesRendez[i])
+                
             }
             else if( uname == username){
                 //setting the variable since using index and whatnot is so long and confusing
@@ -317,9 +250,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     
                     //is a group
                     if( flag){
-                    self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname, g: true))
+                        self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname, g: true))
                     }else{//not a group
-                    self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname))
+                        self.theNotifHelper.addToNotfifs(NotificationNode(username: name, showname: showname))
                     }
                 }
                 
@@ -343,13 +276,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
                     var timefor = dateFormatter.dateFromString(timeS as String)
                 
+                if let a = (prefs.valueForKey(uname) as? NSDate ){
                     if( (prefs.valueForKey(uname) as! NSDate ).compare(timefor!) == NSComparisonResult.OrderedAscending ){
                         self.theNotifHelper.incrementRendez(uname)
                     }
+                }
                 
                     self.theNotifHelper.setMaxtime(uname, time: timefor!)
-                
                 self.theWozMap[initRendezChatD.allDeesRendez[i].username]!.allDeesRendez.append(initRendezChatD.allDeesRendez[i])
+            
+                //added to notification
+                self.rendezstatus.append(initRendezChatD.allDeesRendez[i])
             }
         }
     
@@ -384,6 +321,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.theNotifHelper.setMaxtime(name, time: timeS)
                 self.theWozMap[name]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
             }
+            
+            //for notifications
+            self.chat.append(initRendezChatD.allDeesChat[i])
         }//END OF GROUP CHECKING
         else if( initRendezChatD.allDeesChat[i].username == username){
             for x in self.yourFriends{
@@ -427,7 +367,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.theNotifHelper.setMaxtime(uname, time: timeS)
                 self.theWozMap[initRendezChatD.allDeesChat[i].username]!.allDeesChat.append(initRendezChatD.allDeesChat[i])
             }
+        
+            self.chat.append(initRendezChatD.allDeesChat[i])//END OF ELSE FOR CHAT
         }
+        
         }
          print(initRendezChatD.allDeezLoc.count)
         for(var i = 0; i < initRendezChatD.allDeezLoc.count; i++){
@@ -854,7 +797,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     self.makeFriendsWithWoz(username, friendname: theReal)
                 }
                 
-                
                 let temp:rendezChatDictionary = self.theWozMap[theReal]!
                 temp.putInChat(Chat(username: friendname, details: message, time: NSDate(),toUser: touser))
                 self.theWozMap[theReal] = temp
@@ -1111,4 +1053,84 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             */
         return returnDic
     }
+    
+    /* what queryFriends used to have inside 
+    let post:NSString = "username=\(username)"
+    NSLog("PostData: %@",post);
+    var php:String = ""
+    php = "showFriendlist.php"
+    let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/" + php)!
+    let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+    let postLength:NSString = String( postData.length )
+    let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
+    request.HTTPMethod = "POST"
+    request.HTTPBody = postData
+    request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
+    request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+    request.setValue("application/json", forHTTPHeaderField: "Accept")
+    var reponseError: NSError?
+    var response: NSURLResponse?
+    var urlData: NSData?
+    do {
+    urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+    } catch let error as NSError {
+    reponseError = error
+    urlData = nil
+    }
+    if ( urlData != nil ) {
+    let res = response as! NSHTTPURLResponse!;
+    NSLog("Response code: %ld", res.statusCode);
+    if (res.statusCode >= 200 && res.statusCode < 300)
+    {
+    let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+    NSLog("Response ==> %@", responseData);
+    let jsonData1:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+    
+    let jsonData:NSArray = jsonData1.valueForKey("friends") as! NSArray
+    let jsonData2:NSArray = jsonData1.valueForKey("groups") as! NSArray
+    
+    for(var index = 0; index < jsonData.count; index++ ){
+    let username1:NSString = jsonData[index].valueForKey("username") as! NSString
+    var title2:NSString = ""
+    if let title1 =  jsonData[index].valueForKey("friendname") as? NSString{
+    title2 = jsonData[index].valueForKey("friendname") as! NSString
+    }
+    else{
+    title2 = username1
+    }
+    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: NSDate())
+    self.yourFriends.append(status)
+    print("Friend Entity added: " + status.friendname)
+    }
+    for(var index = 0; index < jsonData2.count; index++ ){
+    let groupname:NSString = jsonData2[index].valueForKey("groupname") as! NSString
+    let groupdetail:NSString = jsonData2[index].valueForKey("groupdetail") as! NSString
+    let groupid: Int = jsonData2[index].valueForKey("id") as! Int
+    let members:NSArray = jsonData2[index].valueForKey("members") as! NSArray
+    let member = Groups(id: groupid, groupname: groupname as String, groupdetail: groupdetail as String, members: members as! [Friend])
+    self.yourGroups.append(member)
+    print("group Entity added:")
+    print(member)
+    }
+    } else {
+    let alertView:UIAlertView = UIAlertView()
+    alertView.title = "Sign in Failed!"
+    alertView.message = "Connection Failed"
+    alertView.delegate = self
+    alertView.addButtonWithTitle("OK")
+    alertView.show()
+    }
+    } else {
+    let alertView:UIAlertView = UIAlertView()
+    alertView.title = "Sign in Failed!"
+    alertView.message = "Connection Failure"
+    if let error = reponseError {
+    alertView.message = (error.localizedDescription)
+    }
+    alertView.delegate = self
+    alertView.addButtonWithTitle("OK")
+    alertView.show()
+    }
+    
+    */
 }

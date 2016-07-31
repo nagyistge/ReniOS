@@ -21,6 +21,7 @@ import UIKit
         var index:Int = 0
         //let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
 
+        var vcNotif: RendezNotifications!
         
         
         override func viewDidLoad()
@@ -46,6 +47,8 @@ import UIKit
                 let showname:String = prefs.stringForKey("SHOWNAME")!
                 delegate.letsGetDatSocketRollin(username, showname1: showname)
                 if (delegate.yourFriends.count == 0){
+                    print("remember that you get the friend list in VIEWCONTENTCONTROLLER")
+                    
                     delegate.queryFriends(username)
                     
                 }
@@ -127,6 +130,13 @@ import UIKit
         {
             return 0
         }
+        
+        @IBAction func onNotificationPress(sender: UIButton) {
+            vcNotif = self.storyboard?.instantiateViewControllerWithIdentifier("rendezNotifications") as! RendezNotifications
+            self.presentViewController(vcNotif, animated: true, completion: nil)
+            
+        }
+        
         
     }
     
