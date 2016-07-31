@@ -7,8 +7,8 @@
 //
 
 import UIKit
-
-class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource {
+import Foundation
+class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UITableViewDelegate, UITableViewDataSource, CLLocationManagerDelegate {
         //usernames
         var username: String!
         var friendname: String!
@@ -30,9 +30,20 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
         var flag:Int = -1
-        
+    
+    var rangeflag:Int = 0
+    
+    var rendezes = [RendezStatus]()
+    var query_rendezes = [RendezStatus]()
+    let locationManager = CLLocationManager()
+    var manager: OneShotLocationManager = OneShotLocationManager()
+    var coords:String = "gwang"
+    var x:String = "x"
+    var y:String = "y"
         override func viewDidLoad() {
             super.viewDidLoad()
+            
+             locationManager.delegate = self
             
     }
         
@@ -44,7 +55,22 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         override func viewDidAppear(animated: Bool) {
             super.viewDidAppear(true)
             let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-          
+          locationManager.requestWhenInUseAuthorization()
+            manager = OneShotLocationManager()
+            manager.fetchWithCompletion {location, error in
+                // fetch location or an error
+                if let loc = location {
+                    print(location)
+                    let lat: Double = loc.coordinate.latitude
+                    let long: Double = loc.coordinate.longitude
+                    self.coords = String(format:"%f", lat)+" : "+String(format:"%f", long)
+                    self.x = String(format:"%f", lat)
+                    self.y = String(format:"%f", long)
+                } else if let err = error {
+                    print(err.localizedDescription)
+                }
+                // self.manager = nil
+            }
         }
         
         //NSNotificationStuff---NSNotificationStuff---
@@ -73,6 +99,65 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         @IBAction func backTapped(sender: UIButton) {
             dismissViewControllerAnimated(true, completion: nil)
         }
+    
+    func ManHanDist(x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Bool {
+        let xx = Double(x)
+        let yy = Double(y)
+        
+        let xxcoord = Double(xcoord)
+        let yycoord = Double(ycoord)
+        
+        //flag here will determine the query distance?
+        //0 = 0.01
+        //1 = 0.001
+        if(flag == 0){
+            return 0.01 <= (abs(xx!-xxcoord!) + abs(yy!-yycoord!))
+        }else{
+            return 0.001 <= (abs(xx!-xxcoord!) + abs(yy!-yycoord!))
+        }
+        
+        
+        //return (abs(from.x - to.x) + abs(from.y - to.y));
+    }
+    
+    
+    // 1.0 = 111km
+    // 0.1 = 11.1 km
+    // 0.01 = 1.1km
+    // 0.001 = 110 m
+    // 0.0001 = 11 m
+    //probably will be workin in between like 1.1 km and 110 m, so difference of 0.01 and 0.001
+    func queryRanges(){
+        
+        if(self.coords != "gwang"){
+            for ren in rendezes{
+                let arr = ren.location.componentsSeparatedByString(" : ")
+                let xcoord = arr[0]
+                let ycoord = arr[1]
+                if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
+                    query_rendezes.append(ren)
+                }
+            }
+        }
+    }
+    
+    /*
+    The units digit (one decimal degree) gives a position up to 111 kilometers (60 nautical miles, about 69 miles). It can tell us roughly what large state or country we are in.
+    
+    The first decimal place is worth up to 11.1 km: it can distinguish the position of one large city from a neighboring large city.
+    
+    The second decimal place is worth up to 1.1 km: it can separate one village from the next.
+    
+    The third decimal place is worth up to 110 m: it can identify a large agricultural field or institutional campus.
+    
+    The fourth decimal place is worth up to 11 m: it can identify a parcel of land. It is comparable to the typical accuracy of an uncorrected GPS unit with no interference.
+    
+    The fifth decimal place is worth up to 1.1 m: it distinguish trees from each other. Accuracy to this level with commercial GPS units can only be achieved with differential correction.
+    
+    The sixth decimal place is worth up to 0.11 m: you can use this for laying out structures in detail, for designing landscapes, building roads. It should be more than good enough for tracking movements of glaciers and rivers. This can be achieved by taking painstaking measures with GPS, such as differentially corrected GPS.
+    
+    */
+
         
 
 }
