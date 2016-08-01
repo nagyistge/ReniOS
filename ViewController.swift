@@ -22,7 +22,7 @@ import UIKit
         //let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
 
         var vcNotif: RendezNotifications!
-        
+        var vcInRanges : rendezChatInRangeViewController!
         
         override func viewDidLoad()
         {
@@ -131,11 +131,23 @@ import UIKit
             return 0
         }
         
+        
+        //on Button for Notificaions
         @IBAction func onNotificationPress(sender: UIButton) {
             vcNotif = self.storyboard?.instantiateViewControllerWithIdentifier("rendezNotifications") as! RendezNotifications
             self.presentViewController(vcNotif, animated: true, completion: nil)
+        }
+        
+        //on Button for Ranges
+        @IBAction func onInRanges(sender: UIButton) {
+            vcInRanges = self.storyboard?.instantiateViewControllerWithIdentifier("rendezInRange") as! rendezChatInRangeViewController
+            let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            vcInRanges.rendezes = delegate.r_rendezstatus
+            vcInRanges.statuses = delegate.r_status
+            self.presentViewController(vcInRanges, animated: true, completion: nil)
             
         }
+        
         
         
     }

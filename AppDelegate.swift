@@ -50,6 +50,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     internal var rendezstatus = [RendezStatus]()
     internal var chat = [Chat]()
     
+    //There is an issue of using just rendezstatus and status for inRange,
+    //since those sent/made by a user should be able to be pinged as well
+    //........... feels iffy to have so much repeated data but will 
+    //set arrays for now x_x
+    internal var r_status = [Status]()
+    internal var r_rendezstatus = [RendezStatus]()
+    
+    
     /*
                                         -=Xxx> theWozMap <xxX=-
                         Essentially the holy grail data structure for the app
@@ -185,6 +193,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.theWozMap[initRendezChatD.allDeesStatus[i].username]!.allDeesStatus.append(initRendezChatD.allDeesStatus[i])
                     self.newfeed.append(initRendezChatD.allDeesStatus[i])
             }
+            self.r_status.append(initRendezChatD.allDeesStatus[i])
         }
     
         for(var i = 0; i < initRendezChatD.allDeesRendez.count; i++){
@@ -288,6 +297,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 //added to notification
                 self.rendezstatus.append(initRendezChatD.allDeesRendez[i])
             }
+            self.r_rendezstatus.append(initRendezChatD.allDeesRendez[i])
+
         }
     
         //allocate all the chats send and recieved by you

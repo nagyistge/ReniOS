@@ -34,18 +34,34 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     var rangeflag:Int = 0
     
     var rendezes = [RendezStatus]()
-    var query_rendezes = [RendezStatus]()
+    var statuses = [Status]()
+    
+    var query_rendezes = [Double : RendezStatus]()
+    var q_indexes = [Double]()//damn dictionaries dont allow for indexing..
+    var query_statuses = [Double : Status]()
+    var q_s_indexes = [Double]()//damn dictionaries dont allow for indexing..
+    
+    var query_effit = [Double:AnyObject]()
+    var q_effit = [Double]()
+    var finalarr = [AnyObject]()
+    var finalarrInd = [Int:Double]()//array for holding indexes as well as manhattan dist vals
+    
+    var finalInd = [Int]()
+    
     let locationManager = CLLocationManager()
     var manager: OneShotLocationManager = OneShotLocationManager()
     var coords:String = "gwang"
     var x:String = "x"
     var y:String = "y"
+    
+    
         override func viewDidLoad() {
             super.viewDidLoad()
-            
+            self.tableVie.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+
              locationManager.delegate = self
             
-    }
+        }
         
         override func viewWillAppear(animated: Bool) {
             super.viewWillAppear(true)
@@ -66,10 +82,11 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                     self.coords = String(format:"%f", lat)+" : "+String(format:"%f", long)
                     self.x = String(format:"%f", lat)
                     self.y = String(format:"%f", long)
+                    self.queryRanges()
+                    self.tableVie.reloadData()
                 } else if let err = error {
                     print(err.localizedDescription)
                 }
-                // self.manager = nil
             }
         }
         
@@ -83,12 +100,21 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     
         //--TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------
         func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-            return 1
+            //return query_effit.count
+            //return query_rendezes.count + query_statuses.count
+            return finalarr.count
         }
         
         func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-            let cell = tableVie.dequeueReusableCellWithIdentifier("customCell", forIndexPath: indexPath)
-            
+            let cell = tableVie.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
+            if let rr = finalarr[finalInd[indexPath.row]] as? RendezStatus{
+                let r = finalarr[finalInd[indexPath.row]] as! RendezStatus
+                cell.textLabel?.text = r.title + " is " + String(finalarrInd[finalInd[indexPath.row]]!) + " m away!"
+            }else{
+                let r = finalarr[finalInd[indexPath.row]] as! Status
+                 //cell.textLabel?.text = r!.title + " " + r!.username + " " + r!.timeset
+                cell.textLabel?.text = r.title + " is " + String(finalarrInd[finalInd[indexPath.row]]!) + " m away!"
+            }
             return cell
         }
         
@@ -97,7 +123,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         }
         
         @IBAction func backTapped(sender: UIButton) {
-            dismissViewControllerAnimated(true, completion: nil)
+            self.dismissViewControllerAnimated(true, completion: nil)
         }
     
     func ManHanDist(x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Bool {
@@ -115,11 +141,27 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         }else{
             return 0.001 <= (abs(xx!-xxcoord!) + abs(yy!-yycoord!))
         }
+    }
+    
+    func ManHanDistDouble(x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Double {
+        let xx = Double(x)
+        let yy = Double(y)
+        
+        let xxcoord = Double(xcoord)
+        let yycoord = Double(ycoord)
+        
+        //flag here will determine the query distance?
+        //0 = 0.01
+        //1 = 0.001
+        if(flag == 0){
+            return (abs(xx!-xxcoord!) + abs(yy!-yycoord!))
+        }else{
+            return (abs(xx!-xxcoord!) + abs(yy!-yycoord!))
+        }
         
         
         //return (abs(from.x - to.x) + abs(from.y - to.y));
     }
-    
     
     // 1.0 = 111km
     // 0.1 = 11.1 km
@@ -135,9 +177,68 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 let xcoord = arr[0]
                 let ycoord = arr[1]
                 if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
-                    query_rendezes.append(ren)
+                    let i = ManHanDistDouble( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: flag)
+                    query_rendezes[i] = ren
+                     query_effit[i] = ren
+                    
+                    finalarrInd[finalarr.count] = i
+                    finalarr.append(ren)
+                    //q_indexes.append(i)
                 }
             }
+            query_rendezes.sort{
+                return $0.0 < $1.0
+            }
+            for x in query_rendezes{
+                q_indexes.append(x.0)
+            }
+            
+            //statues manhattan calculations
+            for stat in statuses{
+                let arr = stat.location.componentsSeparatedByString(" : ")
+                let xcoord = arr[0]
+                let ycoord = arr[1]
+                if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
+                    let i = ManHanDistDouble( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: flag)
+                    query_statuses[i] = stat
+                    query_effit[i] = stat
+                    
+                    finalarrInd[finalarr.count] = i
+                    finalarr.append(stat)
+                    
+                    //q_indexes.append(i)
+                }
+            }
+            query_statuses.sort{
+                return $0.0 < $1.0
+            }
+            for x in query_statuses{
+                q_s_indexes.append(x.0)
+            }
+            
+            
+            query_effit.sort{
+                return $0.0 < $1.0
+            }
+            for x in query_effit{
+                q_effit.append(x.0)
+            }
+            
+            finalarrInd.sort{
+                return $0.1 < $1.1
+            }
+            
+            for x in finalarrInd{
+                 finalInd.append(x.0)
+            }
+            
+           
+            
+            print("query_effit size " + String(query_effit.count))
+             print("total q size " + String(query_statuses.count + query_rendezes.count ))
+            print("total size " + String(statuses.count + rendezes.count ))
+            print(self.coords)
+            
         }
     }
     
