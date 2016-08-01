@@ -36,17 +36,9 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     var rendezes = [RendezStatus]()
     var statuses = [Status]()
     
-    var query_rendezes = [Double : RendezStatus]()
-    var q_indexes = [Double]()//damn dictionaries dont allow for indexing..
-    var query_statuses = [Double : Status]()
-    var q_s_indexes = [Double]()//damn dictionaries dont allow for indexing..
-    
-    var query_effit = [Double:AnyObject]()
-    var q_effit = [Double]()
     var finalarr = [AnyObject]()
     var finalarrInd = [Int:Double]()//array for holding indexes as well as manhattan dist vals
-    
-    var finalInd = [Int]()
+    var finalInd = [Int]()//extracted indexes from finalarrInd by taking the keys in the array
     
     let locationManager = CLLocationManager()
     var manager: OneShotLocationManager = OneShotLocationManager()
@@ -106,9 +98,16 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         }
         
         func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+            //finalInd[indexPath.row] is basically an array of indexes of Rendezes and Statuses
+            // and their manhattan distanes.
+            //finalarr holds the rendezes/statuses and finalarrInd holds the manhattan distances as
+            //seen below
+            
             let cell = tableVie.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
             if let rr = finalarr[finalInd[indexPath.row]] as? RendezStatus{
+                //use the indexPath.row to get the ith shortest distance RendezStatus
                 let r = finalarr[finalInd[indexPath.row]] as! RendezStatus
+                //
                 cell.textLabel?.text = r.title + " is " + String(finalarrInd[finalInd[indexPath.row]]!) + " m away!"
             }else{
                 let r = finalarr[finalInd[indexPath.row]] as! Status
@@ -178,19 +177,12 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 let ycoord = arr[1]
                 if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
                     let i = ManHanDistDouble( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: flag)
-                    query_rendezes[i] = ren
-                     query_effit[i] = ren
-                    
+                    //calculate its distance and set the current arraysize as the count with the
+                    //distance as the value, allowing the index at which it was appended to be saved
                     finalarrInd[finalarr.count] = i
                     finalarr.append(ren)
-                    //q_indexes.append(i)
+
                 }
-            }
-            query_rendezes.sort{
-                return $0.0 < $1.0
-            }
-            for x in query_rendezes{
-                q_indexes.append(x.0)
             }
             
             //statues manhattan calculations
@@ -200,45 +192,25 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 let ycoord = arr[1]
                 if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
                     let i = ManHanDistDouble( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: flag)
-                    query_statuses[i] = stat
-                    query_effit[i] = stat
-                    
+                    //calculate its distance and set the current arraysize as the count with the
+                    //distance as the value, allowing the index at which it was appended to be saved
                     finalarrInd[finalarr.count] = i
                     finalarr.append(stat)
-                    
-                    //q_indexes.append(i)
+
                 }
             }
-            query_statuses.sort{
-                return $0.0 < $1.0
-            }
-            for x in query_statuses{
-                q_s_indexes.append(x.0)
-            }
             
-            
-            query_effit.sort{
-                return $0.0 < $1.0
-            }
-            for x in query_effit{
-                q_effit.append(x.0)
-            }
-            
+            //sort according to the manhattan distances
             finalarrInd.sort{
                 return $0.1 < $1.1
             }
             
+            //add all the indexes in their newly sorted order according to their distances
             for x in finalarrInd{
                  finalInd.append(x.0)
             }
-            
-           
-            
-            print("query_effit size " + String(query_effit.count))
-             print("total q size " + String(query_statuses.count + query_rendezes.count ))
-            print("total size " + String(statuses.count + rendezes.count ))
-            print(self.coords)
-            
+
+            //then refresh the tables
         }
     }
     
