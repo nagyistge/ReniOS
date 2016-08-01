@@ -55,85 +55,6 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         //NSNOTIFICATION OBSERVER INITILIZER
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateFriendNotif:", name: FriendActivityNotifKey, object: nil)
-        if false{
-            //init param for the initial list from msqli~~~~~~~~~~~~~~~~~~~~
-            let username:String = prefs.valueForKey("USERNAME") as! String
-            let post:NSString = "username=\(username)"
-            NSLog("PostData: %@",post);
-            //random shit needed for the http request
-            let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/fetchRendezChatNotifChecker.php")!
-            let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-            let postLength:NSString = String( postData.length )
-            let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-            request.HTTPMethod = "POST"
-            request.HTTPBody = postData
-            request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
-            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-            request.setValue("application/json", forHTTPHeaderField: "Accept")
-            var reponseError: NSError?
-            var response: NSURLResponse?
-            var urlData: NSData?
-            do {
-                urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
-            } catch let error as NSError {
-                reponseError = error
-                urlData = nil
-            }
-            if ( urlData != nil ) {
-                let res = response as! NSHTTPURLResponse!;
-                NSLog("Response code: %ld", res.statusCode);
-                if (res.statusCode >= 200 && res.statusCode < 300)
-                {
-                    let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
-                    NSLog("Response ==> %@", responseData);
-                    let jsonData:NSArray = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSArray
-                    for(var index = 0; index < jsonData.count; index++ ){
-                        
-                        
-                        let username1:NSString = jsonData[index].valueForKey("username") as! NSString
-                        let title1:NSString = jsonData[index].valueForKey("showname") as! NSString
-                        var detail1:String = jsonData[index].valueForKey("timestamp") as! NSString as String
-                        
-                        if (detail1.characters.count < 18){
-                            detail1 += ":00"
-                        }
-                        
-                        let dateFormatter = NSDateFormatter()
-                        dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-                        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-                        let date = dateFormatter.dateFromString(detail1 as String)
-                        
-                        print("Initial friendlist fetch for " + (username1 as String) + "\n")
-                        print("showname: " + (title1 as String) + "\n")
-                        print("date: " + (date?.description)! + "\n")
-                        
-                        
-                        let status = Friend(username: username1 as String, showname: title1 as String, timestamp: date!)
-                        someInts.append(status)
-                    }
-                    //self.delegate.loadFriends(someInts)
-                } else {
-                    let alertView:UIAlertView = UIAlertView()
-                    alertView.title = "Sign in Failed!"
-                    alertView.message = "Connection Failed"
-                    alertView.delegate = self
-                    alertView.addButtonWithTitle("OK")
-                    alertView.show()
-                }
-            } else {
-                let alertView:UIAlertView = UIAlertView()
-                alertView.title = "Sign in Failed!"
-                alertView.message = "Connection Failure"
-                if let error = reponseError {
-                    alertView.message = (error.localizedDescription)
-                }
-                alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
-                alertView.show()
-            }
-        }else{
-            
-        }
             // Do any additional setup after loading the view, typically from a nib.
         }
         
@@ -197,11 +118,11 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     
                     for y in someFriendInts{
                         if y.username == username{
-                            let z = "From " + (y.username as String)
+                            let z = "From " + (y.username as String) + " at " + y.timeset
                         let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
                         celler.addObject(fcell)
                         }else{
-                            let z = "To " + (y.username as String)
+                            let z = "To " + (y.username as String) + " at " + y.timeset
                             let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
                             celler.addObject(fcell)
                         }
@@ -280,18 +201,44 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
             let currentCellDescriptor = getCellDescriptorForIndexPath(indexPath)
-            let cell = tableView.dequeueReusableCellWithIdentifier(currentCellDescriptor["cellIdentifier"] as! String, forIndexPath: indexPath) as! CustomCell
             
-            if currentCellDescriptor["cellIdentifier"] as! String == "idCellNormal" {
+            
+            if currentCellDescriptor["cellIdentifier"] as! String == "idCellNormal" && currentCellDescriptor["isExpandable"] as! Bool == true {
+                print("Expandable Cell")
+                var cell = tableView.dequeueReusableCellWithIdentifier(currentCellDescriptor["cellIdentifier"] as! String, forIndexPath: indexPath) as! CustomCell
                 if let primaryTitle = currentCellDescriptor["primaryTitle"] {
-                    cell.textLabel?.text = primaryTitle as? String
+                    //cell.textLabel?.text = primaryTitle as? String
+                    cell.detailTextLabel?.text = primaryTitle as? String
                 }
                 
                 if let secondaryTitle = currentCellDescriptor["secondaryTitle"] {
-                    cell.detailTextLabel?.text = secondaryTitle as? String
+                    //cell.detailTextLabel?.text = secondaryTitle as? String
+                    cell.textLabel?.text = secondaryTitle as? String
                 }
+                cell.delegate = self
+                
+                return cell
+            }else{
+                var cell = tableView.dequeueReusableCellWithIdentifier("rendezmapCell", forIndexPath: indexPath) as! mapRendezCell
+                if let primaryTitle = currentCellDescriptor["primaryTitle"] {
+                    //cell.textLabel?.text = primaryTitle as? String
+                    //cell.detailTextLabel?.text = primaryTitle as? String
+                    cell.title.text = primaryTitle as? String
+                }
+                
+                if let secondaryTitle = currentCellDescriptor["secondaryTitle"] {
+                    //cell.detailTextLabel?.text = secondaryTitle as? String
+                    //cell.textLabel?.text = secondaryTitle as? String
+                    cell.time.text = secondaryTitle as? String
+                }
+
+                
+                return cell
+                
             }
+                /*
             else if currentCellDescriptor["cellIdentifier"] as! String == "idCellTextfield" {
+                print("THIS SHOULD NEVER EVA EVA EVA PRINT I THINK##@##!@!@!@!@#!$$!$$!$$!$!#!@")
                 cell.textField.placeholder = currentCellDescriptor["primaryTitle"] as? String
             }
             else if currentCellDescriptor["cellIdentifier"] as! String == "idCellSwitch" {
@@ -306,11 +253,9 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
             else if currentCellDescriptor["cellIdentifier"] as! String == "idCellSlider" {
                 let value = currentCellDescriptor["value"] as! String
                 cell.slExperienceLevel.value = (value as NSString).floatValue
-            }
+            }*/
             
-            cell.delegate = self
             
-            return cell
         }
         
         
@@ -332,9 +277,13 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
             let indexOfTappedRow = visibleRowsPerSection[indexPath.section][indexPath.row]
+            print( String(indexOfTappedRow) + " indexoftapped " + String(indexPath.row) + " cell at" )
             
             if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpandable"] as! Bool == false && cellDescriptors[indexPath.section][indexOfTappedRow]["primaryTitle"] as! String! != ""{
-                //var returnRendezStatus:RendezStatus!
+                print("Selecting a subcell in the expandable tableview.")
+                //set the variables to the notification center to center onto
+                //wherever the cell selected is on the map
+                
                 for x in self.someFriendInts{
                     if x.id == cellDescriptors[indexPath.section][indexOfTappedRow]["id"] as! Int{
                          NSNotificationCenter.defaultCenter().postNotificationName("refresh", object: x)
@@ -342,9 +291,9 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 }
                 self.dismissViewControllerAnimated(true, completion: nil)
             }
-            
-            
-            if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpandable"] as! Bool == true {
+            else if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpandable"] as! Bool == true {
+                print("Selecting Expandable Parent Cell.")
+                
                 var shouldExpandAndShowSubRows = false
                 if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpanded"] as! Bool == false {
                     // In this case the cell should expand.
@@ -360,23 +309,8 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 }
             }
             else {
-                if cellDescriptors[indexPath.section][indexOfTappedRow]["cellIdentifier"] as! String == "idCellValuePicker" {
-                    var indexOfParentCell: Int!
-                    
-                    for var i=indexOfTappedRow - 1; i>=0; --i {
-                        if cellDescriptors[indexPath.section][i]["isExpandable"] as! Bool == true {
-                            indexOfParentCell = i
-                            break
-                        }
-                    }
-                    
-                    cellDescriptors[indexPath.section][indexOfParentCell].setValue((tblExpandable.cellForRowAtIndexPath(indexPath) as! CustomCell).textLabel?.text, forKey: "primaryTitle")
-                    cellDescriptors[indexPath.section][indexOfParentCell].setValue(false, forKey: "isExpanded")
-                    
-                    for i in (indexOfParentCell + 1)...(indexOfParentCell + (cellDescriptors[indexPath.section][indexOfParentCell]["additionalRows"] as! Int)) {
-                        cellDescriptors[indexPath.section][i].setValue(false, forKey: "isVisible")
-                    }
-                }
+                print("uhhhhhhhhhhhhh features incoming?")
+                
             }
             
             getIndicesOfVisibleRows()
