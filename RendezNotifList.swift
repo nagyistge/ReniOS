@@ -50,26 +50,39 @@ class RendezNotifList: UIViewController ,UITableViewDelegate, UITableViewDataSou
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+        //let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
         //f(!self.someInts[indexPath.row].isGroup){
+        
         if(listType == 0){//status
-           //cell.textLabel?.text = "Status: " + self.someStatus[indexPath.row].title
+            let cell = tableView.dequeueReusableCellWithIdentifier("sCell", forIndexPath: indexPath) as! sCell
             cell.textLabel?.text = self.someStatus[indexPath.row].username + " did some sorta something with a status."
+            
+            
+            return cell
         }else if(listType == 1){//rendezes
-             cell.textLabel?.text = self.someRendez[indexPath.row].username + " sent ya a Rendez at " + self.someRendez[indexPath.row].timeset
+            let cell = tableView.dequeueReusableCellWithIdentifier("rCell", forIndexPath: indexPath) as! rCell
+             //cell.textLabel?.text = self.someRendez[indexPath.row].username + " sent ya a Rendez at " + self.someRendez[indexPath.row].timeset
+            cell.time.text = self.someRendez[indexPath.row].timeset
+            cell.rTitle.text = self.someRendez[indexPath.row].username + " sent ya a Rendez!"
+            
+            return cell
         }else{//chat
+            let cell = tableView.dequeueReusableCellWithIdentifier("cCell", forIndexPath: indexPath) as! cCell
             let dateFormatter = NSDateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
             dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
             
             var timefor = dateFormatter.stringFromDate(self.someChat[indexPath.row].time)
             
-            cell.textLabel?.text = self.someChat[indexPath.row].username + " sent ya a message at " + timefor
+            //cell.textLabel?.text = self.someChat[indexPath.row].username + " sent ya a message at " + timefor
 
+            cell.time.text = timefor
+            cell.cTitle.text = self.someChat[indexPath.row].username + " sent ya a message!"
             
+            return cell
         }
         
-        return cell
+        //return cell
     }
     
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {

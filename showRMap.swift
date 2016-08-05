@@ -63,9 +63,16 @@ class showRMap: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate,
             //self.someInts.insert((FromLocation(username: title1, id: title1, location: coords, time: NSDate())), atIndex: 0)
             self.tableView.reloadData()
             
-            if(self.someInts.count == 0){
-            
+            if(self.someInts.count == 0 || self.someInts[0].location.isEmpty){
+                 let alert = UIAlertController(title: "You were not sent a location!", message: "Your friend has never sent you a location.  Loser.", preferredStyle: UIAlertControllerStyle.Alert)
+                
+                alert.addAction(UIAlertAction(title: "Admit Defeat.", style: UIAlertActionStyle.Cancel, handler: { action in
+                    self.dismissViewControllerAnimated(true, completion: nil)
+                }))
+                self.presentViewController(alert, animated: true, completion: nil)
+                //self.dismissViewControllerAnimated(true, completion: nil)
             }else{
+            print(self.someInts[0].location)
             var coordsArray = self.someInts[0].location.componentsSeparatedByString(" : ")
             let lat = (coordsArray[0] as NSString).doubleValue
             let long = (coordsArray[1] as NSString).doubleValue

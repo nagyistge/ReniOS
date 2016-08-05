@@ -28,8 +28,6 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
 
     @IBOutlet weak var inRangesTitle: UILabel!
     
-    
-    
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
         var flag:Int = -1
@@ -109,14 +107,14 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             
             let cell = tableVie.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
             if let rr = finalarr[finalInd[indexPath.row]] as? RendezStatus{
-                //use the indexPath.row to get the ith shortest distance RendezStatus
+                //use the indexPath.row to ge the ith shortest distance RendezStatus
                 let r = finalarr[finalInd[indexPath.row]] as! RendezStatus
                 //
-                cell.textLabel?.text = r.title + " is " + String(finalarrInd[finalInd[indexPath.row]]!) + " m away!"
+                cell.textLabel?.text = r.title + " is " + String( Int(finalarrInd[finalInd[indexPath.row]]!)) + " m away!"
             }else{
                 let r = finalarr[finalInd[indexPath.row]] as! Status
                  //cell.textLabel?.text = r!.title + " " + r!.username + " " + r!.timeset
-                cell.textLabel?.text = r.title + " is " + String(finalarrInd[finalInd[indexPath.row]]!) + " m away!"
+                cell.textLabel?.text = r.title + " is " + String( Int(finalarrInd[finalInd[indexPath.row]]!)) + " m away!"
             }
             return cell
         }
