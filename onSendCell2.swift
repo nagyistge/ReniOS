@@ -11,4 +11,7 @@ import UIKit
 class onSendCell2: UICollectionViewCell {
     
     @IBOutlet weak var title: UILabel!
+    
+
+
 }

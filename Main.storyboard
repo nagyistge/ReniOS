@@ -2039,15 +2039,15 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="Cell" id="s26-Px-y6O" customClass="onSendCell2" customModule="Rendezvous" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="7" width="70" height="63"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell5" id="Unf-t4-39s" customClass="onSendCell2" customModule="Rendezvous" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="7" width="72" height="63"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="70" height="63"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="72" height="63"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="cell2" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="EWk-8f-g32">
-                                                    <rect key="frame" x="8" y="8" width="62" height="47"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="EWk-8f-g32">
+                                                    <rect key="frame" x="8" y="16" width="54" height="39"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -2056,8 +2056,9 @@
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <size key="customSize" width="72" height="63"/>
                                         <connections>
-                                            <outlet property="title" destination="EWk-8f-g32" id="uYf-cG-cnL"/>
+                                            <outlet property="title" destination="EWk-8f-g32" id="PkZ-Us-ghL"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -2098,14 +2099,14 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" restorationIdentifier="Cell" id="tdW-ZN-Nvr" customClass="onSendCell" customModule="Rendezvous" customModuleProvider="target">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell4" id="gzz-pw-dO4" customClass="onSendCell" customModule="Rendezvous" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="10" width="69" height="69"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
                                             <rect key="frame" x="0.0" y="0.0" width="69" height="69"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" restorationIdentifier="cell1" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5AH-tG-hhh">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5AH-tG-hhh">
                                                     <rect key="frame" x="8" y="8" width="53" height="53"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
@@ -2116,8 +2117,7 @@
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
                                         <connections>
-                                            <outlet property="titke" destination="5AH-tG-hhh" id="VQL-qg-nVt"/>
-                                            <outlet property="title" destination="5AH-tG-hhh" id="nAc-aS-Ew2"/>
+                                            <outlet property="title" destination="5AH-tG-hhh" id="Qvd-6k-tkL"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -2530,6 +2530,6 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="SQx-bN-SKa"/>
-        <segue reference="nh6-7E-8MR"/>
+        <segue reference="a4x-Zu-fYf"/>
     </inferredMetricsTieBreakers>
 </document>
