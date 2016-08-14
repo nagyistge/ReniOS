@@ -36,10 +36,14 @@ class onSendRendezList: UIViewController, UICollectionViewDelegate, UICollection
     
     let model: [[UIColor]] = generateRandomData()
     
-    var rendez: [Status] = []
-    var friends: [Friend] = []
+    var rendez = [Status]()
+    var friends = [Friend]()
     
     var username:String!
+    
+    @IBOutlet weak var titlee: UILabel!
+    @IBOutlet weak var detail: UILabel!
+    @IBOutlet weak var location: UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,14 +59,16 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         print(username)
         
         //self.rendez.appendContentsOf(delegate.theWozMap[username]!.allDeesStatus)
-        self.friends.appendContentsOf(delegate.yourFriends)
+        self.friends += delegate.yourFriends
+        self.collection1.reloadData()
+        self.collection2.reloadData()
         // Do any additional setup after loading the view.
     }
 
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(true)
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        self.friends.appendContentsOf(delegate.yourFriends)
+        self.friends += (delegate.yourFriends)
         
         self.collection1.reloadData()
         self.collection2.reloadData()
@@ -89,7 +95,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             if(collectionView == self.collection1){
                 let cell = self.collection1.dequeueReusableCellWithReuseIdentifier("cell4", forIndexPath: indexPath) as! onSendCell
 
-                cell.backgroundColor = UIColor.blackColor()
+                cell.backgroundColor = UIColor.greenColor()
                 cell.title.text? = self.friends[indexPath.row].username
                 return cell
             }else{
@@ -103,7 +109,16 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 return cell
 
             }
-            
+    }
+    
+    
+    func collectionView(collectionView: UICollectionView,
+        didSelectItemAtIndexPath indexPath: NSIndexPath) {
+            if(collectionView == self.collection2){
+                self.titlee.text = self.rendez[indexPath.row].title
+                self.detail.text = self.rendez[indexPath.row].detail
+                self.location.text = self.rendez[indexPath.row].location
+            }
     }
 
 
