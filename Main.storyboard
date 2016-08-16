@@ -2136,9 +2136,11 @@
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <gestureRecognizers/>
                                         <size key="customSize" width="82" height="75"/>
                                         <connections>
                                             <outlet property="title" destination="EWk-8f-g32" id="PkZ-Us-ghL"/>
+                                            <outletCollection property="gestureRecognizers" destination="ixV-op-aGh" appends="YES" id="Qa9-cx-hbJ"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
@@ -2159,6 +2161,7 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Iv2-jg-tf2" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <panGestureRecognizer minimumNumberOfTouches="1" id="ixV-op-aGh"/>
             </objects>
             <point key="canvasLocation" x="-1048" y="2640"/>
         </scene>
