@@ -87,6 +87,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let longPress = gestureRecognizer as! UILongPressGestureRecognizer
         let state = longPress.state
         let locationInView = longPress.locationInView(self.collection2)
+        
         //let indexPath = collection2.indexPathForRowAtPoint(locationInView)
         let indexPath = collection2.indexPathForItemAtPoint(locationInView)
         
@@ -100,7 +101,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         }
         
         var cell: UICollectionViewCell!
-       
+        var offset:CGFloat = 425
         switch state {
         case UIGestureRecognizerState.Began:
             print("is it here?")
@@ -112,7 +113,11 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 My.cellSnapshot  = snapshotOfCell(cell)
                 
                 var center = cell.center
+                print(locationInView.x)
+                print(locationInView.y)
+
                 My.cellSnapshot!.center = locationInView
+                My.cellSnapshot!.center.y += offset
                 //center
                 My.cellSnapshot!.alpha = 0.0
                 
@@ -121,6 +126,10 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 
                 UIView.animateWithDuration(0.25, animations: { () -> Void in
                     center.y = locationInView.y
+                    center.x = locationInView.x
+                    
+                    center.y += offset
+                    
                     My.cellIsAnimating = true
                     My.cellSnapshot!.center = center
                     My.cellSnapshot!.transform = CGAffineTransformMakeScale(1.05, 1.05)
@@ -143,8 +152,13 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             
         case UIGestureRecognizerState.Changed:
             if My.cellSnapshot != nil {
+                
+                
                 var center = My.cellSnapshot!.center
                 center.y = locationInView.y
+                center.x = locationInView.x
+                //print("changing coords " + String(center.x) + " " + String(center.y) )
+                center.y += offset
                 My.cellSnapshot!.center = center
                 
                 /*
@@ -153,6 +167,39 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                     tableView.moveRowAtIndexPath(Path.initialIndexPath!, toIndexPath: indexPath!)
                     Path.initialIndexPath = indexPath
                 }*/
+            }
+        case UIGestureRecognizerState.Ended:
+            print("end?")
+             var center = My.cellSnapshot!.center
+            center.y -= (offset-100)
+            if let indexPath1 = collection1.indexPathForItemAtPoint(center){
+                let fcell = self.collection1.cellForItemAtIndexPath(indexPath1) as! onSendCell!
+                print( fcell.title.text )
+            }
+            
+            if Path.initialIndexPath != nil {
+                //let cell = tableView.cellForRowAtIndexPath(Path.initialIndexPath!) as UITableViewCell!
+                cell = self.collection2.cellForItemAtIndexPath(path!) as UICollectionViewCell!
+                if My.cellIsAnimating {
+                    My.cellNeedToShow = true
+                } else {
+                    cell.hidden = false
+                    cell.alpha = 0.0
+                }
+                
+                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                    My.cellSnapshot!.center = cell.center
+                    My.cellSnapshot!.transform = CGAffineTransformIdentity
+                    My.cellSnapshot!.alpha = 0.0
+                    cell.alpha = 1.0
+                    
+                    }, completion: { (finished) -> Void in
+                        if finished {
+                            Path.initialIndexPath = nil
+                            My.cellSnapshot!.removeFromSuperview()
+                            My.cellSnapshot = nil
+                        }
+                })
             }
         default:
             print("default")
