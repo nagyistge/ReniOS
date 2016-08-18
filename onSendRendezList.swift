@@ -273,6 +273,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 print(self.rendez[indexPath.row].title)
                 
                 cell.title.text = self.rendez[indexPath.row].title
+                cell.makeItCircle()
                 return cell
 
             }
