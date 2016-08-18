@@ -41,6 +41,9 @@ class onSendRendezList: UIViewController, UICollectionViewDelegate, UICollection
     
     var username:String!
     
+    var currStatus: Status!
+    var currFriend:Friend!
+    
     @IBOutlet weak var titlee: UILabel!
     @IBOutlet weak var detail: UILabel!
     @IBOutlet weak var location: UILabel!
@@ -153,20 +156,12 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         case UIGestureRecognizerState.Changed:
             if My.cellSnapshot != nil {
                 
-                
                 var center = My.cellSnapshot!.center
                 center.y = locationInView.y
                 center.x = locationInView.x
-                //print("changing coords " + String(center.x) + " " + String(center.y) )
                 center.y += offset
                 My.cellSnapshot!.center = center
                 
-                /*
-                if ((indexPath != nil) && (indexPath != Path.initialIndexPath)) {
-                    itemsArray.insert(itemsArray.removeAtIndex(Path.initialIndexPath!.row), atIndex: indexPath!.row)
-                    tableView.moveRowAtIndexPath(Path.initialIndexPath!, toIndexPath: indexPath!)
-                    Path.initialIndexPath = indexPath
-                }*/
             }
         case UIGestureRecognizerState.Ended:
             print("end?")
@@ -175,6 +170,8 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             if let indexPath1 = collection1.indexPathForItemAtPoint(center){
                 let fcell = self.collection1.cellForItemAtIndexPath(indexPath1) as! onSendCell!
                 print( fcell.title.text )
+                //only really triggers when released upon a friend cell
+                sendOnRelease(self.rendez[path!.row], friend: self.friends[indexPath1.row])
             }
             
             if Path.initialIndexPath != nil {
@@ -288,6 +285,103 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 self.location.text = self.rendez[indexPath.row].location
             }
     }
+    
+    
+    @IBAction func onBackPressed(sender: UIButton) {
+        self.dismissViewControllerAnimated(true, completion: nil)
+        
+    }
+    
+    func sendOnRelease(status:Status, friend:Friend){
+        var arr = [AnyObject]()
+        var friendarr = [AnyObject]()
+        
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let showname:String = prefs.valueForKey("SHOWNAME") as! String
+        
+        let userObject = ["username": self.username, "showname": showname]
+        arr.append(userObject)
+        let statusObject = ["title": status.title, "detail": status.detail, "location": status.location, "type": status.type, "timefor": status.timefor, "response": 0]
+        arr.append(statusObject)
+
+        if let a:Friend = friend{
+                let friendObj = ["username": friend.username, "showname": friend.friendname]
+                friendarr.append(friendObj)
+                let emitobj = [ "friend": friend.username, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0]
+                delegate.friendarr.append(emitobj)
+            }
+        
+        /*
+         if let a:Groups = group{
+                let groupObj = ["username": group.groupname, "showname": group.groupdetail]
+                friendarr.append(groupObj)
+                let emitobj = [ "friend": friend.username, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0]
+                delegate.grouparr.append(emitobj)
+        }*/
+        
+        delegate.events.trigger("emitRendez")
+        let friendarray = ["array": friendarr]
+        arr.append(friendarray)
+        let finalNSArray:NSArray = arr
+        let finalarr:NSDictionary = ["json": finalNSArray]
+        NSLog("PostData: %@",finalarr);
+        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/sentRSwift.php")!
+        let da:NSData = try! NSJSONSerialization.dataWithJSONObject(finalarr, options: [])
+        print(da)
+        let postLength:NSString = String( da.length )
+        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
+        request.HTTPMethod = "POST"
+        request.HTTPBody = da
+        request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
+        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        var reponseError: NSError?
+        var response: NSURLResponse?
+        var urlData: NSData?
+        do {
+            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+        } catch let error as NSError {
+            reponseError = error
+            urlData = nil
+        }
+        if ( urlData != nil ) {
+            let res = response as! NSHTTPURLResponse!;
+            NSLog("Response code: %ld", res.statusCode);
+            if (res.statusCode >= 200 && res.statusCode < 300)
+            {
+                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                NSLog("Response ==> %@", responseData);
+                let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+                NSLog("sent!!!!!!!")
+                let dateFormatter = NSDateFormatter()
+                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+                
+                let date = dateFormatter.stringFromDate(NSDate())
+                
+                
+            } else {
+                let alertView:UIAlertView = UIAlertView()
+                alertView.title = "Sign in Failed!"
+                alertView.message = "Connection Failed"
+                alertView.delegate = self
+                alertView.addButtonWithTitle("OK")
+                alertView.show()
+            }
+        } else {
+            let alertView:UIAlertView = UIAlertView()
+            alertView.title = "Sign in Failed!"
+            alertView.message = "Connection Failure"
+            if let error = reponseError {
+                alertView.message = (error.localizedDescription)
+            }
+            alertView.delegate = self
+            alertView.addButtonWithTitle("OK")
+            alertView.show()
+        }
+    }
+    }
 
 
-}
+
