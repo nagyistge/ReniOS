@@ -11,17 +11,16 @@ import UIKit
 class onSendCell2: UICollectionViewCell {
     
     @IBOutlet weak var title: UILabel!
-    
+    @IBOutlet weak var imageView: UIImageView!
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        //self.makeItCircle()
+        self.makeItCircle()
     }
     
     func makeItCircle() {
-        
-        //self.backgroundView!.layer.masksToBounds = true
-        //self.backgroundView!.layer.cornerRadius  = CGFloat(roundf(Float( self.backgroundView!.frame.size.width/2.0)))
+        self.imageView.layer.masksToBounds = true
+        self.imageView.layer.cornerRadius  = CGFloat(roundf(Float(self.imageView.frame.size.width/2.0)))
     }
 
 

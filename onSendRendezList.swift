@@ -262,13 +262,13 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             if(collectionView == self.collection1){
                 let cell = self.collection1.dequeueReusableCellWithReuseIdentifier("cell4", forIndexPath: indexPath) as! onSendCell
 
-                cell.backgroundColor = UIColor.greenColor()
+                //cell.backgroundColor = UIColor.greenColor()
                 cell.title.text? = self.friends[indexPath.row].username
                 return cell
             }else{
                 let cell = self.collection2.dequeueReusableCellWithReuseIdentifier("cell5", forIndexPath: indexPath) as! onSendCell2
 
-                cell.backgroundColor = UIColor.redColor()
+                //cell.backgroundColor = UIColor.redColor()
                 
                 print(self.rendez[indexPath.row].title)
                 

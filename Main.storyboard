@@ -2028,42 +2028,50 @@
                         <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" dataMode="prototypes" id="s2q-bM-boq">
-                                <rect key="frame" x="20" y="306" width="280" height="104"/>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" dataMode="prototypes" id="YMu-I7-J8H">
+                                <rect key="frame" x="20" y="428" width="280" height="88"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" red="0.92761811754523804" green="0.92761811754523804" blue="0.92761811754523804" alpha="1" colorSpace="calibratedRGB"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="2db-UL-3IN">
-                                    <size key="itemSize" width="81" height="82"/>
+                                <color key="backgroundColor" red="0.92761811750000001" green="0.92761811750000001" blue="0.92761811750000001" alpha="1" colorSpace="calibratedRGB"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="nDf-Zd-lp5">
+                                    <size key="itemSize" width="82" height="75"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell4" id="gzz-pw-dO4" customClass="onSendCell" customModule="Rendezvous" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="11" width="81" height="82"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell5" id="Unf-t4-39s" customClass="onSendCell2" customModule="Rendezvous" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="7" width="82" height="75"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="81" height="82"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="82" height="75"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5AH-tG-hhh">
-                                                    <rect key="frame" x="8" y="8" width="53" height="53"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="cafe_pin" id="94U-7h-Fiq">
+                                                    <rect key="frame" x="0.0" y="0.0" width="82" height="75"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="EWk-8f-g32">
+                                                    <rect key="frame" x="8" y="23" width="66" height="29"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
+                                        <gestureRecognizers/>
+                                        <size key="customSize" width="82" height="75"/>
                                         <connections>
-                                            <outlet property="title" destination="5AH-tG-hhh" id="Qvd-6k-tkL"/>
+                                            <outlet property="imageView" destination="94U-7h-Fiq" id="JXg-8m-kmT"/>
+                                            <outlet property="title" destination="EWk-8f-g32" id="PkZ-Us-ghL"/>
+                                            <outletCollection property="gestureRecognizers" destination="ixV-op-aGh" appends="YES" id="Qa9-cx-hbJ"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
                                 <connections>
-                                    <outlet property="dataSource" destination="YRy-ar-cR9" id="32a-hk-HpG"/>
-                                    <outlet property="delegate" destination="YRy-ar-cR9" id="hSR-Nb-aFz"/>
+                                    <outlet property="dataSource" destination="YRy-ar-cR9" id="Q8Z-qf-X1I"/>
+                                    <outlet property="delegate" destination="YRy-ar-cR9" id="Wjd-Nb-TTh"/>
                                 </connections>
                             </collectionView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="kvi-i6-Ezp">
@@ -2108,45 +2116,47 @@
                                 <color key="textColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" dataMode="prototypes" id="YMu-I7-J8H">
-                                <rect key="frame" x="20" y="428" width="280" height="88"/>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" showsVerticalScrollIndicator="NO" dataMode="prototypes" id="s2q-bM-boq">
+                                <rect key="frame" x="20" y="304" width="280" height="104"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <color key="backgroundColor" red="0.92761811750000001" green="0.92761811750000001" blue="0.92761811750000001" alpha="1" colorSpace="calibratedRGB"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="nDf-Zd-lp5">
-                                    <size key="itemSize" width="82" height="75"/>
+                                <color key="backgroundColor" red="0.92761811754523804" green="0.92761811754523804" blue="0.92761811754523804" alpha="1" colorSpace="calibratedRGB"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" scrollDirection="horizontal" minimumLineSpacing="10" minimumInteritemSpacing="10" id="2db-UL-3IN">
+                                    <size key="itemSize" width="81" height="82"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell5" id="Unf-t4-39s" customClass="onSendCell2" customModule="Rendezvous" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="7" width="82" height="75"/>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="cell4" id="gzz-pw-dO4" customClass="onSendCell" customModule="Rendezvous" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="11" width="81" height="82"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center">
-                                            <rect key="frame" x="0.0" y="0.0" width="82" height="75"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="81" height="82"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="EWk-8f-g32">
-                                                    <rect key="frame" x="8" y="16" width="54" height="39"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="walking" id="SNv-A6-HLw">
+                                                    <rect key="frame" x="0.0" y="0.0" width="81" height="82"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                </imageView>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="5AH-tG-hhh">
+                                                    <rect key="frame" x="14" y="15" width="53" height="40"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                             </subviews>
                                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                         </view>
-                                        <gestureRecognizers/>
-                                        <size key="customSize" width="82" height="75"/>
                                         <connections>
-                                            <outlet property="title" destination="EWk-8f-g32" id="PkZ-Us-ghL"/>
-                                            <outletCollection property="gestureRecognizers" destination="ixV-op-aGh" appends="YES" id="Qa9-cx-hbJ"/>
+                                            <outlet property="imageView" destination="SNv-A6-HLw" id="ui7-Dc-gR5"/>
+                                            <outlet property="title" destination="5AH-tG-hhh" id="Qvd-6k-tkL"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
                                 <connections>
-                                    <outlet property="dataSource" destination="YRy-ar-cR9" id="Q8Z-qf-X1I"/>
-                                    <outlet property="delegate" destination="YRy-ar-cR9" id="Wjd-Nb-TTh"/>
+                                    <outlet property="dataSource" destination="YRy-ar-cR9" id="32a-hk-HpG"/>
+                                    <outlet property="delegate" destination="YRy-ar-cR9" id="hSR-Nb-aFz"/>
                                 </connections>
                             </collectionView>
                         </subviews>
@@ -2549,10 +2559,12 @@
         </scene>
     </scenes>
     <resources>
+        <image name="cafe_pin" width="35" height="42"/>
         <image name="eat" width="150" height="150"/>
         <image name="icon_me" width="30" height="55"/>
         <image name="idle" width="256" height="256"/>
         <image name="party" width="144" height="140"/>
+        <image name="walking" width="50" height="50"/>
         <image name="working" width="240" height="240"/>
     </resources>
     <inferredMetricsTieBreakers>
