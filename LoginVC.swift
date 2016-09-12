@@ -117,7 +117,7 @@ class LoginVC: UIViewController {
                             prefs.setObject("null", forKey: "EMAIL")
                         }
                         prefs.setObject(username, forKey: "USERNAME")
-                        prefs.setObject(password, forKey: "PASSWORD")
+                        //prefs.setObject(password, forKey: "PASSWORD")
                         prefs.setInteger(1, forKey: "ISLOGGEDIN")
                         prefs.valueForKey("USERNAME") as! String
 
