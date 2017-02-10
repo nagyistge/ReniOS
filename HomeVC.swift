@@ -22,7 +22,7 @@ class HomeVC: UIViewController, UIPageViewControllerDelegate{
     var pageViewController : UIPageViewController!
     
     
-    @IBAction func swipeLeft(sender: AnyObject) {
+    @IBAction func swipeLeft(_ sender: AnyObject) {
         print("SWipe left")
     }
 
@@ -31,11 +31,11 @@ class HomeVC: UIViewController, UIPageViewControllerDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let prefs:UserDefaults = UserDefaults.standard
 
-        let isLoggedIn:Int = prefs.integerForKey("ISLOGGEDIN") as Int
+        let isLoggedIn:Int = prefs.integer(forKey: "ISLOGGEDIN") as Int
         if (isLoggedIn != 1) {
-            self.performSegueWithIdentifier("goto_login", sender: self)
+            self.performSegue(withIdentifier: "goto_login", sender: self)
         }
 
     }
@@ -46,11 +46,11 @@ class HomeVC: UIViewController, UIPageViewControllerDelegate{
     }
 
     
-    func presentationCountForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationCountForPageViewController(_ pageViewController: UIPageViewController) -> Int {
     return pageTitles.count
     }
     
-    func presentationIndexForPageViewController(pageViewController: UIPageViewController) -> Int {
+    func presentationIndexForPageViewController(_ pageViewController: UIPageViewController) -> Int {
     return 0
     }
 

@@ -28,12 +28,12 @@ class editFriendSettingsOptions: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    func showContacts(contacts: Array<Contact>) {
+    func showContacts(_ contacts: Array<Contact>) {
         let alertView = UIAlertView(title: "Success!", message: "\(contacts.count) contacts imported successfully", delegate: nil, cancelButtonTitle: "OK")
         alertView.show()
     }
 
-    @IBAction func onSyncTapped(sender: UIButton) {
+    @IBAction func onSyncTapped(_ sender: UIButton) {
         //let contactsImporter = ContactsImporter()
                 print("DO I NEED CONTACTS IMPORTER?")
         ContactsImporter.importContacts(showContacts)
@@ -41,8 +41,8 @@ class editFriendSettingsOptions: UIViewController {
         contacts = ContactsImporter.copyContacts()
 
         print(contacts.count)
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
 
         var arr = [AnyObject]()
         
@@ -51,12 +51,12 @@ class editFriendSettingsOptions: UIViewController {
     
         print("BEFORE USERNAME IS SET, BEFORE FOR LOOP")
         let first = ["name": username]
-        arr.append(first)
+        arr.append(first as AnyObject)
         for contact in contacts{
             let name: NSString = contact.firstName + " " + contact.lastName
             
             if(contact.phonenumber.count != 0){
-            let param:NSString = contact.phonenumber[0].stringByReplacingOccurrencesOfString("\\D", withString: "", options: .RegularExpressionSearch,range: contact.phonenumber[0].startIndex..<contact.phonenumber[0].endIndex)
+            let param:NSString = contact.phonenumber[0].replacingOccurrences(of: "\\D", with: "", options: .regularExpression,range: contact.phonenumber[0].characters.indices)
             
             
             
@@ -67,56 +67,56 @@ class editFriendSettingsOptions: UIViewController {
                 emailparam = "No Email"
             }
             else{
-            emailparam = contact.email[0]
+            emailparam = contact.email[0] as NSString!
             }
             print("JSON SHIT")
-                let jsonObject = ["name": name, "phonenumber": paramint, "email": emailparam]
-                arr.append(jsonObject)
+                let jsonObject = ["name": name, "phonenumber": paramint, "email": emailparam] as [String : Any]
+                arr.append(jsonObject as AnyObject)
             }else
             {
                 let paramint = "0"
                 let emailparam = "screw emails"
             
-            let jsonObject = ["name": name, "phonenumber": paramint, "email": emailparam]
-            arr.append(jsonObject)
+            let jsonObject = ["name": name, "phonenumber": paramint, "email": emailparam] as [String : Any]
+            arr.append(jsonObject as AnyObject)
             }
         }
-        let fuckingNSArray:NSArray = arr
+        let fuckingNSArray:NSArray = arr as NSArray
         let fuckingfinal:NSDictionary = ["json": fuckingNSArray]
         
-        print(fuckingNSArray[0].valueForKey("name"))
+        print((fuckingNSArray[0] as AnyObject).value(forKey: "name"))
         NSLog("PostData: %@",fuckingfinal);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/fetchFriendsSwift.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/fetchFriendsSwift.php")!
 
-        var theFuckingPostData:NSData = NSKeyedArchiver.archivedDataWithRootObject(fuckingNSArray)
-        let da:NSData = try! NSJSONSerialization.dataWithJSONObject(fuckingfinal, options: [])
+        var theFuckingPostData:Data = NSKeyedArchiver.archivedData(withRootObject: fuckingNSArray)
+        let da:Data = try! JSONSerialization.data(withJSONObject: fuckingfinal, options: [])
         print(da)
-        let postLength:NSString = String( da.length )
+        let postLength:NSString = String( da.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = da
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = da
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
             
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
             
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
 
                     
@@ -126,7 +126,7 @@ class editFriendSettingsOptions: UIViewController {
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         
@@ -138,7 +138,7 @@ class editFriendSettingsOptions: UIViewController {
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         
@@ -151,46 +151,46 @@ class editFriendSettingsOptions: UIViewController {
     }
     
     
-    @IBAction func onFriendlistTapped(sender: UIButton) {
+    @IBAction func onFriendlistTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("friendlistType") as! showFriendlistTypes
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "friendlistType") as! showFriendlistTypes
         vc.flag = 0
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
         
         
     }
 
     
-    @IBAction func onAddFriendsTapped(sender: UIButton) {
+    @IBAction func onAddFriendsTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("friendlistType") as! showFriendlistTypes
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "friendlistType") as! showFriendlistTypes
         vc.flag = 1
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
         
         
     }
     
-    @IBAction func onFriendsAddedYouTapped(sender: UIButton) {
+    @IBAction func onFriendsAddedYouTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("friendlistType") as! showFriendlistTypes
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "friendlistType") as! showFriendlistTypes
         vc.flag = 2
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
         
     }
     
     
-    @IBAction func onInviteFriendsTapped(sender: UIButton) {
+    @IBAction func onInviteFriendsTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("friendlistType") as! showFriendlistTypes
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "friendlistType") as! showFriendlistTypes
         vc.flag = 3
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
         
     }
 
     
     
-    @IBAction func onBackTapped(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackTapped(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     }
     
     

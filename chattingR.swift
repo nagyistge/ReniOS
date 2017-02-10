@@ -18,24 +18,24 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     
     @IBOutlet weak var userLabel: UILabel!
     @IBOutlet weak var friendLabel: UILabel!
-    
     @IBOutlet weak var tableVie: UITableView!
     @IBOutlet weak var txtChatBox: UITextField!
-
     let transitionOperator = TransitionOperator()
-   
     @IBOutlet weak var customCell: UITableViewCell!
-    
-
     var messagesArray = [Chat]()
     
-    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let delegate = UIApplication.shared.delegate as! AppDelegate
+    
+    var flag:Int = -1
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         userLabel.text = "Me"
-        friendLabel.text = showfriend
-        
+        if(flag == -1){
+            friendLabel.text = showfriend
+        }else{
+            friendLabel.text = friendname
+        }
         //lets assume we need all this bs for now
         tableVie.delegate = self
        tableVie.dataSource = self
@@ -43,58 +43,38 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         tableVie.rowHeight = UITableViewAutomaticDimension
         txtChatBox.delegate = self
         
-        
-        
-
         //NSNotificaiton thingy set
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateChattingNotif:", name: chattingNotifKey, object: nil)
-        // Do any additional setup after loading the view.
+        NotificationCenter.default.addObserver(self, selector: #selector(chattingR.updateChattingNotif(_:)), name: NSNotification.Name(rawValue: chattingNotifKey), object: nil)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-
         let statuslist = self.delegate.theWozMap[friendname]!
-        let rendez = statuslist.allDeesChat
-        self.messagesArray.appendContentsOf( rendez)
-        //self.messagesArray = messagesArray.reverse()
-        
-        //self.tableVie.reloadData()
-        updateTableview()
-        NSLog("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
-        
-    }
-    
-    override func viewDidAppear(animated: Bool) {
-        super.viewDidAppear(true)
-        
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        //print(friendname)
+        let rendez = statuslist?.allDeesChat
         self.messagesArray.removeAll()
-        //   let statuslist = delegate.theWozMap[friendname]!
-        //   let rendez = statuslist.allDeesRendez
-        self.messagesArray.appendContentsOf(delegate.theWozMap[friendname]!.allDeesChat! )
+        self.messagesArray.append( rendez)
         updateTableview()
         NSLog("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
-        
     }
     
-
-
-
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        self.messagesArray.removeAll()
+        self.messagesArray.append(contentsOf: delegate.theWozMap[friendname]!.allDeesChat! )
+        updateTableview()
+       print("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
+    }
     
     //NSNotificationStuff---NSNotificationStuff---
-    
     //-ON RECIEVE
     //should be called by the app delegate when it gets new emit by the NSNotificationCenter
-    internal func updateChattingNotif(notification:NSNotification){
+    internal func updateChattingNotif(_ notification:Notification){
         print("is the update in rendezChat even called??")
-        
         //get the friend param and set it
         let postparam = notification.userInfo as? [String: AnyObject]
         print(postparam)
         let friendNotif:Chat = postparam!["chatstatus"]! as! Chat
-        
         if(friendNotif.username == friendname){
             self.messagesArray.append(friendNotif)
             self.updateTableview()
@@ -102,17 +82,17 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     }
     
     //----------ON SEND
-    @IBAction func onChatSend(sender: UIButton) {
+    @IBAction func onChatSend(_ sender: UIButton) {
         if((self.txtChatBox.text!.isEmpty)){
             
         }
         else{
             let postMsg = self.txtChatBox.text!
             let chatobj = ["friend": friendname, "detail": postMsg]
-            let chatMsg = Chat(username: username, details: postMsg, time: NSDate(), toUser: friendname)
-            let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            let chatMsg = Chat(username: username, details: postMsg, time: Date(), toUser: friendname)
+            let delegate: AppDelegate = UIApplication.shared.delegate as! AppDelegate
             //emit the message
-            delegate.chatarr.append(chatobj)
+            delegate.chatarr.append(chatobj as AnyObject)
             //send it to the db
             self.sentToDatabase(postMsg)
             //append it to the msg list
@@ -125,116 +105,107 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     }
   
     //--TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return messagesArray.count
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-
-        let cell = tableVie.dequeueReusableCellWithIdentifier("customCell", forIndexPath: indexPath)
-
-        
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableVie.dequeueReusableCell(withIdentifier: "customCell", for: indexPath)
         var senderLabelText: String!
         var senderColor: UIColor!
-        
         //set the time to local
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.timeStyle = NSDateFormatterStyle.MediumStyle
-        dateFormatter.dateStyle = NSDateFormatterStyle.MediumStyle
-        dateFormatter.timeZone = NSTimeZone()
+        dateFormatter.timeStyle = DateFormatter.Style.medium
+        dateFormatter.dateStyle = DateFormatter.Style.medium
+        dateFormatter.timeZone = TimeZone()
 
-        
         let currentMessage = messagesArray[indexPath.row] as Chat
-        let date = dateFormatter.stringFromDate(currentMessage.time)
+        let date = dateFormatter.string(from: currentMessage.time as Date)
         
         if currentMessage.username == username {
                 senderLabelText = "I said at:" + date
-                senderColor = UIColor.blueColor()
+                senderColor = UIColor.blue
             print("Chat set to user")
         }
         else{
+            if(flag == -1){
                 senderLabelText = showfriend + " said at:" + date
-                senderColor = UIColor.redColor()
+                senderColor = UIColor.red
                 print("Chat set to friend")
+            }else{
+                senderLabelText = currentMessage.username + " said at:" + date
+                senderColor = UIColor.red
+                print("Chat set to friend")
+            }
         }
         print(senderLabelText)
-
-            cell.detailTextLabel?.text = senderLabelText
-            cell.detailTextLabel?.textColor = senderColor
-            cell.textLabel?.text = currentMessage.details as String
+        cell.detailTextLabel?.text = senderLabelText
+        cell.detailTextLabel?.textColor = senderColor
+        cell.textLabel?.text = currentMessage.details as String
         return cell
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
-    @IBAction func backTapped(sender: UIButton) {
-        dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func backTapped(_ sender: UIButton) {
+        dismiss(animated: true, completion: nil)
     }
     
     //Just a method for refreshes tableview data and scrolls down to the bottom of the screen
     func updateTableview(){
         self.tableVie.reloadData()
         if self.tableVie.contentSize.height > self.tableVie.frame.size.height {
-            tableVie.scrollToRowAtIndexPath(NSIndexPath(forRow: messagesArray.count - 1, inSection: 0), atScrollPosition: UITableViewScrollPosition.Top, animated: true)
+            tableVie.scrollToRow(at: IndexPath(row: messagesArray.count - 1, section: 0), at: UITableViewScrollPosition.top, animated: true)
         }
     }
     
-    
     //ugly mofo sql query that needs to insert the chat into the database for reference
-    func sentToDatabase(messege:String){
+    func sentToDatabase(_ messege:String){
         //this is the meta array... contains all 3 values[sender, msg, reciever]
         var arr = [AnyObject]()
-        
         //array that holds friends, but in this case should only be one friend...
         var friendarr = [AnyObject]()
-        
         //create and add the user object here
         let userObject = ["username": self.username, "showname": self.showuser]
-        arr.append(userObject)
-        
+        arr.append(userObject as AnyObject)
         //create the chat message
         let statusObject = ["detail": messege]
-        arr.append(statusObject)
-        
-
+        arr.append(statusObject as AnyObject)
         let friendObj = ["username": friendname, "showname": showfriend]
-        friendarr.append(friendObj)
-
-
+        friendarr.append(friendObj as AnyObject)
         if(friendarr.count == 0){
             let alertView:UIAlertView = UIAlertView()
             alertView.title = "You have not chosen any friends!!"
             alertView.message = "Choose a friend loser"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         else{
             let friendarray = ["array": friendarr]
-            arr.append(friendarray)
-            let aNSArray:NSArray = arr
+            arr.append(friendarray as AnyObject)
+            let aNSArray:NSArray = arr as NSArray
             let final:NSDictionary = ["json": aNSArray]
             NSLog("PostData: %@",final);
-            let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/sendChatRSwift.php")!
-            let da:NSData = try! NSJSONSerialization.dataWithJSONObject(final, options: [])
+            let url:URL = URL(string: "http://www.jjkbashlord.com/sendChatRSwift.php")!
+            let da:Data = try! JSONSerialization.data(withJSONObject: final, options: [])
             print(da)
-            let postLength:NSString = String( da.length )
-            let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-            request.HTTPMethod = "POST"
-            request.HTTPBody = da
+            let postLength:NSString = String( da.count ) as NSString
+            let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = da
             request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
             request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
             var reponseError: NSError?
-            var response: NSURLResponse?
+            var response: URLResponse?
             
-            var urlData: NSData?
+            var urlData: Data?
             do {
-                urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+                urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
             } catch let error as NSError {
                 reponseError = error
                 urlData = nil
@@ -242,9 +213,9 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 urlData = nil
             }
             if ( urlData != nil ) {
-                let res = response as! NSHTTPURLResponse!;
-                NSLog("Response code: %ld", res.statusCode);
-                if (res.statusCode >= 200 && res.statusCode < 300)
+                let res = response as! HTTPURLResponse!;
+                NSLog("Response code: %ld", res?.statusCode);
+                if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
                 {
                     NSLog("sent!!!!!!!")
                 } else {
@@ -252,10 +223,9 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     alertView.title = "Sign in Failed!"
                     alertView.message = "Connection Failed"
                     alertView.delegate = self
-                    alertView.addButtonWithTitle("OK")
+                    alertView.addButton(withTitle: "OK")
                     alertView.show()
                 }
-                
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
@@ -264,11 +234,9 @@ class chattingR: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     alertView.message = (error.localizedDescription)
                 }
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         }
-
-    
     }
 }

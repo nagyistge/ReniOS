@@ -14,35 +14,35 @@ class GoogleDirectionsHelper{
     - parameter parameters: Dictionary of query string parameters
     - returns: The properly escaped query string
     */
-    private class func query(parameters: [String: AnyObject]) -> String {
+    fileprivate class func query(_ parameters: [String: AnyObject]) -> String {
         var components: [(String, String)] = []
-        for key in Array(parameters.keys).sort(<) {
+        for key in Array(parameters.keys).sorted(by: <) {
             let value: AnyObject! = parameters[key]
             components += [(escape(key), escape("\(value)"))]
         }
         
-        return (components.map{"\($0)=\($1)"} as [String]).joinWithSeparator("&")
+        return (components.map{"\($0)=\($1)"} as [String]).joined(separator: "&")
     }
     
-    private class func escape(string: String) -> String {
-        let legalURLCharactersToBeEscaped: CFStringRef = ":/?&=;+!@#$()',*"
-        return CFURLCreateStringByAddingPercentEscapes(nil, string, nil, legalURLCharactersToBeEscaped, CFStringBuiltInEncodings.UTF8.rawValue) as String
+    fileprivate class func escape(_ string: String) -> String {
+        let legalURLCharactersToBeEscaped: CFString = ":/?&=;+!@#$()',*" as CFString
+        return CFURLCreateStringByAddingPercentEscapes(nil, string as CFString!, nil, legalURLCharactersToBeEscaped, CFStringBuiltInEncodings.UTF8.rawValue) as String
     }
     
-    public class func doRequest(url: String, params: [String: String], success: NSDictionary -> ()) {
+    open class func doRequest(_ url: String, params: [String: String], success: @escaping (NSDictionary) -> ()) {
         let request = NSMutableURLRequest(
-            URL: NSURL(string: "\(url)?\(query(params))")!
+            url: URL(string: "\(url)?\(query(params as [String : AnyObject]))")!
         )
         
-        let session = NSURLSession.sharedSession()
-        let task = session.dataTaskWithRequest(request) { data, response, error in
-            self.handleResponse(data, response: response as? NSHTTPURLResponse, error: error, success: success)
-        }
+        let session = URLSession.shared
+        let task = session.dataTask(with: request, completionHandler: { data, response, error in
+            self.handleResponse(data, response: response as? , error: error, success: success)
+        }) 
         
         task.resume()
     }
     
-    private class func handleResponse(data: NSData!, response: NSHTTPURLResponse!, error: NSError!, success: NSDictionary -> ()) {
+    fileprivate class func handleResponse(_ data: Data!, response: HTTPURLResponse!, error: NSError!, success: @escaping (NSDictionary) -> ()) {
         if let error = error {
             print("GoogleDirections Error: \(error.localizedDescription)")
             return
@@ -62,9 +62,9 @@ class GoogleDirectionsHelper{
         //let serializationError: NSError?
         let json:NSDictionary!
         do{
-                json = try NSJSONSerialization.JSONObjectWithData(
-                data,
-                options: NSJSONReadingOptions.MutableContainers) as! NSDictionary
+                json = try JSONSerialization.jsonObject(
+                with: data,
+                options: JSONSerialization.ReadingOptions.mutableContainers) as! NSDictionary
         
   
             
@@ -76,8 +76,8 @@ class GoogleDirectionsHelper{
             }
         
             // Perform table updates on UI thread
-            dispatch_async(dispatch_get_main_queue(), {
-                UIApplication.sharedApplication().networkActivityIndicatorVisible = false
+            DispatchQueue.main.async(execute: {
+                UIApplication.shared.isNetworkActivityIndicatorVisible = false
             
                 success(json)
             })

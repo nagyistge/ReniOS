@@ -13,7 +13,7 @@ class Friend:NSObject, Comparable{
     var friendname: String!
     var selected: Bool = false
     var notification:Bool = false
-    var time: NSDate!
+    var time: Date!
     var rendezCount: Int!//simple counters to see notification numbers
     var chatCount: Int!
     var loctime:String!
@@ -21,21 +21,21 @@ class Friend:NSObject, Comparable{
     var isGroup:Bool = false
     
     
-    init(username: String, showname: String, timestamp: NSDate){
+    init(username: String, showname: String, timestamp: Date){
         self.username = username
         self.friendname = showname
         self.time = timestamp
         self.isGroup = false
     }
     
-    init(username: String, showname: String, timestamp: NSDate,g:Bool){
+    init(username: String, showname: String, timestamp: Date,g:Bool){
         self.username = username
         self.friendname = showname
         self.time = timestamp
         self.isGroup = true
     }
     
-    init(username: String, showname: String, timestamp: NSDate, loctime:String, location:String){
+    init(username: String, showname: String, timestamp: Date, loctime:String, location:String){
         self.username = username
         self.friendname = showname
         self.time = timestamp
@@ -51,7 +51,7 @@ class Friend:NSObject, Comparable{
     func getShowname()-> String! {
     return self.friendname
     }
-    func getTime()->NSDate{
+    func getTime()->Date{
         return self.time
     }
     
@@ -65,7 +65,7 @@ func <(lhs: Friend, rhs: Friend) -> Bool {
     let notifFlag = lhs.time.compare(rhs.time)
     //print(notifFlag)
     
-    if notifFlag == .OrderedAscending{
+    if notifFlag == .orderedAscending{
         return true
     }else{
        return false
@@ -77,7 +77,7 @@ func >(lhs: Friend, rhs: Friend) -> Bool {
     let notifFlag = lhs.time.compare(rhs.time)
     //print(notifFlag)
     
-    if notifFlag == .OrderedDescending{
+    if notifFlag == .orderedDescending{
         return true
     }else{
         return false
@@ -89,7 +89,7 @@ func ==(lhs: Friend, rhs: Friend) -> Bool {
     let notifFlag = lhs.time.compare(rhs.time)
     //print(notifFlag)
     
-    if notifFlag == .OrderedSame{
+    if notifFlag == .orderedSame{
         return true
     }else{
         return false

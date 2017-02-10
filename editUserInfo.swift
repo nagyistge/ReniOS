@@ -33,7 +33,7 @@ class editUserInfo: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         
         if(flag == 0){
@@ -62,30 +62,30 @@ class editUserInfo: UIViewController {
     
     
     
-    @IBAction func onSetTapped(sender: UIButton) {
+    @IBAction func onSetTapped(_ sender: UIButton) {
         var alert: Bool = false
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
-        let password:String = prefs.valueForKey("PASSWORD") as! String
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
+        let password:String = prefs.value(forKey: "PASSWORD") as! String
         var param:String!
         if(editInfo.text!.isEmpty){
             let alertView:UIAlertView = UIAlertView()
             alertView.title = "Empty field!"
             alertView.message = "Please enter Display Name/ Email/ Phonenumber above!"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         
         }
         if(flag == 0){
             param = editInfo.text
-            prefs.setObject(param, forKey: "SHOWNAME")
+            prefs.set(param, forKey: "SHOWNAME")
                                     prefs.synchronize()
         }
         if(flag == 1){
             if(isValidEmail(editInfo.text!)){
                 param = editInfo.text
-                 prefs.setObject(param, forKey: "EMAIL")
+                 prefs.set(param, forKey: "EMAIL")
                                         prefs.synchronize()
 
                 
@@ -96,15 +96,15 @@ class editUserInfo: UIViewController {
                 alertView.title = "Invalid Email!"
                 alertView.message = "Please enter a valid email address!!"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         }
         if(flag == 2){
             if(isValidPhonenumber(editInfo.text!)){
                 param = editInfo.text
-                param = param.stringByReplacingOccurrencesOfString("\\D", withString: "", options: .RegularExpressionSearch,range: param.startIndex..<param.endIndex)
-                 prefs.setObject(param, forKey: "PHONENUMBER")
+                param = param.replacingOccurrences(of: "\\D", with: "", options: .regularExpression,range: param.characters.indices)
+                 prefs.set(param, forKey: "PHONENUMBER")
                                         prefs.synchronize()
             }
             else{
@@ -113,7 +113,7 @@ class editUserInfo: UIViewController {
                 alertView.title = "Invalid Phonenumber!"
                 alertView.message = "Please enter a valid phonenumber!!!"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         }
@@ -122,52 +122,52 @@ class editUserInfo: UIViewController {
         
         
         
-            let post:NSString = "username=\(username)&password=\(password)&param=\(param)"
+            let post:NSString = "username=\(username)&password=\(password)&param=\(param)" as NSString
         
             NSLog("PostData: %@",post);
         
-            let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/" + php)!
+            let url:URL = URL(string: "http://www.jjkbashlord.com/" + php)!
         
-            let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+            let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-            let postLength:NSString = String( postData.length )
+            let postLength:NSString = String( postData.count ) as NSString
         
-            let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-            request.HTTPMethod = "POST"
-            request.HTTPBody = postData
+            let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = postData
             request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
             request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
             request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
             var reponseError: NSError?
-            var response: NSURLResponse?
+            var response: URLResponse?
         
-            var urlData: NSData?
+            var urlData: Data?
             do {
-                urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+                urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
             } catch let error as NSError {
                 reponseError = error
                 urlData = nil
             }
         
         
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
         
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
         
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
                 NSLog("Edit SUCCESS");
                 
                 
-                self.dismissViewControllerAnimated(false, completion: nil)
+                self.dismiss(animated: false, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         }
@@ -179,19 +179,19 @@ class editUserInfo: UIViewController {
         
     }
     
-    func isValidPhonenumber(value: String) -> Bool {
+    func isValidPhonenumber(_ value: String) -> Bool {
         
         let PHONE_REGEX = "^((\\+)|(00)|(\\*)|())[0-9]{3,14}((\\#)|())$"
         
         let phoneTest = NSPredicate(format: "SELF MATCHES %@", PHONE_REGEX)
         
-        let result =  phoneTest.evaluateWithObject(value)
+        let result =  phoneTest.evaluate(with: value)
         
         return result
         
     }
     
-    func isValidEmail(testStr:String) -> Bool {
+    func isValidEmail(_ testStr:String) -> Bool {
         
         print("validate emilId: \(testStr)")
         
@@ -199,7 +199,7 @@ class editUserInfo: UIViewController {
         
         let emailTest = NSPredicate(format:"SELF MATCHES %@", emailRegEx)
         
-        let result = emailTest.evaluateWithObject(testStr)
+        let result = emailTest.evaluate(with: testStr)
         
         return result
         

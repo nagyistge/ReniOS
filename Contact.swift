@@ -13,9 +13,9 @@ class Contact: NSObject {
     var lastName : String
     var phonenumber: Array<String>
     var email: Array<String>
-    var birthday: NSDate?
-    var thumbnailImage: NSData?
-    var originalImage: NSData?
+    var birthday: Date?
+    var thumbnailImage: Data?
+    var originalImage: Data?
     
     // these two contain emails and phones in <label> = <value> format
     var emailsArray: Array<Dictionary<String, String>>?
@@ -25,7 +25,7 @@ class Contact: NSObject {
         return "\(firstName) \(lastName) \nBirthday: \(birthday) \nPhones: \(phonesArray) \nEmails: \(emailsArray)\n\n"}
     }
     
-    init(firstName: String, lastName: String, birthday: NSDate?, phonenumber: Array<String>, email: Array<String>) {
+    init(firstName: String, lastName: String, birthday: Date?, phonenumber: Array<String>, email: Array<String>) {
         self.firstName = firstName
         self.lastName = lastName
         self.birthday = birthday

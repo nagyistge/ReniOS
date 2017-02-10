@@ -13,22 +13,22 @@ import UIKit
 
 class ContactsImporter {
     
-    private class func extractABAddressBookRef(abRef: Unmanaged<ABAddressBookRef>!) -> ABAddressBookRef? {
+    fileprivate class func extractABAddressBookRef(_ abRef: Unmanaged<ABAddressBook>!) -> ABAddressBook? {
         if let ab = abRef {
             return Unmanaged<NSObject>.fromOpaque(ab.toOpaque()).takeUnretainedValue()
         }
         return nil
     }
     
-    class func importContacts(callback: (Array<Contact>) -> Void) {
-        if(ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.Denied || ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.Restricted) {
+    class func importContacts(_ callback: @escaping (Array<Contact>) -> Void) {
+        if(ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.denied || ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.restricted) {
             let alert = UIAlertView(title: "Address Book Access Denied", message: "Please grant us access to your Address Book in Settings -> Privacy -> Contacts", delegate: nil, cancelButtonTitle: "OK")
             alert.show()
             return
         }
-        else if (ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.NotDetermined) {
+        else if (ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.notDetermined) {
             var errorRef: Unmanaged<CFError>? = nil
-            let addressBook: ABAddressBookRef? = extractABAddressBookRef(ABAddressBookCreateWithOptions(nil, &errorRef))
+            let addressBook: ABAddressBook? = extractABAddressBookRef(ABAddressBookCreateWithOptions(nil, &errorRef))
             ABAddressBookRequestAccessWithCompletion(addressBook, { (accessGranted: Bool, error: CFError!) -> Void in
                 if(accessGranted) {
                     let contacts = self.copyContacts()
@@ -36,7 +36,7 @@ class ContactsImporter {
                 }
             })
         }
-        else if (ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.Authorized) {
+        else if (ABAddressBookGetAuthorizationStatus() == ABAuthorizationStatus.authorized) {
             let contacts = self.copyContacts()
             callback(contacts)
         }
@@ -44,13 +44,13 @@ class ContactsImporter {
     
     class func copyContacts() -> Array<Contact> {
         var errorRef: Unmanaged<CFError>? = nil
-        let addressBook: ABAddressBookRef? = extractABAddressBookRef(ABAddressBookCreateWithOptions(nil, &errorRef))
+        let addressBook: ABAddressBook? = extractABAddressBookRef(ABAddressBookCreateWithOptions(nil, &errorRef))
         let contactsList: NSArray = ABAddressBookCopyArrayOfAllPeople(addressBook).takeRetainedValue() as NSArray
         print("\(contactsList.count) records in the array")
         
         var importedContacts = Array<Contact>()
         
-        for record:ABRecordRef in contactsList {
+        for record:ABRecord in contactsList {
             let contactPerson: ABRecordRef = record
             
             var firstName:String = ""
@@ -115,14 +115,14 @@ class ContactsImporter {
             print("All Emails: \(emailsArray)")
 
             
-            var thumbnail: NSData? = nil
-            var original: NSData? = nil
+            var thumbnail: Data? = nil
+            var original: Data? = nil
             if ABPersonHasImageData(contactPerson) {
-                thumbnail = ABPersonCopyImageDataWithFormat(contactPerson, kABPersonImageFormatThumbnail).takeRetainedValue() as NSData
-                original = ABPersonCopyImageDataWithFormat(contactPerson, kABPersonImageFormatOriginalSize).takeRetainedValue() as NSData
+                thumbnail = ABPersonCopyImageDataWithFormat(contactPerson, kABPersonImageFormatThumbnail).takeRetainedValue() as Data
+                original = ABPersonCopyImageDataWithFormat(contactPerson, kABPersonImageFormatOriginalSize).takeRetainedValue() as Data
             }
             
-            let currentContact = Contact(firstName: firstName, lastName: lastName, birthday: NSDate(), phonenumber: phones, email: email1)
+            let currentContact = Contact(firstName: firstName, lastName: lastName, birthday: Date(), phonenumber: phones, email: email1)
             currentContact.phonesArray = phonesArray
             currentContact.emailsArray = emailsArray
             currentContact.thumbnailImage = thumbnail

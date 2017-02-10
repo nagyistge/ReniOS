@@ -8,20 +8,20 @@
 
 import Foundation
 
-public class ChatStatus{
+open class ChatStatus{
     var username: NSString!
     var title: NSString!
     var detail: NSString!
     var location: NSString!
-    var time: NSDate!
+    var time: Date!
     
-    init(username:NSString, detail:NSString, time:NSDate){
+    init(username:NSString, detail:NSString, time:Date){
         self.username = username
         self.detail = detail
         self.time = time
     }
     
-    init(username:NSString, title:NSString, detail:NSString, location:NSString, time:NSDate){
+    init(username:NSString, title:NSString, detail:NSString, location:NSString, time:Date){
         self.username = username
         self.title = title
         self.detail = detail

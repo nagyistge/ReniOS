@@ -21,7 +21,7 @@ class GroupDeets: UIViewController,UITableViewDelegate, UITableViewDataSource {
 
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         gname.text = name
         gdeets.text = deet
@@ -36,27 +36,27 @@ class GroupDeets: UIViewController,UITableViewDelegate, UITableViewDataSource {
     }
     
 
-    @IBAction func onBackPressed(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackPressed(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         return self.someInts.count
     }
     
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         NSLog("Checking if the uitable in friendsactivity gets called before or after");
         // 3
-        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "cell")
        cell.textLabel?.text = someInts[indexPath.row].friendname
         return cell
     }

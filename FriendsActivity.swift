@@ -20,29 +20,29 @@ class FriendsActivity: UIViewController,UITableViewDelegate, UITableViewDataSour
     var someInts = [Friend]()
     var statusToPass: Friend!
     var newCar: String = ""
-    let notif:UIImageView = UIImageView.init(frame: CGRectMake(0, 0, 35, 35))
-    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-    var notifObj:[NSObject : AnyObject]!
+    let notif:UIImageView = UIImageView.init(frame: CGRect(x: 0, y: 0, width: 35, height: 35))
+    let delegate = UIApplication.shared.delegate as! AppDelegate
+    var notifObj:[AnyHashable: Any]!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var txtUsername: UILabel!
     
     
-    let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    let prefs:UserDefaults = UserDefaults.standard
     
     override func viewDidLoad()
     {
         
         super.viewDidLoad()
         notif.image = UIImage(named: "notification")
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         //tableView
         
         //NSNOTIFICATION OBSERVER INITILIZER
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateFriendNotif:", name: FriendActivityNotifKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(FriendsActivity.updateFriendNotif(_:)), name: NSNotification.Name(rawValue: FriendActivityNotifKey), object: nil)
         //if self.delegate.yourFriends.count == 0{
         
-        
+        print("WHAT THE EFF")
         //done with the initial fetch~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     }
     
@@ -51,37 +51,36 @@ class FriendsActivity: UIViewController,UITableViewDelegate, UITableViewDataSour
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         self.someInts.removeAll()
-        self.someInts.appendContentsOf(self.delegate.theNotifHelper.returnFriendNotif())
+        self.someInts.append(contentsOf: self.delegate.theNotifHelper.returnFriendNotif())
         print(someInts)
         self.tableView.reloadData()
 
     }
+    
     //NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---
-    
-    
     //should be called by the app delegate when it gets new emit by the NSNotificationCenter
     //all this should do is change the friend notif time and update the table
-    internal func updateFriendNotif(notification:NSNotification){
+    internal func updateFriendNotif(_ notification:Notification){
         print("is the update in friend'sactivity even called??")
         
         //get the friend param and set it
-        let postparam:Dictionary<String, Friend!> = notification.userInfo as! Dictionary<String, Friend!>
-        let friendNotif:Friend = postparam["friend"]!
+        let postparam:Dictionary<String, Friend?> = notification.userInfo as! Dictionary<String, Friend?>
+        let friendNotif:Friend = postparam["friend"]!!
         var wasItIn = false
         
         //Now you have the friend, you need to insert it into some ints, but what if it is already in someInts?
-        for (index, value) in someInts.enumerate(){
+        for (index, value) in someInts.enumerated(){
             if value.username == friendNotif.username{
-                self.someInts.removeAtIndex(index)
-                self.someInts.insert(friendNotif, atIndex: 0)
+                self.someInts.remove(at: index)
+                self.someInts.insert(friendNotif, at: 0)
                 wasItIn = true
             }
         }
         if(wasItIn == false){
-            self.someInts.insert(friendNotif, atIndex: 0)
+            self.someInts.insert(friendNotif, at: 0)
         }
         
         self.tableView.reloadData()
@@ -91,44 +90,41 @@ class FriendsActivity: UIViewController,UITableViewDelegate, UITableViewDataSour
     
     
     //TABLE STUFF-----TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------
-    
-
-    
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         return self.someInts.count
     }
     
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         NSLog("Checking if the uitable in friendsactivity gets called before or after");
         // 3
-        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
+        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "cell")
         
         NSLog("DATES BEING COMPARED FROM THE LAST NOTIF CHECKED AND LAST RENDEZ SENT")
         print(self.someInts[indexPath.row].username)
-        if(prefs.valueForKey(self.someInts[indexPath.row].username) == nil){
-         prefs.setObject(NSDate(), forKey: self.someInts[indexPath.row].username)
+        if(prefs.value(forKey: self.someInts[indexPath.row].username) == nil){
+         prefs.set(Date(), forKey: self.someInts[indexPath.row].username)
         }
-        NSLog("TIME LAST CLICKED ==> " + (prefs.valueForKey(self.someInts[indexPath.row].username)?.description)!)
+        NSLog("TIME LAST CLICKED ==> " + ((prefs.value(forKey: self.someInts[indexPath.row].username) as AnyObject).description)!)
         NSLog("TIME OF LAST RECIEVED ==> " + (self.someInts[indexPath.row].time).description)
         NSLog((self.someInts[indexPath.row].username))
         
         
-        let friendLastChecked:NSDate = prefs.valueForKey(self.someInts[indexPath.row].username) as! NSDate
-        let friendLastSent: NSDate = self.someInts[indexPath.row].time as NSDate
+        let friendLastChecked:Date = prefs.value(forKey: self.someInts[indexPath.row].username) as! Date
+        let friendLastSent: Date = self.someInts[indexPath.row].time as Date
         
         // NSComparisonResult
         let notifFlag = friendLastChecked.compare(friendLastSent)
         print(notifFlag)
         
-        if notifFlag == .OrderedAscending{
+        if notifFlag == .orderedAscending{
         cell.accessoryView = notif
         }else{
         cell.accessoryView = nil
@@ -142,7 +138,7 @@ class FriendsActivity: UIViewController,UITableViewDelegate, UITableViewDataSour
         }
         
         
-        cell.selectionStyle = UITableViewCellSelectionStyle.None
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
         if(self.someInts[indexPath.row].rendezCount != nil){
             print("Printing the rendez and chat notificiation numbers")
             print(self.someInts[indexPath.row].rendezCount)
@@ -155,80 +151,60 @@ class FriendsActivity: UIViewController,UITableViewDelegate, UITableViewDataSour
             }
         }
         
-        
         cell.textLabel!.text = name
         cell.detailTextLabel?.text = self.someInts[indexPath.row].time.description
+        //print("wat")
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         //let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
-        tableView.cellForRowAtIndexPath(indexPath)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("rendezChat") as! rendezChat
+        tableView.cellForRow(at: indexPath)
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "rendezChat") as! rendezChat
         if(!self.someInts[indexPath.row].isGroup){
             print("Friend is NOT a Group!")
-            vc.username = prefs.valueForKey("USERNAME") as! String
+            vc.username = prefs.value(forKey: "USERNAME") as! String
             vc.friendname = self.someInts[indexPath.row].username
-            vc.showuser = prefs.valueForKey("SHOWNAME") as! String
+            vc.showuser = prefs.value(forKey: "SHOWNAME") as! String
             vc.showfriend = self.someInts[indexPath.row].friendname
-            vc.rendezNotifTimeFlag = prefs.valueForKey(self.someInts[indexPath.row].username) as! NSDate
+            vc.rendezNotifTimeFlag = prefs.value(forKey: self.someInts[indexPath.row].username) as! Date
         
-            prefs.setObject(NSDate(), forKey: self.someInts[indexPath.row].username)
+            prefs.set(Date(), forKey: self.someInts[indexPath.row].username)
             print(self.someInts[indexPath.row].username + " prefs time now set to ")
             self.delegate.theNotifHelper.resetCounts(self.someInts[indexPath.row].username)
             //print(NSDate())
-            self.presentViewController(vc, animated: true, completion: nil)
+            self.present(vc, animated: true, completion: nil)
         }else{
              print("Friend IS a Group!")
-            vc.username = prefs.valueForKey("USERNAME") as! String
+            vc.username = prefs.value(forKey: "USERNAME") as! String
             vc.friendname = self.someInts[indexPath.row].username
-            vc.showuser = prefs.valueForKey("SHOWNAME") as! String
+            vc.showuser = prefs.value(forKey: "SHOWNAME") as! String
             vc.showfriend = self.someInts[indexPath.row].friendname
-            vc.rendezNotifTimeFlag = prefs.valueForKey(self.someInts[indexPath.row].username) as! NSDate
+            vc.rendezNotifTimeFlag = prefs.value(forKey: self.someInts[indexPath.row].username) as! Date
             vc.flag = 1
-            prefs.setObject(NSDate(), forKey: self.someInts[indexPath.row].username)
+            prefs.set(Date(), forKey: self.someInts[indexPath.row].username)
             print(self.someInts[indexPath.row].username + " prefs time now set to ")
             self.delegate.theNotifHelper.resetCounts(self.someInts[indexPath.row].username)
             //print(NSDate())
             vc.ggroup = self.delegate.getGroup(self.someInts[indexPath.row].username)
-            self.presentViewController(vc, animated: true, completion: nil)
+            self.present(vc, animated: true, completion: nil)
             
         }
     }
     
+    @IBAction func onCreateGroupClicked(_ sender: UIButton) {
+        createGroupVC = self.storyboard?.instantiateViewController(withIdentifier: "createGroup") as! onCreateGroupVC
 
-    
-    @IBAction func onCreateGroupClicked(sender: UIButton) {
-        createGroupVC = self.storyboard?.instantiateViewControllerWithIdentifier("createGroup") as! onCreateGroupVC
-
-        print(NSDate())
+        print(Date())
         
         
-        self.presentViewController(createGroupVC, animated: true, completion: nil)
+        self.present(createGroupVC, animated: true, completion: nil)
         
     }
     
-    
-    
-    
-    @IBAction func newR(sender: AnyObject) {
+    @IBAction func newR(_ sender: AnyObject) {
    
     }
-    
-    
-    
-    
-    
-    /*
-    // MARK: - Navigation
-    
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-    // Get the new view controller using segue.destinationViewController.
-    // Pass the selected object to the new view controller.
-    }
-    */
-    
 }

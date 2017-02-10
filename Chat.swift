@@ -11,10 +11,10 @@ import Foundation
 class Chat{
     var username:String
     var details:String
-    var time: NSDate
+    var time: Date
     var toUser:String
 
-    init(username:String, details:String, time:NSDate, toUser:String){
+    init(username:String, details:String, time:Date, toUser:String){
         self.username = username
         self.details = details
         self.time = time

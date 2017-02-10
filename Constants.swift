@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class Constants{
-    public static var CHAT_SERVER_URL:String = "http://rendezvous-51012.onmodulus.net"
+open class Constants{
+    open static var CHAT_SERVER_URL:String = "http://rendezvous-51012.onmodulus.net"
 
 }
