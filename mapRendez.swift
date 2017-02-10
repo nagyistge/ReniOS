@@ -22,7 +22,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var txtChatBox: UITextField!
     
-    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let delegate = UIApplication.shared.delegate as! AppDelegate
     
     let transitionOperator = TransitionOperator()
     
@@ -37,7 +37,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     var messagesArray = [ChatStatus]()
     
     var someInts = [Friend]()
-    let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    let prefs:UserDefaults = UserDefaults.standard
     var username:String!// = prefs.valueForKey("USERNAME") as! String
     var someFriendInts = [RendezStatus]()
 
@@ -50,19 +50,19 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        username = prefs.valueForKey("USERNAME") as! String
+        username = prefs.value(forKey: "USERNAME") as! String
         //tableView
         
         //NSNOTIFICATION OBSERVER INITILIZER
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateFriendNotif:", name: FriendActivityNotifKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: "updateFriendNotif:", name: NSNotification.Name(rawValue: FriendActivityNotifKey), object: nil)
             // Do any additional setup after loading the view, typically from a nib.
         }
         
         
-        override func viewWillAppear(animated: Bool) {
+        override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(animated)
             self.someInts.removeAll()
-            self.someInts.appendContentsOf(self.delegate.theNotifHelper.returnFriendNotif())
+            self.someInts.append(contentsOf: self.delegate.theNotifHelper.returnFriendNotif())
             print(someInts)
             //self.tableView.reloadData()
             configureTableView()
@@ -83,14 +83,14 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         func configureTableView() {
             tblExpandable.delegate = self
             tblExpandable.dataSource = self
-            tblExpandable.tableFooterView = UIView(frame: CGRectZero)
+            tblExpandable.tableFooterView = UIView(frame: CGRect.zero)
             
-            tblExpandable.registerNib(UINib(nibName: "NormalCell", bundle: nil), forCellReuseIdentifier: "idCellNormal")
-            tblExpandable.registerNib(UINib(nibName: "TextfieldCell", bundle: nil), forCellReuseIdentifier: "idCellTextfield")
-            tblExpandable.registerNib(UINib(nibName: "DatePickerCell", bundle: nil), forCellReuseIdentifier: "idCellDatePicker")
-            tblExpandable.registerNib(UINib(nibName: "SwitchCell", bundle: nil), forCellReuseIdentifier: "idCellSwitch")
-            tblExpandable.registerNib(UINib(nibName: "ValuePickerCell", bundle: nil), forCellReuseIdentifier: "idCellValuePicker")
-            tblExpandable.registerNib(UINib(nibName: "SliderCell", bundle: nil), forCellReuseIdentifier: "idCellSlider")
+            tblExpandable.register(UINib(nibName: "NormalCell", bundle: nil), forCellReuseIdentifier: "idCellNormal")
+            tblExpandable.register(UINib(nibName: "TextfieldCell", bundle: nil), forCellReuseIdentifier: "idCellTextfield")
+            tblExpandable.register(UINib(nibName: "DatePickerCell", bundle: nil), forCellReuseIdentifier: "idCellDatePicker")
+            tblExpandable.register(UINib(nibName: "SwitchCell", bundle: nil), forCellReuseIdentifier: "idCellSwitch")
+            tblExpandable.register(UINib(nibName: "ValuePickerCell", bundle: nil), forCellReuseIdentifier: "idCellValuePicker")
+            tblExpandable.register(UINib(nibName: "SliderCell", bundle: nil), forCellReuseIdentifier: "idCellSlider")
         }
         
         
@@ -102,33 +102,33 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                     if(!(delegate.isTheFriendInTheWoz(x.username))){
                         //not only does this store the chat in theWoz but also returns the rendezchatdictionary
                         let niceToMeetYou:rendezChatDictionary = delegate.makeFriendsWithWoz(username, friendname: x.username)
-                        someFriendInts.appendContentsOf(niceToMeetYou.allDeesRendez)
+                        someFriendInts.append(contentsOf: niceToMeetYou.allDeesRendez)
                         print("they had to be introduced first but it is gucci meng now")
                         
                     }
                     else{ //the chat of that friend exists already, so lets just get it from theWozMap and make the lists
                         let statuslist = delegate.theWozMap[x.username]!
-                        let rendez = statuslist.allDeesRendez
+                        let rendez = statuslist?.allDeesRendez
                         someFriendInts += rendez
                         NSLog("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
                     }
                     
                     let cell:NSMutableDictionary = ["isExpandable": true, "isExpanded": false, "isVisible": true, "value": "", "primaryTitle": "", "secondaryTitle": x.username, "cellIdentifier": "idCellNormal", "additionalRows": someFriendInts.count]
-                    celler.addObject(cell)
+                    celler.add(cell)
                     
                     for y in someFriendInts{
                         if y.username == username{
                             let z = "From " + (y.username as String) + " at " + y.timeset
                         let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
-                        celler.addObject(fcell)
+                        celler.add(fcell)
                         }else{
                             let z = "To " + (y.username as String) + " at " + y.timeset
                             let fcell:NSMutableDictionary = ["isExpandable": false, "isExpanded": false, "isVisible": false, "value": "", "primaryTitle": y.title, "secondaryTitle": z, "cellIdentifier": "idCellNormal", "additionalRows": 0, "id": y.id]
-                            celler.addObject(fcell)
+                            celler.add(fcell)
                         }
                     }
                 }
-                cellDescriptors.addObject(celler)
+                cellDescriptors.add(celler)
             if(!someInts.isEmpty){
                 getIndicesOfVisibleRows()
             }
@@ -156,7 +156,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func getCellDescriptorForIndexPath(indexPath: NSIndexPath) -> [String: AnyObject] {
+        func getCellDescriptorForIndexPath(_ indexPath: IndexPath) -> [String: AnyObject] {
             let indexOfVisibleRow = visibleRowsPerSection[indexPath.section][indexPath.row]
             let cellDescriptor = cellDescriptors[indexPath.section][indexOfVisibleRow] as! [String: AnyObject]
             return cellDescriptor
@@ -165,7 +165,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         
         // MARK: UITableView Delegate and Datasource Functions
         
-        func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        func numberOfSections(in tableView: UITableView) -> Int {
             if cellDescriptors.count != 0 {
                 return cellDescriptors.count
             }
@@ -175,7 +175,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             if(!visibleRowsPerSection.isEmpty){
                 return visibleRowsPerSection[section].count
             }else{
@@ -184,7 +184,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
     }
         
         
-        func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
             
             switch section {
             case 0:
@@ -199,13 +199,13 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             let currentCellDescriptor = getCellDescriptorForIndexPath(indexPath)
             
             
             if currentCellDescriptor["cellIdentifier"] as! String == "idCellNormal" && currentCellDescriptor["isExpandable"] as! Bool == true {
                 print("Expandable Cell")
-                var cell = tableView.dequeueReusableCellWithIdentifier(currentCellDescriptor["cellIdentifier"] as! String, forIndexPath: indexPath) as! CustomCell
+                let cell = tableView.dequeueReusableCell(withIdentifier: currentCellDescriptor["cellIdentifier"] as! String, for: indexPath) as! CustomCell
                 if let primaryTitle = currentCellDescriptor["primaryTitle"] {
                     //cell.textLabel?.text = primaryTitle as? String
                     cell.detailTextLabel?.text = primaryTitle as? String
@@ -219,7 +219,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 
                 return cell
             }else{
-                var cell = tableView.dequeueReusableCellWithIdentifier("rendezmapCell", forIndexPath: indexPath) as! mapRendezCell
+                let cell = tableView.dequeueReusableCell(withIdentifier: "rendezmapCell", for: indexPath) as! mapRendezCell
                 if let primaryTitle = currentCellDescriptor["primaryTitle"] {
                     //cell.textLabel?.text = primaryTitle as? String
                     //cell.detailTextLabel?.text = primaryTitle as? String
@@ -259,7 +259,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
             let currentCellDescriptor = getCellDescriptorForIndexPath(indexPath)
             
             switch currentCellDescriptor["cellIdentifier"] as! String {
@@ -275,7 +275,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
             let indexOfTappedRow = visibleRowsPerSection[indexPath.section][indexPath.row]
             print( String(indexOfTappedRow) + " indexoftapped " + String(indexPath.row) + " cell at" )
             
@@ -286,10 +286,10 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
                 
                 for x in self.someFriendInts{
                     if x.id == cellDescriptors[indexPath.section][indexOfTappedRow]["id"] as! Int{
-                         NSNotificationCenter.defaultCenter().postNotificationName("refresh", object: x)
+                         NotificationCenter.default.post(name: Notification.Name(rawValue: "refresh"), object: x)
                     }
                 }
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             }
             else if cellDescriptors[indexPath.section][indexOfTappedRow]["isExpandable"] as! Bool == true {
                 print("Selecting Expandable Parent Cell.")
@@ -314,13 +314,13 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
             }
             
             getIndicesOfVisibleRows()
-            tblExpandable.reloadSections(NSIndexSet(index: indexPath.section), withRowAnimation: UITableViewRowAnimation.Fade)
+            tblExpandable.reloadSections(IndexSet(integer: indexPath.section), with: UITableViewRowAnimation.fade)
         }
         
         
         // MARK: CustomCellDelegate Functions
         
-        func dateWasSelected(selectedDateString: String) {
+        func dateWasSelected(_ selectedDateString: String) {
             let dateCellSection = 0
             let dateCellRow = 3
             
@@ -329,7 +329,7 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func maritalStatusSwitchChangedState(isOn: Bool) {
+        func maritalStatusSwitchChangedState(_ isOn: Bool) {
             let maritalSwitchCellSection = 0
             let maritalSwitchCellRow = 6
             
@@ -342,11 +342,11 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func textfieldTextWasChanged(newText: String, parentCell: CustomCell) {
-            let parentCellIndexPath = tblExpandable.indexPathForCell(parentCell)
+        func textfieldTextWasChanged(_ newText: String, parentCell: CustomCell) {
+            let parentCellIndexPath = tblExpandable.indexPath(for: parentCell)
             
             let currentFullname = cellDescriptors[0][0]["primaryTitle"] as! String
-            let fullnameParts = currentFullname.componentsSeparatedByString(" ")
+            let fullnameParts = currentFullname.components(separatedBy: " ")
             
             var newFullname = ""
             
@@ -367,17 +367,19 @@ class mapRendez: UIViewController, UITextFieldDelegate, UITableViewDelegate, UIT
         }
         
         
-        func sliderDidChangeValue(newSliderValue: String) {
+        func sliderDidChangeValue(_ newSliderValue: String) {
             cellDescriptors[2][0].setValue(newSliderValue, forKey: "primaryTitle")
             cellDescriptors[2][1].setValue(newSliderValue, forKey: "value")
             
-            tblExpandable.reloadSections(NSIndexSet(index: 2), withRowAnimation: UITableViewRowAnimation.None)
+            tblExpandable.reloadSections(IndexSet(integer: 2), with: UITableViewRowAnimation.none)
         }
 
-    @IBAction func onBackPressed(sender: UIButton) {
-         self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackPressed(_ sender: UIButton) {
+         self.dismiss(animated: true, completion: nil)
     }
 
+    
+    
 
 }
 

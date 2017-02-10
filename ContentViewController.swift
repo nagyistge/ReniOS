@@ -20,31 +20,37 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var newCar: String = ""
     var vc: showR!
     var username:String!
+    var onsend:onSendRendezList!
     
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var txtUsername: UILabel!
     
-    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let delegate = UIApplication.shared.delegate as! AppDelegate
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        self.friendTableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell1")
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let isLoggedIn:Int = prefs.integerForKey("ISLOGGEDIN") as Int
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.friendTableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell1")
+        let prefs:UserDefaults = UserDefaults.standard
+        let isLoggedIn:Int = prefs.integer(forKey: "ISLOGGEDIN") as Int
         if(isLoggedIn != 1){
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         }
-        self.txtUsername.text = prefs.valueForKey("USERNAME") as? String
-        username = prefs.valueForKey("USERNAME") as! String
+        username = prefs.value(forKey: "USERNAME") as! String
         if (self.delegate.theWozMap[username] == nil){
             self.delegate.starting()
             
         }
+        if let a = prefs.value(forKey: "SHOWNAME") as? String{
+            self.txtUsername.text = prefs.value(forKey: "SHOWNAME") as? String
+        }else{
+            self.txtUsername.text = prefs.value(forKey: "USERNAME") as? String
+
+        }
          //let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        self.someInts.appendContentsOf( self.delegate.theWozMap[username]!.allDeesStatus )
-        self.someFriendInts.appendContentsOf(self.delegate.newfeed)
+        self.someInts.append( contentsOf: self.delegate.theWozMap[username]!.allDeesStatus )
+        self.someFriendInts.append(contentsOf: self.delegate.newfeed)
 
         
         
@@ -55,29 +61,29 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         
-        let delegate1 = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate1 = UIApplication.shared.delegate as! AppDelegate
         print("IS THIS BEING CALLED???")
         self.someInts.removeAll()
         self.someFriendInts.removeAll()
-        self.someInts.appendContentsOf( delegate1.theWozMap[username]!.allDeesStatus )
-        self.someFriendInts.appendContentsOf(delegate1.newfeed)
+        self.someInts.append( contentsOf: delegate1.theWozMap[username]!.allDeesStatus )
+        self.someFriendInts.append(contentsOf: delegate1.newfeed)
         self.tableView.reloadData()
         self.friendTableView.reloadData()
 
     }
     
-func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+func tableView( _ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
     if tableView == self.tableView{
         return self.someInts.count
@@ -86,21 +92,17 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
     return self.someFriendInts.count
     }
     }
-    func friendTableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func friendTableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         return self.someFriendInts.count
     }
     
- func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+ func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 3
-
-        //NSLog("WHEN DOES THE TABLE REFRESH?  WHERE DO I NEED TO SET SOMEINTS")
-  //  let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-    //let username = prefs.valueForKey("USERNAME") as! String
     if tableView == self.tableView{
-        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "cell")
-         cell.selectionStyle = UITableViewCellSelectionStyle.None
-        cell.textLabel!.font = UIFont.boldSystemFontOfSize(17)
+        let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: "cell")
+         cell.selectionStyle = UITableViewCellSelectionStyle.none
+        cell.textLabel!.font = UIFont.boldSystemFont(ofSize: 17)
         cell.textLabel!.text = self.someInts[indexPath.row].title
         let status = self.someInts[indexPath.row]
         var v = ""
@@ -129,21 +131,13 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
         return cell
     }
     else{
-       // var friendcell:UITableViewCell = self.friendTableView.dequeueReusableCellWithIdentifier("cell1", forIndexPath: indexPath)
-        //if friendcell != nil{
-        //  friendcell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
-                let friendcell = UITableViewCell(style: UITableViewCellStyle.Value1, reuseIdentifier: "cell1")
-        //if(someInts.count > indexPath.row){
-
-        friendcell.selectionStyle = UITableViewCellSelectionStyle.None
-        friendcell.textLabel?.font = UIFont.boldSystemFontOfSize(17)
-        friendcell.textLabel!.text = self.someFriendInts[indexPath.row].title
-       // print( self.someFriendInts[indexPath.row].username)
         
-           ///print( "size of someInts   " + String(someInts.count) + "  indexpath row "  + String(indexPath.row))
+        let friendcell = UITableViewCell(style: UITableViewCellStyle.value1, reuseIdentifier: "cell1")
+        friendcell.selectionStyle = UITableViewCellSelectionStyle.none
+        friendcell.textLabel?.font = UIFont.boldSystemFont(ofSize: 17)
+        friendcell.textLabel!.text = self.someFriendInts[indexPath.row].title
         let status = self.someFriendInts[indexPath.row]
 
-        
         friendcell.detailTextLabel!.text = "from " + self.someFriendInts[indexPath.row].username + "\n" + status.timefor
         
         if(status.type == 0){
@@ -160,26 +154,25 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
             friendcell.imageView?.image = UIImage(named: "idle")
             
         }
-        //}
         return friendcell
     }
-    }
+}
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         if tableView == self.tableView{
         let currentCell = self.someInts[indexPath.row] as Status
         statusToPass = currentCell
         
         //let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("showR") as! showR
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "showR") as! showR
         vc.programVar = statusToPass
         vc.isStatusFromYou = true
             vc.returnDelegate = self
         
             
        
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
         }
         else{
             let currentCell = self.someFriendInts[indexPath.row] as Status
@@ -187,38 +180,46 @@ func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> I
             
             
             //let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            vc = self.storyboard?.instantiateViewControllerWithIdentifier("showR") as! showR
+            vc = self.storyboard?.instantiateViewController(withIdentifier: "showR") as! showR
             vc.programVar = statusToPass
             vc.isStatusFromYou = false
            // vc.returnDelegate = self
             
-            self.presentViewController(vc, animated: true, completion: nil)
+            self.present(vc, animated: true, completion: nil)
         }
     }
     
 
 
-    @IBAction func newR(sender: AnyObject) {
+    @IBAction func newR(_ sender: AnyObject) {
     
     
     }
 
 
-    func returnUpdate(status:Status){
-        print("the fuck")
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
+    func returnUpdate(_ status:Status){
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         
-        let delegate1 = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate1 = UIApplication.shared.delegate as! AppDelegate
         
         self.someInts.removeAll()
         self.someFriendInts.removeAll()
-        self.someInts.appendContentsOf( delegate1.theWozMap[username]!.allDeesStatus )
-        self.someFriendInts.appendContentsOf(delegate1.newfeed)
+        self.someInts.append( contentsOf: delegate1.theWozMap[username]!.allDeesStatus )
+        self.someFriendInts.append(contentsOf: delegate1.newfeed)
         self.tableView.reloadData()
         self.friendTableView.reloadData()
         
     
+    }
+    
+    
+    @IBAction func onSend(_ sender: UIButton) {
+        onsend = self.storyboard?.instantiateViewController(withIdentifier: "onSend") as! onSendRendezList
+        onsend.rendez.append(contentsOf: self.someInts)
+        onsend.friends.append(contentsOf: ( UIApplication.shared.delegate as! AppDelegate).yourFriends)
+        onsend.groups.append(contentsOf: ( UIApplication.shared.delegate as! AppDelegate).yourGroups)
+        self.present(onsend, animated: true, completion: nil)
     }
 
 

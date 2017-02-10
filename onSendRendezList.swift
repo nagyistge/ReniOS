@@ -51,18 +51,18 @@ class onSendRendezList: UIViewController, UICollectionViewDelegate, UICollection
     @IBOutlet weak var detail: UILabel!
     @IBOutlet weak var location: UILabel!
     
-     var path: NSIndexPath!
+     var path: IndexPath!
     override func viewDidLoad() {
         super.viewDidLoad()
 
         //self.collection1.registerClass(onSendCell.self, forCellWithReuseIdentifier: "cell4")
         //self.collection2.registerClass(onSendCell2.self, forCellWithReuseIdentifier: "cell5")
-        let longpress = UILongPressGestureRecognizer(target: self, action: "longPressGestureRecognized:")
+        let longpress = UILongPressGestureRecognizer(target: self, action: #selector(onSendRendezList.longPressGestureRecognized(_:)))
         self.collection2.addGestureRecognizer(longpress)
         
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        username = prefs.valueForKey("USERNAME") as! String
-let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let prefs:UserDefaults = UserDefaults.standard
+        username = prefs.value(forKey: "USERNAME") as! String
+let delegate = UIApplication.shared.delegate as! AppDelegate
         
         
         print(username)
@@ -75,9 +75,9 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     }
     
 
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate = UIApplication.shared.delegate as! AppDelegate
         //self.friends += (delegate.yourFriends)
         
         //self.peeps.appendContentsOf(self.friends)
@@ -100,13 +100,13 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         // Dispose of any resources that can be recreated.
     }
     
-    func longPressGestureRecognized(gestureRecognizer: UIGestureRecognizer) {
+    func longPressGestureRecognized(_ gestureRecognizer: UIGestureRecognizer) {
         let longPress = gestureRecognizer as! UILongPressGestureRecognizer
         let state = longPress.state
-        let locationInView = longPress.locationInView(self.collection2)
+        let locationInView = longPress.location(in: self.collection2)
         
         //let indexPath = collection2.indexPathForRowAtPoint(locationInView)
-        let indexPath = collection2.indexPathForItemAtPoint(locationInView)
+        let indexPath = collection2.indexPathForItem(at: locationInView)
         
         struct My {
             static var cellSnapshot : UIView? = nil
@@ -114,19 +114,19 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             static var cellNeedToShow : Bool = false
         }
         struct Path {
-            static var initialIndexPath : NSIndexPath? = nil
+            static var initialIndexPath : IndexPath? = nil
         }
         
         var cell: UICollectionViewCell!
-        var offset:CGFloat = 425
+        let offset:CGFloat = 425
         switch state {
-        case UIGestureRecognizerState.Began:
+        case UIGestureRecognizerState.began:
             print("is it here?")
             if indexPath != nil {
                 Path.initialIndexPath = indexPath
                 //let cell = tableView.cellForRowAtIndexPath(indexPath!) as UITableViewCell!
                 path = indexPath!
-                cell = self.collection2.cellForItemAtIndexPath(indexPath!) as UICollectionViewCell!
+                cell = self.collection2.cellForItem(at: indexPath!) as UICollectionViewCell!
                 My.cellSnapshot  = snapshotOfCell(cell)
                 
                 var center = cell.center
@@ -141,7 +141,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 self.view.addSubview(My.cellSnapshot!)
                 //tableView.addSubview(My.cellSnapshot!)
                 
-                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                UIView.animate(withDuration: 0.25, animations: { () -> Void in
                     center.y = locationInView.y
                     center.x = locationInView.x
                     
@@ -149,7 +149,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                     
                     My.cellIsAnimating = true
                     My.cellSnapshot!.center = center
-                    My.cellSnapshot!.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                    My.cellSnapshot!.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
                     My.cellSnapshot!.alpha = 0.98
                     cell.alpha = 0.1
                     }, completion: { (finished) -> Void in
@@ -157,17 +157,17 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                             My.cellIsAnimating = false
                             if My.cellNeedToShow {
                                 My.cellNeedToShow = false
-                                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                                UIView.animate(withDuration: 0.25, animations: { () -> Void in
                                     cell.alpha = 1
                                 })
                             } else {
-                                cell.hidden = true
+                                cell.isHidden = true
                             }
                         }
                 })
             }
             
-        case UIGestureRecognizerState.Changed:
+        case UIGestureRecognizerState.changed:
             if My.cellSnapshot != nil {
                 
                 var center = My.cellSnapshot!.center
@@ -177,13 +177,13 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 My.cellSnapshot!.center = center
                 
             }
-        case UIGestureRecognizerState.Ended:
+        case UIGestureRecognizerState.ended:
             print("end?")
              var center = My.cellSnapshot!.center
             center.y -= (offset-100)
-            if let indexPath1 = collection1.indexPathForItemAtPoint(center){
-                let fcell = self.collection1.cellForItemAtIndexPath(indexPath1) as! onSendCell!
-                print( fcell.title.text )
+            if let indexPath1 = collection1.indexPathForItem(at: center){
+                let fcell = self.collection1.cellForItem(at: indexPath1) as! onSendCell!
+                print( fcell?.title.text )
                 //only really triggers when released upon a friend cell
                 
                 if let a = self.peeps[indexPath1.row] as? Friend{
@@ -199,17 +199,17 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             
             if Path.initialIndexPath != nil {
                 //let cell = tableView.cellForRowAtIndexPath(Path.initialIndexPath!) as UITableViewCell!
-                cell = self.collection2.cellForItemAtIndexPath(path!) as UICollectionViewCell!
+                cell = self.collection2.cellForItem(at: path!) as UICollectionViewCell!
                 if My.cellIsAnimating {
                     My.cellNeedToShow = true
                 } else {
-                    cell.hidden = false
+                    cell.isHidden = false
                     cell.alpha = 0.0
                 }
                 
-                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                UIView.animate(withDuration: 0.25, animations: { () -> Void in
                     My.cellSnapshot!.center = cell.center
-                    My.cellSnapshot!.transform = CGAffineTransformIdentity
+                    My.cellSnapshot!.transform = CGAffineTransform.identity
                     My.cellSnapshot!.alpha = 0.0
                     cell.alpha = 1.0
                     
@@ -226,17 +226,17 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             
             if Path.initialIndexPath != nil {
                 //let cell = tableView.cellForRowAtIndexPath(Path.initialIndexPath!) as UITableViewCell!
-                cell = self.collection2.cellForItemAtIndexPath(path!) as UICollectionViewCell!
+                cell = self.collection2.cellForItem(at: path!) as UICollectionViewCell!
                 if My.cellIsAnimating {
                     My.cellNeedToShow = true
                 } else {
-                    cell.hidden = false
+                    cell.isHidden = false
                     cell.alpha = 0.0
                 }
                 
-                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                UIView.animate(withDuration: 0.25, animations: { () -> Void in
                     My.cellSnapshot!.center = cell.center
-                    My.cellSnapshot!.transform = CGAffineTransformIdentity
+                    My.cellSnapshot!.transform = CGAffineTransform.identity
                     My.cellSnapshot!.alpha = 0.0
                     cell.alpha = 1.0
                     
@@ -252,22 +252,22 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         }
     }
     
-    func snapshotOfCell(inputView: UIView) -> UIView {
+    func snapshotOfCell(_ inputView: UIView) -> UIView {
         UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0.0)
-        inputView.layer.renderInContext(UIGraphicsGetCurrentContext()!)
-        let image = UIGraphicsGetImageFromCurrentImageContext() as UIImage
+        inputView.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()! as UIImage
         UIGraphicsEndImageContext()
         
         let cellSnapshot : UIView = UIImageView(image: image)
         cellSnapshot.layer.masksToBounds = false
         cellSnapshot.layer.cornerRadius = 0.0
-        cellSnapshot.layer.shadowOffset = CGSizeMake(-5.0, 0.0)
+        cellSnapshot.layer.shadowOffset = CGSize(width: -5.0, height: 0.0)
         cellSnapshot.layer.shadowRadius = 5.0
         cellSnapshot.layer.shadowOpacity = 0.4
         return cellSnapshot
     }
     
-    func collectionView(collectionView: UICollectionView,
+    func collectionView(_ collectionView: UICollectionView,
         numberOfItemsInSection section: Int) -> Int {
             if(collectionView == collection1){
                 return self.peeps.count
@@ -277,10 +277,10 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
             //return model[collectionView.tag].count
     }
     
-    func collectionView(collectionView: UICollectionView,
-        cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(_ collectionView: UICollectionView,
+        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
             if(collectionView == self.collection1){
-                let cell = self.collection1.dequeueReusableCellWithReuseIdentifier("cell4", forIndexPath: indexPath) as! onSendCell
+                let cell = self.collection1.dequeueReusableCell(withReuseIdentifier: "cell4", for: indexPath) as! onSendCell
                 
                 //it is a friend cell so need to set up the cell as such
                 if let a:Friend = self.peeps[indexPath.row] as? Friend{
@@ -293,7 +293,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 //cell.title.text? = self.friends[indexPath.row].username
                 return cell
             }else{
-                let cell = self.collection2.dequeueReusableCellWithReuseIdentifier("cell5", forIndexPath: indexPath) as! onSendCell2
+                let cell = self.collection2.dequeueReusableCell(withReuseIdentifier: "cell5", for: indexPath) as! onSendCell2
 
                 //cell.backgroundColor = UIColor.redColor()
                 
@@ -307,8 +307,8 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     }
     
     
-    func collectionView(collectionView: UICollectionView,
-        didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    func collectionView(_ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath) {
             if(collectionView == self.collection2){
                 self.titlee.text = self.rendez[indexPath.row].title
                 self.detail.text = self.rendez[indexPath.row].detail
@@ -317,29 +317,29 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
     }
     
     
-    @IBAction func onBackPressed(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackPressed(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
         
     }
     
-    func sendOnRelease(status:Status, friend:Friend){
+    func sendOnRelease(_ status:Status, friend:Friend){
         var arr = [AnyObject]()
         var friendarr = [AnyObject]()
         
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let showname:String = prefs.valueForKey("SHOWNAME") as! String
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let prefs:UserDefaults = UserDefaults.standard
+        let showname:String = prefs.value(forKey: "SHOWNAME") as! String
         
         let userObject = ["username": self.username, "showname": showname]
-        arr.append(userObject)
-        let statusObject = ["title": status.title, "detail": status.detail, "location": status.location, "type": status.type, "timefor": status.timefor, "response": 0]
-        arr.append(statusObject)
+        arr.append(userObject as AnyObject)
+        let statusObject = ["title": status.title, "detail": status.detail, "location": status.location, "type": status.type, "timefor": status.timefor, "response": 0] as [String : Any]
+        arr.append(statusObject as AnyObject)
 
         if let a:Friend = friend{
                 let friendObj = ["username": friend.username, "showname": friend.friendname]
-                friendarr.append(friendObj)
-                let emitobj = [ "friend": friend.username, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0]
-                delegate.friendarr.append(emitobj)
+                friendarr.append(friendObj as AnyObject)
+                let emitobj = [ "friend": friend.username, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0] as [String : Any]
+                delegate.friendarr.append(emitobj as AnyObject)
             }
         
         /*
@@ -352,43 +352,43 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
         delegate.events.trigger("emitRendez")
         let friendarray = ["array": friendarr]
-        arr.append(friendarray)
-        let finalNSArray:NSArray = arr
+        arr.append(friendarray as AnyObject)
+        let finalNSArray:NSArray = arr as NSArray
         let finalarr:NSDictionary = ["json": finalNSArray]
         NSLog("PostData: %@",finalarr);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/sentRSwift.php")!
-        let da:NSData = try! NSJSONSerialization.dataWithJSONObject(finalarr, options: [])
+        let url:URL = URL(string: "http://www.jjkbashlord.com/sentRSwift.php")!
+        let da:Data = try! JSONSerialization.data(withJSONObject: finalarr, options: [])
         print(da)
-        let postLength:NSString = String( da.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = da
+        let postLength:NSString = String( da.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = da
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
+        var response: URLResponse?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
-            NSLog("Response code: %ld", res.statusCode);
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            let res = response as! HTTPURLResponse!;
+            NSLog("Response code: %ld", res?.statusCode);
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 NSLog("Response ==> %@", responseData);
-                let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+                let jsonData:NSObject = (try! JSONSerialization.jsonObject(with: urlData!, options:JSONSerialization.ReadingOptions.mutableContainers )) as! NSObject
                 NSLog("sent!!!!!!!")
-                let dateFormatter = NSDateFormatter()
-                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 
-                let date = dateFormatter.stringFromDate(NSDate())
+                let date = dateFormatter.string(from: Date())
                 
                 
             } else {
@@ -396,7 +396,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -407,23 +407,23 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }
 
-    func sendOnRelease(status:Status, group:Groups){
+    func sendOnRelease(_ status:Status, group:Groups){
         var arr = [AnyObject]()
         var friendarr = [AnyObject]()
         
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let showname:String = prefs.valueForKey("SHOWNAME") as! String
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let prefs:UserDefaults = UserDefaults.standard
+        let showname:String = prefs.value(forKey: "SHOWNAME") as! String
         
         let userObject = ["username": self.username, "showname": showname]
-        arr.append(userObject)
-        let statusObject = ["title": status.title, "detail": status.detail, "location": status.location, "type": status.type, "timefor": status.timefor, "response": 0]
-        arr.append(statusObject)
+        arr.append(userObject as AnyObject)
+        let statusObject = ["title": status.title, "detail": status.detail, "location": status.location, "type": status.type, "timefor": status.timefor, "response": 0] as [String : Any]
+        arr.append(statusObject as AnyObject)
         
         /*
         if let a:Friend = friend{
@@ -436,50 +436,50 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         
         if let a:Groups = group{
         let groupObj = ["username": group.groupname, "showname": group.groupdetail]
-        friendarr.append(groupObj)
-        let emitobj = [ "friend": a.groupname, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0]
-        delegate.grouparr.append(emitobj)
+        friendarr.append(groupObj as AnyObject)
+        let emitobj = [ "friend": a.groupname, "title": status.title, "detail": status.detail, "location": status.location, "timefor": status.timefor, "type": status.type, "response": 0] as [String : Any]
+        delegate.grouparr.append(emitobj as AnyObject)
         }
         
         delegate.events.trigger("emitRendez")
         let friendarray = ["array": friendarr]
-        arr.append(friendarray)
-        let finalNSArray:NSArray = arr
+        arr.append(friendarray as AnyObject)
+        let finalNSArray:NSArray = arr as NSArray
         let finalarr:NSDictionary = ["json": finalNSArray]
         NSLog("PostData: %@",finalarr);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/sentRSwift.php")!
-        let da:NSData = try! NSJSONSerialization.dataWithJSONObject(finalarr, options: [])
+        let url:URL = URL(string: "http://www.jjkbashlord.com/sentRSwift.php")!
+        let da:Data = try! JSONSerialization.data(withJSONObject: finalarr, options: [])
         print(da)
-        let postLength:NSString = String( da.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = da
+        let postLength:NSString = String( da.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = da
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
+        var response: URLResponse?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
-            NSLog("Response code: %ld", res.statusCode);
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            let res = response as! HTTPURLResponse!;
+            NSLog("Response code: %ld", res?.statusCode);
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 NSLog("Response ==> %@", responseData);
-                let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+                let jsonData:NSObject = (try! JSONSerialization.jsonObject(with: urlData!, options:JSONSerialization.ReadingOptions.mutableContainers )) as! NSObject
                 NSLog("sent!!!!!!!")
-                let dateFormatter = NSDateFormatter()
-                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+                let dateFormatter = DateFormatter()
+                dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 
-                let date = dateFormatter.stringFromDate(NSDate())
+                let date = dateFormatter.string(from: Date())
                 
                 
             } else {
@@ -487,7 +487,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -498,7 +498,7 @@ let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }
