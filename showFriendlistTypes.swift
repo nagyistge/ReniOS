@@ -30,7 +30,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
         //self.imageView.image = UIImage(named: self.imageFile)
         // self.titleLabel.text = self.titleText
         //cars = ["BMW","Audi","Volkswagen"]
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         //tableView.delegate = self
         //tableView.dataSource = self
         
@@ -43,22 +43,22 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
     }
     
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let isLoggedIn:Int = prefs.integerForKey("ISLOGGEDIN") as Int
+        let prefs:UserDefaults = UserDefaults.standard
+        let isLoggedIn:Int = prefs.integer(forKey: "ISLOGGEDIN") as Int
         if(isLoggedIn != 1){
-            self.dismissViewControllerAnimated(true, completion: nil)
+            self.dismiss(animated: true, completion: nil)
         }
         
         //self.txtUsername.text = prefs.valueForKey("USERNAME") as? String
         
         
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         
         
-        let post:NSString = "username=\(username)"
+        let post:NSString = "username=\(username)" as NSString
         
         NSLog("PostData: %@",post);
         
@@ -78,62 +78,62 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
         }
         
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/" + php)!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/" + php)!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
             
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
             
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
-                let jsonData1:NSDictionary = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSDictionary
+                let jsonData1:NSDictionary = (try! JSONSerialization.jsonObject(with: urlData!, options:JSONSerialization.ReadingOptions.mutableContainers )) as! NSDictionary
                 
-                let jsonData:NSArray = jsonData1.valueForKey("friends") as! NSArray
+                let jsonData:NSArray = jsonData1.value(forKey: "friends") as! NSArray
                 
                 
-                for(var index = 0; index < jsonData.count; index++ ){
+                for(index in 0 ..< jsonData.count ){
                     
-                    let username1:NSString = jsonData[index].valueForKey("username") as! NSString
+                    let username1:NSString = (jsonData[index] as AnyObject).value(forKey: "username") as! NSString
                     
                     var title2:NSString = ""
-                    if let title1:NSString = jsonData[index].valueForKey("friendname") as? NSString{
-                        title2 = (jsonData[index].valueForKey("friendname") as? NSString)!
+                    if let title1:NSString = (jsonData[index] as AnyObject).value(forKey: "friendname") as? NSString{
+                        title2 = ((jsonData[index] as AnyObject).value(forKey: "friendname") as? NSString)!
                     }else{
                         title2 = username1
                     }
 
-                    let status1:Int = jsonData[index].valueForKey("status") as! Int
+                    let status1:Int = (jsonData[index] as AnyObject).value(forKey: "status") as! Int
                     
                     print(title2)
-                    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: NSDate(), loctime: "", location: "")
+                    let status = Friend(username: username1 as String, showname: title2 as String, timestamp: Date(), loctime: "", location: "")
                     
                     someInts.append(status)
                     print("Friend Entity: " + status.friendname)
@@ -144,7 +144,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -155,7 +155,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         
@@ -171,42 +171,42 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
     
     
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         return self.someInts.count
     }
     
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 3
-        let cell:UITableViewCell = self.tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) 
+        let cell:UITableViewCell = self.tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) 
         
         cell.textLabel?.text = self.someInts[indexPath.row].friendname
         print("TableView: " + self.someInts[indexPath.row].friendname)
         return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         
         var addFlag: Int = 0
         
         
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         
         let friendname1: Friend = self.someInts[indexPath.row] as Friend
         
-        let post:NSString = "user=\(username)&friend=\(friendname1.username)"
+        let post:NSString = "user=\(username)&friend=\(friendname1.username)" as NSString
         
         NSLog("PostData: %@",post);
         
@@ -219,7 +219,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
             php = "http://www.jjkbashlord.com/addingFriend.php"
             addFlag = 1
             
-            let date = NSDate()
+            let date = Date()
            // var dateFormatter = NSDateFormatter()
            // dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
            // dateFormatter.timeZone = NSTimeZone(abbreviation: "UTC");
@@ -227,13 +227,13 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
           //  let addDate = dateFormatter.dateFromString(date)
             
             
-            prefs.setObject(date, forKey: friendname1.username)
+            prefs.set(date, forKey: friendname1.username)
         }
         if(flag == 2){
             php = "http://www.jjkbashlord.com/addingBack.php"
             addFlag = 1
 
-            let date = NSDate()
+            let date = Date()
           //  let dateFormatter = NSDateFormatter()
            // dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
            // dateFormatter.timeZone = NSTimeZone(abbreviation: "UTC");
@@ -241,7 +241,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
             //let addDate = dateFormatter.dateFromString(date)
             
             
-            prefs.setObject(date, forKey: friendname1.username)
+            prefs.set(date, forKey: friendname1.username)
         }
         if(flag == 3){
 
@@ -251,39 +251,39 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
         
             
         
-        let url:NSURL = NSURL(string: php)!
+        let url:URL = URL(string: php)!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
             
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
             
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
@@ -292,7 +292,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 alertView.title = "Add Complete!"
                 alertView.message = "You got homies now!"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
 
             } else {
@@ -300,7 +300,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -311,7 +311,7 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         
@@ -330,8 +330,8 @@ class showFriendlistTypes: UIViewController,UITableViewDelegate, UITableViewData
     }
     
 
-    @IBAction func onBackTapped(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackTapped(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     }
     
 

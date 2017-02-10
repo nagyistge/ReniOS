@@ -31,7 +31,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     @IBOutlet weak var txtDetail: UILabel!
     @IBOutlet weak var txtLocation: UILabel!
     var vc: sendToFriends!
-    let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let delegate = UIApplication.shared.delegate as! AppDelegate
     
     var vm: showRMap!
     
@@ -43,10 +43,11 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     var transitionOperator = TransitionOperator()
     var locationCoords:String!
      var flag:Int = -1//IF THIS IS -1 IT IS NORMAL, ELSE IT IS A GROUPCHAT
+    
     var id:Int!
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.friendResponses.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.friendResponses.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         // Do any additional setup after loading the view.
     }
     
@@ -55,7 +56,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         
         
@@ -103,11 +104,11 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 //friendResponses.removeFromSuperview()
                 }
         }
-        let delegate1 = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate1 = UIApplication.shared.delegate as! AppDelegate
         print("id: " + String(id))
         if let a = delegate1.groupResponses[id]{
             print("succ")
-            friendRespArray.appendContentsOf(delegate1.groupResponses[id]!)
+            friendRespArray.append(contentsOf: delegate1.groupResponses[id]!)
             print(friendRespArray.count)
         }else{
             print("fuafomkclqm")
@@ -117,42 +118,42 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         
     }
     
-    @IBAction func deleteR(sender: UIButton) {
-        let post:NSString = "id=\(self.programVar1.id)&flag=\(0)"
+    @IBAction func deleteR(_ sender: UIButton) {
+        let post:NSString = "id=\(self.programVar1.id)&flag=\(0)" as NSString
         NSLog("PostData: %@",post);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateRendez.php")!
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        let postLength:NSString = String( postData.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let url:URL = URL(string: "http://www.jjkbashlord.com/updateRendez.php")!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
+        let postLength:NSString = String( postData.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
+        var response: URLResponse?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             NSLog("Response code: %ld", res.statusCode);
             if (res.statusCode >= 200 && res.statusCode < 300){
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 NSLog("Response ==> %@", responseData);
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -163,13 +164,13 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }
     
-    @IBAction func showOnMapTapped(sender: UIButton) {
-        vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
+    @IBAction func showOnMapTapped(_ sender: UIButton) {
+        vm = self.storyboard?.instantiateViewController(withIdentifier: "showRMap") as! showRMap
         let coords = txtLocation.text
         let title = txtTitle.text
         let detail = txtDetail.text
@@ -178,39 +179,39 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         vm.title1 = title
         vm.detail = detail
         vm.flag = 1
-        
-        self.presentViewController(vm, animated: true, completion: nil)
+        vm.gflag = flag
+        self.present(vm, animated: true, completion: nil)
     }
     
-    @IBAction func backTapped(sender: UIButton) {
+    @IBAction func backTapped(_ sender: UIButton) {
         //if this value is 0, that means that need to check the response and if it is not the same as it was initially then got to update it
         if self.isStatusFromYou == false{
-            if(self.programVar1.response != self.responsePicker.selectedRowInComponent(0)){
-                updateStatus( self.programVar1.id, flag: 2, response: self.responsePicker.selectedRowInComponent(0))
+            if(self.programVar1.response != self.responsePicker.selectedRow(inComponent: 0)){
+                updateStatus( self.programVar1.id, flag: 2, response: self.responsePicker.selectedRow(inComponent: 0))
                 
-                for(var i = 0; i < self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez.count; i++ ){
+                for(i in 0 ..< self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez.count ){
                     if((self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez[i] as RendezStatus) == self.programVar1 as RendezStatus){
-                        self.delegate.newfeed[i].response = self.responsePicker.selectedRowInComponent(0)
+                        self.delegate.theWozMap[self.programVar1.fromuser]!.allDeesRendez[i].response = self.responsePicker.selectedRow(inComponent: 0)
                     }
                 }
             }
         }
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView( _ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
             return self.friendRespArray.count
         
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell:UITableViewCell = self.friendResponses.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
-        cell.selectionStyle = UITableViewCellSelectionStyle.None
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell:UITableViewCell = self.friendResponses.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        cell.selectionStyle = UITableViewCellSelectionStyle.none
         
         var r = ""
         if friendRespArray[indexPath.row].resp == 0{
@@ -226,59 +227,59 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         return cell
     }
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return self.responses.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String?{
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String?{
         return self.responses[row]
     }
 
-    func updateStatus(id:Int, flag:Int, response:Int) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.stringForKey("USERNAME") as String!
+    func updateStatus(_ id:Int, flag:Int, response:Int) {
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.string(forKey: "USERNAME") as String!
         //check the flag here, if it is -1 we are in a 1 to 1 rendez, else
         //we need to set some sort of indicator to update a response
         //to the correct rendezresponse that related to the groupchat....
         
-        let post:NSString = "id=\(id)&response=\(response)&flag=\(flag)&username=\(username)"
+        let post:NSString = "id=\(id)&response=\(response)&flag=\(flag)&username=\(username)" as NSString
         NSLog("PostData: %@",post);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateStatusResponse.php")!
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        let postLength:NSString = String( postData.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let url:URL = URL(string: "http://www.jjkbashlord.com/updateStatusResponse.php")!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
+        let postLength:NSString = String( postData.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
+        var response: URLResponse?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             NSLog("Response code: %ld", res.statusCode);
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 NSLog("Response ==> %@", responseData);
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -289,7 +290,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }

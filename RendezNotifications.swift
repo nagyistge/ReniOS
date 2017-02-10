@@ -39,52 +39,52 @@ class RendezNotifications: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
                 // Do any additional setup after loading the view.
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate = UIApplication.shared.delegate as! AppDelegate
         someRendez.removeAll()
         someChat.removeAll()
         someStatus.removeAll()
         
-        someRendez.appendContentsOf(delegate.rendezstatus )
-        someChat.appendContentsOf(delegate.chat)
-        someStatus.appendContentsOf(delegate.status)
-        self.list0 = self.storyboard?.instantiateViewControllerWithIdentifier("notifList") as! RendezNotifList
+        someRendez.append(contentsOf: delegate.rendezstatus )
+        someChat.append(contentsOf: delegate.chat)
+        someStatus.append(contentsOf: delegate.status)
+        self.list0 = self.storyboard?.instantiateViewController(withIdentifier: "notifList") as! RendezNotifList
         
-        self.list1 = self.storyboard?.instantiateViewControllerWithIdentifier("notifList") as! RendezNotifList
+        self.list1 = self.storyboard?.instantiateViewController(withIdentifier: "notifList") as! RendezNotifList
         
-        self.list2 = self.storyboard?.instantiateViewControllerWithIdentifier("notifList") as! RendezNotifList
+        self.list2 = self.storyboard?.instantiateViewController(withIdentifier: "notifList") as! RendezNotifList
         self.list0.listType = 0
         self.list1.listType = 1
         self.list2.listType = 2
         
-        self.list0.someStatus.appendContentsOf(someStatus)
-        self.list1.someRendez.appendContentsOf(someRendez)
-        self.list2.someChat.appendContentsOf(someChat)
+        self.list0.someStatus.append(contentsOf: someStatus)
+        self.list1.someRendez.append(contentsOf: someRendez)
+        self.list2.someChat.append(contentsOf: someChat)
         
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        let recognizerL: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: "swipeLeft:")
-        recognizerL.direction = .Left
-        let recognizerR: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: "swipeRight:")
-        recognizerR.direction = .Right
+        let recognizerL: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(RendezNotifications.swipeLeft(_:)))
+        recognizerL.direction = .left
+        let recognizerR: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(RendezNotifications.swipeRight(_:)))
+        recognizerR.direction = .right
         
         statusflag = 1
         rendezflag = 0
         chatflag = 0
-        statusB.selected = true
+        statusB.isSelected = true
         
         self.view.addGestureRecognizer(recognizerL)
         self.view.addGestureRecognizer(recognizerR)
         
         let startVC = self.viewControllerAtIndex(self.index)
         let viewControllers = NSArray(object: startVC)
-        self.pageViewController = self.storyboard?.instantiateViewControllerWithIdentifier("PageViewController") as! UIPageViewController
-        self.pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .Forward, animated: true, completion: nil)
-        self.pageViewController.view.frame = CGRectMake(0, 150, self.view.frame.width, self.view.frame.size.height-85)
+        self.pageViewController = self.storyboard?.instantiateViewController(withIdentifier: "PageViewController") as! UIPageViewController
+        self.pageViewController.setViewControllers(viewControllers as? [UIViewController], direction: .forward, animated: true, completion: nil)
+        self.pageViewController.view.frame = CGRect(x: 0, y: 105, width: self.view.frame.width, height: self.view.frame.size.height-85)
         self.addChildViewController(self.pageViewController)
         self.view.addSubview(self.pageViewController.view)
-        self.pageViewController.didMoveToParentViewController(self)
+        self.pageViewController.didMove(toParentViewController: self)
     
     }
 
@@ -94,7 +94,7 @@ class RendezNotifications: UIViewController {
     }
     
     
-    func viewControllerAtIndex(index: Int) -> UIViewController
+    func viewControllerAtIndex(_ index: Int) -> UIViewController
     {
         if ((self.pageTitles.count == 0) || (index >= self.pageTitles.count)) {
             return ContentViewController()
@@ -112,24 +112,24 @@ class RendezNotifications: UIViewController {
         return vc
     }
     
-    func swipeLeft(recognizer : UISwipeGestureRecognizer) {
+    func swipeLeft(_ recognizer : UISwipeGestureRecognizer) {
         if(self.index != 2 ){
             print("swipeLeft")
             self.index += 1
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
             setButtons()
             
         }
         
     }
     
-    func swipeRight(recognizer : UISwipeGestureRecognizer) {
+    func swipeRight(_ recognizer : UISwipeGestureRecognizer) {
         if(self.index != 0 ){
             print("swipeRight")
             self.index -= 1
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .reverse, animated: true, completion: nil)
             setButtons()
         }
     }
@@ -138,61 +138,61 @@ class RendezNotifications: UIViewController {
         if(self.index == 0){
             rendezflag = 0
             chatflag = 0
-            rendezB.selected = false
-            chatB.selected = false
+            rendezB.isSelected = false
+            chatB.isSelected = false
             
             statusflag = 1
-            statusB.selected = true
+            statusB.isSelected = true
         }else if(self.index == 1){
             rendezflag = 1
             chatflag = 0
-            rendezB.selected = true
-            chatB.selected = false
+            rendezB.isSelected = true
+            chatB.isSelected = false
             
             statusflag = 0
-            statusB.selected = false
+            statusB.isSelected = false
         }else{
             rendezflag = 0
             chatflag = 1
-            rendezB.selected = false
-            chatB.selected = true
+            rendezB.isSelected = false
+            chatB.isSelected = true
             
             statusflag = 0
-            statusB.selected = false
+            statusB.isSelected = false
         }
     }
     
-    @IBAction func onStatus(sender: UIButton) {
+    @IBAction func onStatus(_ sender: UIButton) {
         if(self.index != 0){
             self.index = 0
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .reverse, animated: true, completion: nil)
             setButtons()
         }
     }
-    @IBAction func onRendez(sender: UIButton) {
+    @IBAction func onRendez(_ sender: UIButton) {
         if(self.index != 1){
             
             
             if(self.index < 1){
                 self.index = 1
                 let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
             }else{
                 self.index = 1
                 let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Reverse, animated: true, completion: nil)
+                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .reverse, animated: true, completion: nil)
             }
             
             setButtons()
         }
         
     }
-    @IBAction func onChat(sender: UIButton) {
+    @IBAction func onChat(_ sender: UIButton) {
         if(self.index != 2){
              self.index = 2
             let viewControllers = NSArray(object: viewControllerAtIndex(self.index))
-            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .Forward, animated: true, completion: nil)
+            self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
             
            
             
@@ -201,8 +201,8 @@ class RendezNotifications: UIViewController {
         }
     }
     
-    @IBAction func onBackPressed(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackPressed(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     }
 
   

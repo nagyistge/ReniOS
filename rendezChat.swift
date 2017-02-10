@@ -25,7 +25,7 @@ var locationCoords:String!
     var someChats = [Chat]()
     var showuser: String!
     var showfriend: String!
-    var rendezNotifTimeFlag: NSDate!
+    var rendezNotifTimeFlag: Date!
     
     var statusToPass: RendezStatus!
     var vc: showRRendez!
@@ -45,11 +45,11 @@ var locationCoords:String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tableView.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         // Do any additional setup after loading the view.
         
         //NSNOTIFICATION OBSERVER INITILIZER
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateRendezChatNotif:", name: rendezChatNotifKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(rendezChat.updateRendezChatNotif(_:)), name: NSNotification.Name(rawValue: rendezChatNotifKey), object: nil)
         print("This notifcation observer should be set now for this friend... it should be called every time")
         
     }
@@ -60,7 +60,7 @@ var locationCoords:String!
     }
     
     
-override func viewWillAppear(animated: Bool) {
+override func viewWillAppear(_ animated: Bool) {
     super.viewWillAppear(true)
     //set the user display names in the respective labels
     if(flag == -1){
@@ -73,15 +73,15 @@ override func viewWillAppear(animated: Bool) {
 
 }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate = UIApplication.shared.delegate as! AppDelegate
         print(friendname)
         self.someInts.removeAll()
      //   let statuslist = delegate.theWozMap[friendname]!
      //   let rendez = statuslist.allDeesRendez
-        self.someInts.appendContentsOf(delegate.theWozMap[friendname]!.allDeesRendez! )
+        self.someInts.append(contentsOf: delegate.theWozMap[friendname]!.allDeesRendez! )
         self.tableView.reloadData()
         NSLog("\n THE CHAT HAS RETRIEVED THE STATIC LIST FROM THE WOZ")
         
@@ -104,31 +104,31 @@ override func viewWillAppear(animated: Bool) {
     }
     
     //~~~~~~~~~~~~~~~~~~Button cases for the View
-    @IBAction func onBackTapped(sender: UIButton) {
+    @IBAction func onBackTapped(_ sender: UIButton) {
         
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func onChatTapped(sender: UIButton) {
+    @IBAction func onChatTapped(_ sender: UIButton) {
             //self.performSegueWithIdentifier("presentNav", sender: self)
         
-        toViewController = self.storyboard?.instantiateViewControllerWithIdentifier("chattingR") as! chattingR
+        toViewController = self.storyboard?.instantiateViewController(withIdentifier: "chattingR") as! chattingR
        // toViewController = segue.destinationViewController as! chattingR
         toViewController.username = username
         toViewController.friendname = friendname
         toViewController.showuser = showuser
         toViewController.showfriend = showfriend
-        self.modalPresentationStyle = UIModalPresentationStyle.Custom
+        self.modalPresentationStyle = UIModalPresentationStyle.custom
         toViewController.transitioningDelegate = self.transitionOperator
         toViewController.flag = flag
-        self.presentViewController(toViewController, animated: true, completion: nil)
+        self.present(toViewController, animated: true, completion: nil)
     }
     
     //NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---NSNotificationStuff---
 
     //should be called by the app delegate when it gets new emit by the NSNotificationCenter
     //all this should do is change the friend notif time and update the table
-    internal func updateRendezChatNotif(notification:NSNotification){
+    internal func updateRendezChatNotif(_ notification:Notification){
         print("is the update in rendezChat even called??")
         
         //get the friend param and set it
@@ -137,72 +137,72 @@ override func viewWillAppear(animated: Bool) {
         let friendNotif:RendezStatus = postparam["chatstatus"]! as! RendezStatus
         
         if(friendNotif.username == friendname){
-            self.someInts.insert(friendNotif, atIndex: 0)
+            self.someInts.insert(friendNotif, at: 0)
             self.tableView.reloadData()
         }
     }
 
     //TABLEVIEW INITIALIZATION STUFF, HANDLES MAKING THE LIST AND ONCLICKS ON THE LIST
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         return self.someInts.count
     }
 
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 3
-        let dateFormatter = NSDateFormatter()
-        dateFormatter.locale = NSLocale.currentLocale()
-        dateFormatter.dateStyle = NSDateFormatterStyle.FullStyle
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = Locale.current
+        dateFormatter.dateStyle = DateFormatter.Style.full
         //let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
         let datee = self.someInts[indexPath.row].timeset as NSString as String
-        let showdate = datee.stringByReplacingOccurrencesOfString("-", withString: "/")
+        let showdate = datee.replacingOccurrences(of: "-", with: "/")
         //SETS THEE RENDEZ THAT IS FROM YOU
         if(self.someInts[indexPath.row].username == username){
-            var cell1 = self.tableView.dequeueReusableCellWithIdentifier("rightcell", forIndexPath: indexPath) as! RightView
+            let cell1 = self.tableView.dequeueReusableCell(withIdentifier: "rightcell", for: indexPath) as! RightView
             cell1.title.text = self.someInts[indexPath.row].title as NSString as String
             let date = self.someInts[indexPath.row].timeset as NSString as String
-            let showdate = date.stringByReplacingOccurrencesOfString("-", withString: "/")
+            let showdate = date.replacingOccurrences(of: "-", with: "/")
              cell1.detail.text = showdate
             return cell1
         }
         else{//ELSE THE RENDEZ IS FROM THE FRIEND
             if(flag == -1){
                 
-                let cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
-                cell.textLabel?.textAlignment = .Left
-                cell.detailTextLabel?.textAlignment = .Left
-                cell.textLabel?.textColor = UIColor.blueColor()
-                cell.detailTextLabel?.textColor = UIColor.blueColor()
+                let cell = UITableViewCell(style: UITableViewCellStyle.subtitle, reuseIdentifier: "cell")
+                cell.textLabel?.textAlignment = .left
+                cell.detailTextLabel?.textAlignment = .left
+                cell.textLabel?.textColor = UIColor.blue
+                cell.detailTextLabel?.textColor = UIColor.blue
                 cell.textLabel!.text = self.someInts[indexPath.row].title as NSString as String
                 
                 cell.detailTextLabel?.text = showdate
             //check with the LAST TIME THAT FRIEND WAS CHECKED TIME with the time of the redenz from the friend to see if it is new and should be highlighted or not
             
-                let dateFormatter = NSDateFormatter()
+                let dateFormatter = DateFormatter()
                 if self.someInts[indexPath.row].timeset.characters.count == 19 {
                     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 }else{
                     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
                 }
-                dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-                var date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
-                date = dateFormatter.dateFromString(self.someInts[indexPath.row].timeset)
+                dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
+                var date = dateFormatter.date(from: self.someInts[indexPath.row].timeset)
+                date = dateFormatter.date(from: self.someInts[indexPath.row].timeset)
                 print(self.someInts[indexPath.row].timeset)
                 print(date)
                 let notifFlag = rendezNotifTimeFlag.compare(date!)
             
-                if notifFlag == .OrderedAscending{
-                    cell.backgroundColor = UIColor.yellowColor()
+                if notifFlag == .orderedAscending{
+                    cell.backgroundColor = UIColor.yellow
                 }
                     return cell
             }else{
-                var cell2 = self.tableView.dequeueReusableCellWithIdentifier("lefter", forIndexPath: indexPath) as! LeftRendez
+                let cell2 = self.tableView.dequeueReusableCell(withIdentifier: "lefter", for: indexPath) as! LeftRendez
                 
                 cell2.from.text = self.someInts[indexPath.row].title as NSString as String
                 cell2.fromtime.text = showdate
@@ -215,12 +215,12 @@ override func viewWillAppear(animated: Bool) {
         //return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         let currentCell = self.someInts[indexPath.row] as RendezStatus
         statusToPass = currentCell
      //   let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("showRRendez") as! showRRendez
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "showRRendez") as! showRRendez
         vc.programVar1 = statusToPass
         vc.username = username
         vc.friendname = friendname
@@ -237,57 +237,57 @@ override func viewWillAppear(animated: Bool) {
             vc.isStatusFromYou = false
         }
         
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
     }
     
     
-    @IBAction func onSendLocClicked(sender: UIButton) {
+    @IBAction func onSendLocClicked(_ sender: UIButton) {
         //send current location to the relational in the database
         if(self.locationCoords == nil){
             let alertView:UIAlertView = UIAlertView()
             alertView.title = "Location not found!"
             alertView.message = "Connection is faulty. Try another area."
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
             
         }else{
-        let post:NSString = "friendname=\(friendname)&username=\(username)&location=\(self.locationCoords)"
+        let post:NSString = "friendname=\(friendname)&username=\(username)&location=\(self.locationCoords)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/onLocationUpdate.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/onLocationUpdate.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             
             NSLog("Response code: %ld", res.statusCode);
             
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
@@ -299,7 +299,7 @@ override func viewWillAppear(animated: Bool) {
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -310,19 +310,19 @@ override func viewWillAppear(animated: Bool) {
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         }
     }
     
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         // 2
-        if status == .AuthorizedWhenInUse {
+        if status == .authorizedWhenInUse {
             locationManager.startUpdatingLocation()
         }
     }
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             print(locations.first)
             print(location)
@@ -338,72 +338,72 @@ override func viewWillAppear(animated: Bool) {
         
     }
     
-    @IBAction func onMapLoc(sender: UIButton) {
+    @IBAction func onMapLoc(_ sender: UIButton) {
         
-        let post:NSString = "friendname=\(friendname)&username=\(username)"
+        let post:NSString = "friendname=\(friendname)&username=\(username)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/fetchFriendLoc.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/fetchFriendLoc.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             
             NSLog("Response code: %ld", res.statusCode);
             
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
-                let jsonData:NSObject = (try! NSJSONSerialization.JSONObjectWithData(urlData!, options:NSJSONReadingOptions.MutableContainers )) as! NSObject
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
+                let jsonData:NSObject = (try! JSONSerialization.jsonObject(with: urlData!, options:JSONSerialization.ReadingOptions.mutableContainers )) as! NSObject
                 NSLog("Response ==> %@", responseData);
                 
                 //   var error: NSError?
-                vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
+                vm = self.storyboard?.instantiateViewController(withIdentifier: "showRMap") as! showRMap
                 if(flag == -1){
-                    if let coords1 = jsonData.valueForKey("location") as? String{
-                        let coords = jsonData.valueForKey("location") as? String
+                    if let coords1 = jsonData.value(forKey: "location") as? String{
+                        let coords = jsonData.value(forKey: "location") as? String
                         let title = friendname
-                        let detail = jsonData.valueForKey("loctime") as? String
+                        let detail = jsonData.value(forKey: "loctime") as? String
                         vm.name = friendname
                         vm.coords = coords
                         vm.title1 = title
                         vm.detail = detail
                         vm.gflag = flag
                 
-                        self.presentViewController(vm, animated: true, completion: nil)
+                        self.present(vm, animated: true, completion: nil)
                     }
                 }else{
-                    let coords = jsonData.valueForKey("location") as? String
+                    let coords = jsonData.value(forKey: "location") as? String
                     let title = friendname
-                    let detail = jsonData.valueForKey("loctime") as? String
+                    let detail = jsonData.value(forKey: "loctime") as? String
                     vm.name = friendname
                     vm.coords = coords
                     vm.title1 = title
                     vm.detail = detail
                     vm.gflag = flag
-                    self.presentViewController(vm, animated: true, completion: nil)
+                    self.present(vm, animated: true, completion: nil)
                 }
 
                 
@@ -413,7 +413,7 @@ override func viewWillAppear(animated: Bool) {
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -424,20 +424,20 @@ override func viewWillAppear(animated: Bool) {
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }
     
     
-    @IBAction func onDeetsPressed(sender: UIButton) {
+    @IBAction func onDeetsPressed(_ sender: UIButton) {
         
-        groupdeet = self.storyboard?.instantiateViewControllerWithIdentifier("groupdeet") as! GroupDeets
+        groupdeet = self.storyboard?.instantiateViewController(withIdentifier: "groupdeet") as! GroupDeets
         
         groupdeet.name = friendname
         groupdeet.deet = showfriend
         groupdeet.someInts = ggroup.members
-        self.presentViewController(groupdeet, animated: true, completion: nil)
+        self.present(groupdeet, animated: true, completion: nil)
         
         
     }

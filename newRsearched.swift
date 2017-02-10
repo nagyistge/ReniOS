@@ -33,10 +33,10 @@ class newRsearched: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        workButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        eatButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        funButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        boredButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
+        workButton.addTarget(self, action: #selector(newRsearched.buttonClicked(_:)), for: .touchUpInside)
+        eatButton.addTarget(self, action: #selector(newRsearched.buttonClicked(_:)), for: .touchUpInside)
+        funButton.addTarget(self, action: #selector(newRsearched.buttonClicked(_:)), for: .touchUpInside)
+        boredButton.addTarget(self, action: #selector(newRsearched.buttonClicked(_:)), for: .touchUpInside)
         
         // Do any additional setup after loading the view.
     }
@@ -46,44 +46,44 @@ class newRsearched: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         placeDetails.text = programVar
         txtLocation.text = location
         
     }
     
-    func buttonClicked( sender: UIButton!) {
+    func buttonClicked( _ sender: UIButton!) {
         if sender === workButton {
-            workButton.highlighted = true
-            eatButton.highlighted = false
-            funButton.highlighted = false
-            boredButton.highlighted = false
+            workButton.isHighlighted = true
+            eatButton.isHighlighted = false
+            funButton.isHighlighted = false
+            boredButton.isHighlighted = false
             self.selectedType.text = "For Work!"
             flag = 2
             // do something
         } else if sender === eatButton {
-            workButton.highlighted = false
-            eatButton.highlighted = true
-            funButton.highlighted = false
-            boredButton.highlighted = false
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = true
+            funButton.isHighlighted = false
+            boredButton.isHighlighted = false
             self.selectedType.text = "For Food!"
             flag = 0
             // do something
         } else if sender === funButton {
-            workButton.highlighted = false
-            eatButton.highlighted = false
-            funButton.highlighted = true
-            boredButton.highlighted = false
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = false
+            funButton.isHighlighted = true
+            boredButton.isHighlighted = false
             self.selectedType.text = "For Fun!"
             flag = 1
             // do something
         }
         else if sender == boredButton{
-            workButton.highlighted = false
-            eatButton.highlighted = false
-            funButton.highlighted = false
-            boredButton.highlighted = true
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = false
+            funButton.isHighlighted = false
+            boredButton.isHighlighted = true
             self.selectedType.text = "Im bored."
             flag = 3
         }
@@ -93,11 +93,11 @@ class newRsearched: UIViewController {
     
     
     
-    @IBAction func datePickerAction(sender: AnyObject) {
-        let dateFormatter = NSDateFormatter()
+    @IBAction func datePickerAction(_ sender: AnyObject) {
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(abbreviation: "UTC")
-        let strDate = dateFormatter.stringFromDate(datePicker.date)
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        let strDate = dateFormatter.string(from: datePicker.date)
         self.selectedDate.text = strDate
         
     }
@@ -105,14 +105,14 @@ class newRsearched: UIViewController {
     
     
     
-    @IBAction func newRTapped(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    @IBAction func newRTapped(_ sender: UIButton) {
+        let prefs:UserDefaults = UserDefaults.standard
         
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         let title:String = txtTitle.text!
         let detail:String = txtDetails.text!
         let location:String = txtLocation.text!
-        var timefor = self.selectedDate.text!
+        let timefor = self.selectedDate.text!
         
         //let dateFormatter = NSDateFormatter()
        // dateFormatter.dateFormat = "dd-MM-yyyy HH:mm:ss"
@@ -124,7 +124,7 @@ class newRsearched: UIViewController {
             alertView.title = "Pick a type!"
             alertView.message = "Are you working, eating, going out having a blast, or bored??"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         else if(title.isEmpty || detail.isEmpty){
@@ -132,52 +132,52 @@ class newRsearched: UIViewController {
             alertView.title = "Fill it out!!"
             alertView.message = "Be as descriptive or non-descriptive as you'd like, but put something!"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         else{
         
         
-        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)"
+        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/newStatus.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/newStatus.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
             
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
             
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
                // self.performSegueWithIdentifier("goto_mainactivity", sender: self)
                                 //self.dismissViewControllerAnimated(true, completion: nil)
             } else {
@@ -185,7 +185,7 @@ class newRsearched: UIViewController {
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -196,7 +196,7 @@ class newRsearched: UIViewController {
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         }

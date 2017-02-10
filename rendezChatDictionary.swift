@@ -8,13 +8,13 @@
 
 import Foundation
 
-public class rendezChatDictionary: NSObject{
+open class rendezChatDictionary: NSObject{
     var allDeesStatus: Array<Status>!
     var allDeesRendez: Array<RendezStatus>!
     var allDeesChat: Array<Chat>!
     var allDeezLoc: Array<FromLocation>!
     var allDeesFriends: Array<Friend>!
-    var allDeesFriendsMap:  Dictionary<String, Friend!> = Dictionary<String, Friend!>()
+    var allDeesFriendsMap:  Dictionary<String, Friend?> = Dictionary<String, Friend!>()
     var allDeesGroups: Array<Groups>!
     //when will it end
     var allDeesReps: Array<GResps>!
@@ -31,27 +31,27 @@ public class rendezChatDictionary: NSObject{
         self.allDeesReps = Array<GResps>()
     }
     
-    func rendezChatDictionary(status: Array<Status>, rendez:Array<RendezStatus>, chat: Array<Chat>){
+    func rendezChatDictionary(_ status: Array<Status>, rendez:Array<RendezStatus>, chat: Array<Chat>){
         self.allDeesStatus = status
         self.allDeesRendez = rendez
         self.allDeesChat = chat
     }
     
-    func initRendez(initR:Array<RendezStatus>){
+    func initRendez(_ initR:Array<RendezStatus>){
         self.allDeesRendez = initR
     }
-    func initChat(initC:Array<Chat>){
+    func initChat(_ initC:Array<Chat>){
         self.allDeesChat = initC
     }
-    func initStatus(initS:Array<Status>){
+    func initStatus(_ initS:Array<Status>){
         self.allDeesStatus = initS
     }
 
-    func putInRendez(rendez:RendezStatus){
+    func putInRendez(_ rendez:RendezStatus){
         self.allDeesRendez.append(rendez)
     }
 
-    func putInChat(rendez:Chat){
+    func putInChat(_ rendez:Chat){
         self.allDeesChat.append(rendez)
     }
 

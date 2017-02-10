@@ -28,7 +28,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
 
     @IBOutlet weak var inRangesTitle: UILabel!
     
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate = UIApplication.shared.delegate as! AppDelegate
         
         var flag:Int = -1
     
@@ -50,20 +50,20 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     
         override func viewDidLoad() {
             super.viewDidLoad()
-            self.tableVie.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+            self.tableVie.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
 
              locationManager.delegate = self
             
         }
         
-        override func viewWillAppear(animated: Bool) {
+        override func viewWillAppear(_ animated: Bool) {
             super.viewWillAppear(true)
 
         }
         
-        override func viewDidAppear(animated: Bool) {
+        override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(true)
-            let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+            let delegate = UIApplication.shared.delegate as! AppDelegate
           locationManager.requestWhenInUseAuthorization()
             manager = OneShotLocationManager()
             manager.fetchWithCompletion {location, error in
@@ -83,9 +83,9 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                     alertView.title = "Connection Error!"
                     alertView.message = "Location could not be found!"
                     alertView.delegate = self
-                    alertView.addButtonWithTitle("OK")
+                    alertView.addButton(withTitle: "OK")
                     alertView.show()
-                    self.dismissViewControllerAnimated(true, completion: nil)
+                    self.dismiss(animated: true, completion: nil)
                 }
             }
         }
@@ -93,19 +93,19 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
 
     
         //--TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------TABLE STUFF ------
-        func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             //return query_effit.count
             //return query_rendezes.count + query_statuses.count
             return finalarr.count
         }
         
-        func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
             //finalInd[indexPath.row] is basically an array of indexes of Rendezes and Statuses
             // and their manhattan distanes.
             //finalarr holds the rendezes/statuses and finalarrInd holds the manhattan distances as
             //seen below
             
-            let cell = tableVie.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
+            let cell = tableVie.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
             if let rr = finalarr[finalInd[indexPath.row]] as? RendezStatus{
                 //use the indexPath.row to ge the ith shortest distance RendezStatus
                 let r = finalarr[finalInd[indexPath.row]] as! RendezStatus
@@ -119,7 +119,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             return cell
         }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         if let rr = finalarr[finalInd[indexPath.row]] as? RendezStatus{
             //use the indexPath.row to get the ith shortest distance RendezStatus
@@ -139,11 +139,11 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             super.didReceiveMemoryWarning()
         }
         
-        @IBAction func backTapped(sender: UIButton) {
-            self.dismissViewControllerAnimated(true, completion: nil)
+        @IBAction func backTapped(_ sender: UIButton) {
+            self.dismiss(animated: true, completion: nil)
         }
     
-    func ManHanDist(x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Bool {
+    func ManHanDist(_ x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Bool {
         let xx = Double(x)
         let yy = Double(y)
         
@@ -160,7 +160,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         }
     }
     
-    func ManHanDistDouble(x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Double {
+    func ManHanDistDouble(_ x:String, y:String, xcoord:String, ycoord:String, flag:Int) -> Double {
         let xx = Double(x)
         let yy = Double(y)
         
@@ -190,7 +190,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         
         if(self.coords != "gwang"){
             for ren in rendezes{
-                let arr = ren.location.componentsSeparatedByString(" : ")
+                let arr = ren.location.components(separatedBy: " : ")
                 let xcoord = arr[0]
                 let ycoord = arr[1]
                 if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
@@ -205,7 +205,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             
             //statues manhattan calculations
             for stat in statuses{
-                let arr = stat.location.componentsSeparatedByString(" : ")
+                let arr = stat.location.components(separatedBy: " : ")
                 let xcoord = arr[0]
                 let ycoord = arr[1]
                 if( ManHanDist( self.x,y: self.y, xcoord: xcoord,ycoord: ycoord,flag: self.rangeflag)){
@@ -219,7 +219,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             }
             
             //sort according to the manhattan distances
-            finalarrInd.sort{
+            finalarrInd.sorted{
                 return $0.1 < $1.1
             }
             
@@ -235,7 +235,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     
     }
     
-    @IBAction func onRangeOption(sender: UIButton) {
+    @IBAction func onRangeOption(_ sender: UIButton) {
         var settingflag = -1
         var msg = "What is the distances you would like to see Rendezes?"
         if(rangeflag == 0){
@@ -243,10 +243,10 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
         }else{
             msg += " \nCurrent range is 2 miles!"
         }
-        let alert = UIAlertController(title: "Select a range below!", message: msg, preferredStyle: UIAlertControllerStyle.Alert)
+        let alert = UIAlertController(title: "Select a range below!", message: msg, preferredStyle: UIAlertControllerStyle.alert)
         
         // add the actions (buttons)
-        alert.addAction(UIAlertAction(title: "100 meters", style: UIAlertActionStyle.Default, handler: { action in
+        alert.addAction(UIAlertAction(title: "100 meters", style: UIAlertActionStyle.default, handler: { action in
             if( self.rangeflag != 0 ){
                 self.rangeflag = 0
                 self.queryRanges()
@@ -255,7 +255,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
             }
             
         }))
-        alert.addAction(UIAlertAction(title: "2 miles", style: UIAlertActionStyle.Default, handler: { action in
+        alert.addAction(UIAlertAction(title: "2 miles", style: UIAlertActionStyle.default, handler: { action in
             if( self.rangeflag != 1 ){
                 self.rangeflag = 1
                 self.queryRanges()
@@ -263,11 +263,11 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
 
             }
         }))
-        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.Cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
         
         
         // show the alert
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     /*
     The units digit (one decimal degree) gives a position up to 111 kilometers (60 nautical miles, about 69 miles). It can tell us roughly what large state or country we are in.
@@ -286,35 +286,35 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
     
     */
 
-    func fireOffRange(id:Int, flag:Int){
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    func fireOffRange(_ id:Int, flag:Int){
+        let prefs:UserDefaults = UserDefaults.standard
         
-        let username:String = prefs.valueForKey("USERNAME") as! String
-        let post:NSString = "id=\(id)&username=\(username)&flag=\(flag)"
+        let username:String = prefs.value(forKey: "USERNAME") as! String
+        let post:NSString = "id=\(id)&username=\(username)&flag=\(flag)" as NSString
         NSLog("PostData: %@",post);
         //random shit needed for the http request
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/onInRangeUpdate.php")!
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
-        let postLength:NSString = String( postData.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let url:URL = URL(string: "http://www.jjkbashlord.com/onInRangeUpdate.php")!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
+        let postLength:NSString = String( postData.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
-        var urlData: NSData?
+        var response: URLResponse?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
-            NSLog("Response code: %ld", res.statusCode);
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            let res = response as! HTTPURLResponse!;
+            NSLog("Response code: %ld", res?.statusCode);
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
                 //WE ARE IN THE PROMISED LAND
                 print("shboozy")
@@ -322,7 +322,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 alertView.title = "Sent!"
                 alertView.message = "Now they know you were nearby!  Creep."
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
                 
             } else {
@@ -330,7 +330,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -341,7 +341,7 @@ class rendezChatInRangeViewController: UIViewController, UITextFieldDelegate, UI
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }

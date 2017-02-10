@@ -14,11 +14,11 @@ class TransitionOperator: NSObject, UIViewControllerAnimatedTransitioning, UIVie
     var snapshot : UIView!
     var isPresenting : Bool = true
     
-    func transitionDuration(transitionContext: UIViewControllerContextTransitioning?) -> NSTimeInterval {
+    func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
     return 0.5
     }
     
-    func animateTransition(transitionContext: UIViewControllerContextTransitioning) {
+    func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         if isPresenting{
             presentNavigation(transitionContext)
         }
@@ -28,36 +28,36 @@ class TransitionOperator: NSObject, UIViewControllerAnimatedTransitioning, UIVie
         
     }
     
-    func animationControllerForPresentedController(presented: UIViewController, presentingController presenting: UIViewController, sourceController source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         self.isPresenting = true
     return self
     }
     
-    func animationControllerForDismissedController(dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+    func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
         self.isPresenting = false
     return self
     }
     
     
-    func presentNavigation(transitionContext: UIViewControllerContextTransitioning) {
-        let container = transitionContext.containerView()
-        let fromViewController = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)
+    func presentNavigation(_ transitionContext: UIViewControllerContextTransitioning) {
+        let container = transitionContext.containerView
+        let fromViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)
         let fromView = fromViewController!.view
-        let toViewController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)
+        let toViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)
         let toView = toViewController!.view
         
-        let size = toView.frame.size
-        var offSetTransform = CGAffineTransformMakeTranslation(size.width - 120, 0)
-        offSetTransform = CGAffineTransformScale(offSetTransform, 0.6, 0.6)
+        let size = toView?.frame.size
+        var offSetTransform = CGAffineTransform(translationX: (size?.width)! - 120, y: 0)
+        offSetTransform = offSetTransform.scaledBy(x: 0.6, y: 0.6)
         
-        snapshot = fromView.snapshotViewAfterScreenUpdates(true)
+        snapshot = fromView?.snapshotView(afterScreenUpdates: true)
         
-        container!.addSubview(toView)
-        container!.addSubview(snapshot)
+        container.addSubview(toView!)
+        container.addSubview(snapshot)
         
-        let duration = self.transitionDuration(transitionContext)
+        let duration = self.transitionDuration(using: transitionContext)
         
-        UIView.animateWithDuration(duration, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8, options: [], animations: {
+        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.8, options: [], animations: {
             
             self.snapshot.transform = offSetTransform
             
@@ -68,19 +68,19 @@ class TransitionOperator: NSObject, UIViewControllerAnimatedTransitioning, UIVie
 
     }
 
-    func dismissNavigation(transitionContext: UIViewControllerContextTransitioning) {
+    func dismissNavigation(_ transitionContext: UIViewControllerContextTransitioning) {
         
-        let container = transitionContext.containerView()
-        let fromViewController = transitionContext.viewControllerForKey(UITransitionContextFromViewControllerKey)
+        let container = transitionContext.containerView
+        let fromViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from)
         let fromView = fromViewController!.view
-        let toViewController = transitionContext.viewControllerForKey(UITransitionContextToViewControllerKey)
+        let toViewController = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to)
         let toView = toViewController!.view
         
-        let duration = self.transitionDuration(transitionContext)
+        let duration = self.transitionDuration(using: transitionContext)
         
-        UIView.animateWithDuration(duration, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.8, options: [], animations: {
+        UIView.animate(withDuration: duration, delay: 0.0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.8, options: [], animations: {
             
-            self.snapshot.transform = CGAffineTransformIdentity
+            self.snapshot.transform = CGAffineTransform.identity
             
             }, completion: { finished in
                 transitionContext.completeTransition(true)

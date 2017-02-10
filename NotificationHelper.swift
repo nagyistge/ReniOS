@@ -10,7 +10,7 @@ import Foundation
 
 class NotificationHelper {
     var NotifMap = Dictionary<String,NotificationNode!>()
-    func isInNotifMap(name:String)->Bool{
+    func isInNotifMap(_ name:String)->Bool{
         if(self.NotifMap[name] == nil){
             return false
         }else{
@@ -18,28 +18,28 @@ class NotificationHelper {
         }
     }
     
-    func addToNotfifs(node:NotificationNode){
+    func addToNotfifs(_ node:NotificationNode){
         self.NotifMap[node.username] = node
     }
     
-    func setMaxtime(username:String, time:NSDate){
+    func setMaxtime(_ username:String, time:Date){
         let notifFlag = self.NotifMap[username]!.maxtime.compare(time)
-        if notifFlag == .OrderedAscending{
+        if notifFlag == .orderedAscending{
         //if notifFlag == .OrderedDescending{
             self.NotifMap[username]!.maxtime = (time)
         }
         
     }
     
-    func incrementRendez(username:String){
+    func incrementRendez(_ username:String){
         self.NotifMap[username]!.rendezCount = self.NotifMap[username]!.rendezCount + 1
     }
     
-    func incrementChat(username:String){
+    func incrementChat(_ username:String){
         self.NotifMap[username]!.chatCount =  self.NotifMap[username]!.chatCount + 1
     }
     
-    func resetCounts(username:String){
+    func resetCounts(_ username:String){
         self.NotifMap[username]!.rendezCount = 0
         self.NotifMap[username]!.chatCount = 0
     }
@@ -60,7 +60,7 @@ class NotificationHelper {
                 friends.append(friend)
             }
         }
-        friends.sortInPlace()
-        return friends.reverse()
+        friends.sort()
+        return friends.reversed()
     }
 }

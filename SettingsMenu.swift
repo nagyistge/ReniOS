@@ -29,14 +29,14 @@ class SettingsMenu: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        showname = prefs.stringForKey("SHOWNAME")!
-        email = prefs.stringForKey("EMAIL")!
-        phonenumber = prefs.stringForKey("PHONENUMBER")!
+        let prefs:UserDefaults = UserDefaults.standard
+        showname = prefs.string(forKey: "SHOWNAME")!
+        email = prefs.string(forKey: "EMAIL")!
+        phonenumber = prefs.string(forKey: "PHONENUMBER")!
 
     }
 
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
     }
 
@@ -45,7 +45,7 @@ class SettingsMenu: UIViewController {
         super.didReceiveMemoryWarning()
         }
 
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
         if(showname == "null"){
@@ -57,9 +57,9 @@ class SettingsMenu: UIViewController {
         if(email == "null"){
             email = "Set your email!"
         }
-        txtDisplayname.setTitle(showname, forState: .Normal)
-        txtPhonenumber.setTitle(phonenumber, forState: .Normal)
-        txtEmail.setTitle(email, forState: .Normal)
+        txtDisplayname.setTitle(showname, for: UIControlState())
+        txtPhonenumber.setTitle(phonenumber, for: UIControlState())
+        txtEmail.setTitle(email, for: UIControlState())
         print(showname + "  "  + phonenumber + "  " + email )
     }
     /*
@@ -71,57 +71,58 @@ class SettingsMenu: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
-    @IBAction func onLogoutTapped(sender: UIButton) {
-        let appDomain = NSBundle.mainBundle().bundleIdentifier
+    @IBAction func onLogoutTapped(_ sender: UIButton) {
+        let appDomain = Bundle.main.bundleIdentifier
         
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username = prefs.valueForKey("USERNAME")
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let prefs:UserDefaults = UserDefaults.standard
+        let username = prefs.value(forKey: "USERNAME")
+        let delegate = UIApplication.shared.delegate as! AppDelegate
 
         let friends = delegate.yourFriends
         var notifArr = [AnyObject]()
         
-        for(var i = 0; i < friends.count; i++){
-           let time =  prefs.valueForKey(friends[i].username)?.description!
+        for(i in 0 ..< friends.count){
+           let time =  (prefs.value(forKey: friends[i].username)? as AnyObject).description!
             notifArr.append(["friend": friends[i].username, "time": time])
         
         }
         
-        let finalNSArray:NSArray = notifArr
+        let finalNSArray:NSArray = notifArr as NSArray
         let finalarr:NSDictionary = ["json": finalNSArray, "username":username!]
         NSLog("PostData: %@",finalarr);
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/onLogout.php")!
-        let da:NSData = try! NSJSONSerialization.dataWithJSONObject(finalarr, options: [])
+        let url:URL = URL(string: "http://www.jjkbashlord.com/onLogout.php")!
+        let da:Data = try! JSONSerialization.data(withJSONObject: finalarr, options: [])
         print(da)
-        let postLength:NSString = String( da.length )
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = da
+        let postLength:NSString = String( da.count ) as NSString
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = da
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
-            NSLog("Response code: %ld", res.statusCode);
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            let res = response as! HTTPURLResponse!;
+            NSLog("Response code: %ld", res?.statusCode);
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
                 NSLog("sent!!!!!!!")
+                delegate.mSocket.disconnect(fast: true)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
             
@@ -133,47 +134,47 @@ class SettingsMenu: UIViewController {
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         
-        NSUserDefaults.standardUserDefaults().removePersistentDomainForName(appDomain!)
+        UserDefaults.standard.removePersistentDomain(forName: appDomain!)
     
-        self.performSegueWithIdentifier("goto_login", sender: self)
+        self.performSegue(withIdentifier: "goto_login", sender: self)
         
     }
     
     
-    @IBAction func onSetDisplaynameTapped(sender: UIButton) {
+    @IBAction func onSetDisplaynameTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = storyboard.instantiateViewControllerWithIdentifier("editUser") as! editUserInfo
+        vc = storyboard.instantiateViewController(withIdentifier: "editUser") as! editUserInfo
 
         vc.flag = 0
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
     }
     
     
-    @IBAction func onSetEmailTapped(sender: UIButton) {
+    @IBAction func onSetEmailTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = storyboard.instantiateViewControllerWithIdentifier("editUser") as! editUserInfo
+        vc = storyboard.instantiateViewController(withIdentifier: "editUser") as! editUserInfo
         vc.flag = 1
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
     }
 
-    @IBAction func onSetPhonenumberTapped(sender: UIButton) {
+    @IBAction func onSetPhonenumberTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = storyboard.instantiateViewControllerWithIdentifier("editUser") as! editUserInfo
+        vc = storyboard.instantiateViewController(withIdentifier: "editUser") as! editUserInfo
         vc.flag = 2
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
     }
 
-    @IBAction func onFriendSettingsTapped(sender: UIButton) {
+    @IBAction func onFriendSettingsTapped(_ sender: UIButton) {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = storyboard.instantiateViewControllerWithIdentifier("editFriendlist") as! editUserInfo
+        vc = storyboard.instantiateViewController(withIdentifier: "editFriendlist") as! editUserInfo
     }
 
-    @IBAction func onBackTapped(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackTapped(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     }
     
     

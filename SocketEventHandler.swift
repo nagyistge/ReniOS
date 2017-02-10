@@ -24,13 +24,11 @@
 
 import Foundation
 
-private func emitAckCallback(socket: SocketIOClient?, num: Int?)
-    (items: AnyObject...) -> Void {
+private func emitAckCallback(_ socket: SocketIOClient?, num: Int?, _ items: AnyObject...) -> Void {
         socket?.emitAck(num ?? -1, withItems: items)
 }
 
-private func emitAckCallbackObjectiveC(socket: SocketIOClient?, num: Int?)
-    (items: NSArray) -> Void {
+private func emitAckCallbackObjectiveC(_ socket: SocketIOClient?, num: Int?, _ items: NSArray) -> Void {
         socket?.emitAck(num ?? -1, withItems: items as [AnyObject])
 }
 
@@ -39,19 +37,19 @@ struct SocketEventHandler {
     let callback: NormalCallback?
     let callBackObjectiveC: NormalCallbackObjectiveC?
     
-    init(event: String, callback: NormalCallback) {
+    init(event: String, callback: @escaping NormalCallback) {
         self.event = event
         self.callback = callback
         self.callBackObjectiveC = nil
     }
     
-    init(event: String, callback: NormalCallbackObjectiveC) {
+    init(event: String, callback: @escaping NormalCallbackObjectiveC) {
         self.event = event
         self.callback = nil
         self.callBackObjectiveC = callback
     }
     
-    func executeCallback(items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
+    func executeCallback(_ items:NSArray? = nil, withAck ack:Int? = nil, withAckType type:Int? = nil,
         withSocket socket:SocketIOClient? = nil) {
             self.callback != nil ?
                 self.callback?(items, emitAckCallback(socket, num: ack))

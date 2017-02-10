@@ -9,7 +9,7 @@
 import UIKit
 
 protocol showRDelegate{
-    func returnUpdate(status: Status)
+    func returnUpdate(_ status: Status)
 
 }
 
@@ -37,7 +37,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     
     var returnDelegate: showRDelegate!
     
-     let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+     let delegate = UIApplication.shared.delegate as! AppDelegate
 
     var vm: showRMap!
     
@@ -57,7 +57,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.friendResponses.registerClass(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        self.friendResponses.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
 
         // Do any additional setup after loading the view.
     }
@@ -67,7 +67,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
         
         //switchBool = self.programVar.visable
@@ -89,7 +89,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 typeImg.image = UIImage(named: "idle")
             }
             if  self.programVar.timefor != "0000-00-00 00:00"{
-                let dateFormatter = NSDateFormatter()
+                let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 timeTxt.text = "Set for " + self.programVar.timefor
             }else{
@@ -126,63 +126,63 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     }
     
     
-    @IBAction func deleteR(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    @IBAction func deleteR(_ sender: UIButton) {
+        let prefs:UserDefaults = UserDefaults.standard
         
-        let username:String = prefs.stringForKey("USERNAME") as String!
+        let username:String = prefs.string(forKey: "USERNAME") as String!
         
         let title:String = txtTitle.text as String!
         let detail:String = txtDetail.text as String!
         let location: String = txtLocation.text as String!
         
-        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)"
+        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/deleteStatus.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/deleteStatus.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             
             NSLog("Response code: %ld", res.statusCode);
             
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
                 //var error: NSError?
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -193,7 +193,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }
@@ -202,28 +202,28 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
 
     
     
-    @IBAction func sendRTapped(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-        let username:String = prefs.valueForKey("USERNAME") as! String
-        let showname:String = prefs.valueForKey("SHOWNAME") as! String
+    @IBAction func sendRTapped(_ sender: UIButton) {
+        let prefs:UserDefaults = UserDefaults.standard
+        let username:String = prefs.value(forKey: "USERNAME") as! String
+        let showname:String = prefs.value(forKey: "SHOWNAME") as! String
         
         let title:String = txtTitle.text!
         let detail:String = txtDetail.text!
         let location:String = txtLocation.text!
         
         
-        vc = self.storyboard?.instantiateViewControllerWithIdentifier("sendToFriends") as! sendToFriends
+        vc = self.storyboard?.instantiateViewController(withIdentifier: "sendToFriends") as! sendToFriends
         vc.username = username
         vc.showname = showname
         vc.title1 = title
         vc.detail1 = detail
         vc.location1 = location
         vc.progVar = self.programVar
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
     }
     
-    @IBAction func showOnMapTapped(sender: UIButton) {
-        vm = self.storyboard?.instantiateViewControllerWithIdentifier("showRMap") as! showRMap
+    @IBAction func showOnMapTapped(_ sender: UIButton) {
+        vm = self.storyboard?.instantiateViewController(withIdentifier: "showRMap") as! showRMap
         let coords = txtLocation.text
         let title = txtTitle.text
         let detail = txtDetail.text
@@ -232,20 +232,20 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         vm.detail = detail
         vm.flag = 1
         
-        self.presentViewController(vm, animated: true, completion: nil)
+        self.present(vm, animated: true, completion: nil)
     }
     
-    @IBAction func backTapped(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
-         let username:String = prefs.valueForKey("USERNAME") as! String
+    @IBAction func backTapped(_ sender: UIButton) {
+        let prefs:UserDefaults = UserDefaults.standard
+         let username:String = prefs.value(forKey: "USERNAME") as! String
         //if this value is 0, that means that need to check the response and if it is not the same as it was initially then got to update it
         if self.isStatusFromYou == false{
-            if(self.programVar.response != self.responsePicker.selectedRowInComponent(0)){
-                updateStatus( self.programVar.id, flag: 0, response: self.responsePicker.selectedRowInComponent(0))
+            if(self.programVar.response != self.responsePicker.selectedRow(inComponent: 0)){
+                updateStatus( self.programVar.id, flag: 0, response: self.responsePicker.selectedRow(inComponent: 0))
                 
-                for(var i = 0; i < self.delegate.newfeed.count; i++ ){
+                for(i in 0 ..< self.delegate.newfeed.count ){
                     if((self.delegate.newfeed[i] as Status) == self.programVar as Status){
-                        self.delegate.newfeed[i].response = self.responsePicker.selectedRowInComponent(0)
+                        self.delegate.newfeed[i].response = self.responsePicker.selectedRow(inComponent: 0)
                     }
                 }
             }
@@ -253,22 +253,22 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         //else need to check to see if you need to change if you updated the visability of the status
             print("back tapped for status that is yours")
             print(self.programVar.visable)
-            print(visableIndicator.on)
-            if( self.programVar.visable == 0 && visableIndicator.on){
+            print(visableIndicator.isOn)
+            if( self.programVar.visable == 0 && visableIndicator.isOn){
                 print("changing visable to true after toggle in showR")
                 updateStatus( self.programVar.id, flag: 1, response: 1)
                 
-                  for(var i = 0; i < self.delegate.theWozMap[username]!.allDeesStatus.count; i++ ){
+                  for(i in 0 ..< self.delegate.theWozMap[username]!.allDeesStatus.count ){
                     if((  self.delegate.theWozMap[username]!.allDeesStatus[i] as Status) == self.programVar as Status){
                            self.delegate.theWozMap[username]!.allDeesStatus[i].visable = 1
                         self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
                     }
                 }
 
-            }else if( self.programVar.visable == 1 && !visableIndicator.on){
+            }else if( self.programVar.visable == 1 && !visableIndicator.isOn){
                 updateStatus(self.programVar.id, flag: 1, response: 0)
                 
-                for(var i = 0; i < self.delegate.theWozMap[username]!.allDeesStatus.count; i++ ){
+                for(i in 0 ..< self.delegate.theWozMap[username]!.allDeesStatus.count ){
                     if((  self.delegate.theWozMap[username]!.allDeesStatus[i] as Status) == self.programVar as Status){
                         self.delegate.theWozMap[username]!.allDeesStatus[i].visable = 0
                         self.returnDelegate.returnUpdate(self.delegate.newfeed[i])
@@ -277,17 +277,17 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
 
             }
         }
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
     
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView( tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView( _ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         if (self.programVar == nil){
             return 0
@@ -296,15 +296,15 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         }}
 
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 3
         
  
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+        let prefs:UserDefaults = UserDefaults.standard
         //let username = prefs.valueForKey("USERNAME") as! String
         
-            let cell:UITableViewCell = self.friendResponses.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath)
-            cell.selectionStyle = UITableViewCellSelectionStyle.None
+            let cell:UITableViewCell = self.friendResponses.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            cell.selectionStyle = UITableViewCellSelectionStyle.none
         
         var r = ""
         if programVar.fromuser[indexPath.row].response == 0{
@@ -322,75 +322,75 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         
     }
     
-    func numberOfComponentsInPickerView(pickerView: UIPickerView) -> Int {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
-    func pickerView(pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return self.responses.count
     }
     
-    func pickerView(pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return self.responses[row]
     }
     
-    func updateStatus(id:Int, flag:Int, response:Int) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    func updateStatus(_ id:Int, flag:Int, response:Int) {
+        let prefs:UserDefaults = UserDefaults.standard
         
-        let username:String = prefs.stringForKey("USERNAME") as String!
+        let username:String = prefs.string(forKey: "USERNAME") as String!
         
        // let title:String = txtTitle.text as String!
         //let detail:String = txtDetail.text as String!
        // let location: String = txtLocation.text as String!
         
-        let post:NSString = "id=\(id)&username=\(username)&response=\(response)&flag=\(flag)"
+        let post:NSString = "id=\(id)&username=\(username)&response=\(response)&flag=\(flag)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/updateStatusResponse.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/updateStatusResponse.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
         
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse
+            let res = response as! HTTPURLResponse
             
             NSLog("Response code: %ld", res.statusCode);
             
             if (res.statusCode >= 200 && res.statusCode < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
                 //var error: NSError?
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -401,7 +401,7 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
     }

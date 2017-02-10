@@ -39,12 +39,12 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
     override func viewDidLoad() {
         super.viewDidLoad()
         locationManager.delegate = self
-        locationManager.requestWhenInUseAuthorization()
+        
         // Do any additional setup after loading the view.
-        workButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        eatButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        partyButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
-        boredButton.addTarget(self, action: "buttonClicked:", forControlEvents: .TouchUpInside)
+        workButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
+        eatButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
+        partyButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
+        boredButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,8 +52,9 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        locationManager.requestWhenInUseAuthorization()
         manager = OneShotLocationManager()
         manager.fetchWithCompletion {location, error in
             // fetch location or an error
@@ -70,37 +71,37 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
         }
     }
     
-    func buttonClicked( sender: UIButton!) {
+    func buttonClicked( _ sender: UIButton!) {
         if sender === workButton {
-            workButton.highlighted = true
-            eatButton.highlighted = false
-            partyButton.highlighted = false
-            boredButton.highlighted = false
+            workButton.isHighlighted = true
+            eatButton.isHighlighted = false
+            partyButton.isHighlighted = false
+            boredButton.isHighlighted = false
             self.buttonLabel.text = "For Work!"
             flag = 2
             // do something
         } else if sender === eatButton {
-            workButton.highlighted = false
-            eatButton.highlighted = true
-            partyButton.highlighted = false
-            boredButton.highlighted = false
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = true
+            partyButton.isHighlighted = false
+            boredButton.isHighlighted = false
             self.buttonLabel.text = "For Food!"
             flag = 0
             // do something
         } else if sender === partyButton {
-            workButton.highlighted = false
-            eatButton.highlighted = false
-            partyButton.highlighted = true
-            boredButton.highlighted = false
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = false
+            partyButton.isHighlighted = true
+            boredButton.isHighlighted = false
             self.buttonLabel.text = "For Fun!"
             flag = 1
             // do something
         }
         else if sender == boredButton{
-            workButton.highlighted = false
-            eatButton.highlighted = false
-            partyButton.highlighted = false
-            boredButton.highlighted = true
+            workButton.isHighlighted = false
+            eatButton.isHighlighted = false
+            partyButton.isHighlighted = false
+            boredButton.isHighlighted = true
             self.buttonLabel.text = "Im bored."
             flag = 3
         }
@@ -108,27 +109,22 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
 
     
     
-    @IBAction func dateChanger(sender: UIDatePicker) {
-        let dateFormatter = NSDateFormatter()
+    @IBAction func dateChanger(_ sender: UIDatePicker) {
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(abbreviation: "UTC")
-        let strDate = dateFormatter.stringFromDate(datePicker.date)
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+        let strDate = dateFormatter.string(from: datePicker.date)
         self.dateLabel.text = strDate
     }
+
     
-    
-    
-    
-    
-    
-    
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         // 2
-        if status == .AuthorizedWhenInUse {
+        if status == .authorizedWhenInUse {
             locationManager.startUpdatingLocation()
         }
     }
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
             print(locations.first)
             print(location)
@@ -141,20 +137,19 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
 
             locationManager.stopUpdatingLocation()
         }
-        
     }
     
     
     
 
-    @IBAction func newRTapped(sender: UIButton) {
-        let prefs:NSUserDefaults = NSUserDefaults.standardUserDefaults()
+    @IBAction func newRTapped(_ sender: UIButton) {
+        let prefs:UserDefaults = UserDefaults.standard
 
-        let username:String = prefs.valueForKey("USERNAME") as! String
+        let username:String = prefs.value(forKey: "USERNAME") as! String
         let title:String = txtTitle.text!
         let detail:String = txtDetails.text!
         let location:String = txtLocation.text!
-                var timefor = self.dateLabel.text!
+                let timefor = self.dateLabel.text!
         
         if(flag == -1){
             print(flag)
@@ -162,7 +157,7 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
             alertView.title = "Pick a type!"
             alertView.message = "Are you working, eating, going out having a blast, or bored??"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         else if(title.isEmpty || detail.isEmpty){
@@ -170,56 +165,56 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
             alertView.title = "Fill it out!!"
             alertView.message = "Be as descriptive or non-descriptive as you'd like, but put something!"
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         else{
-        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)"
+        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)" as NSString
         NSLog("PostData: %@",post);
         
-        let url:NSURL = NSURL(string: "http://www.jjkbashlord.com/newStatus.php")!
+        let url:URL = URL(string: "http://www.jjkbashlord.com/newStatus.php")!
         
-        let postData:NSData = post.dataUsingEncoding(NSASCIIStringEncoding)!
+        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
         
-        let postLength:NSString = String( postData.length )
+        let postLength:NSString = String( postData.count ) as NSString
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: url)
-        request.HTTPMethod = "POST"
-        request.HTTPBody = postData
+        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = postData
         request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         var reponseError: NSError?
-        var response: NSURLResponse?
+        var response: URLResponse?
         
-        var urlData: NSData?
+        var urlData: Data?
         do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request, returningResponse:&response)
+            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
         } catch let error as NSError {
             reponseError = error
             urlData = nil
         }
         
         if ( urlData != nil ) {
-            let res = response as! NSHTTPURLResponse!;
+            let res = response as! HTTPURLResponse!;
             
-            NSLog("Response code: %ld", res.statusCode);
+            NSLog("Response code: %ld", res?.statusCode);
             
-            if (res.statusCode >= 200 && res.statusCode < 300)
+            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
             {
-                let responseData:NSString  = NSString(data:urlData!, encoding:NSUTF8StringEncoding)!
+                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
                 
                 NSLog("Response ==> %@", responseData);
                 
-                var error: NSError?
+             //   var error: NSError?
                 
-                self.dismissViewControllerAnimated(true, completion: nil)
+                self.dismiss(animated: true, completion: nil)
             } else {
                 let alertView:UIAlertView = UIAlertView()
                 alertView.title = "Sign in Failed!"
                 alertView.message = "Connection Failed"
                 alertView.delegate = self
-                alertView.addButtonWithTitle("OK")
+                alertView.addButton(withTitle: "OK")
                 alertView.show()
             }
         } else {
@@ -230,11 +225,11 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
                 alertView.message = (error.localizedDescription)
             }
             alertView.delegate = self
-            alertView.addButtonWithTitle("OK")
+            alertView.addButton(withTitle: "OK")
             alertView.show()
         }
         }
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     /*
     // MARK: - Navigation

@@ -30,7 +30,7 @@ class PlacePickerViewController: UIViewController, UITextViewDelegate {
         super.viewDidLoad()
            // Do any additional setup after loading the view.
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        vc = storyboard.instantiateViewControllerWithIdentifier("newRsearched") as! newRsearched
+        vc = storyboard.instantiateViewController(withIdentifier: "newRsearched") as! newRsearched
         
         manager = OneShotLocationManager()
         manager!.fetchWithCompletion {location, error in
@@ -65,14 +65,14 @@ class PlacePickerViewController: UIViewController, UITextViewDelegate {
     }
 
     
-    @IBAction func pickPlace(sender: UIButton) {
+    @IBAction func pickPlace(_ sender: UIButton) {
         let northEast = CLLocationCoordinate2DMake(VIEWPORT_LATLNG.latitude + VIEWPORT_DELTA, VIEWPORT_LATLNG.longitude + VIEWPORT_DELTA)
         let southWest = CLLocationCoordinate2DMake(VIEWPORT_LATLNG.latitude - VIEWPORT_DELTA, VIEWPORT_LATLNG.longitude - VIEWPORT_DELTA)
         let viewport = GMSCoordinateBounds(coordinate: northEast, coordinate: southWest)
         let config = GMSPlacePickerConfig(viewport: viewport)
         placePicker = GMSPlacePicker(config: config)
         
-        placePicker?.pickPlaceWithCallback({ (place: GMSPlace?,error: NSError?) -> Void in
+        placePicker?.pickPlace(callback: { (place: GMSPlace?,error: NSError?) -> Void in
             self.nameLabel.text = ""
             if error != nil {
                 self.nameLabel.text = error?.localizedDescription
@@ -81,7 +81,7 @@ class PlacePickerViewController: UIViewController, UITextViewDelegate {
             
             if let place = place {
                 self.nameLabel.text = place.name
-                self.addressLabel.text = place.formattedAddress.componentsSeparatedByString(", ").joinWithSeparator("\n")
+                self.addressLabel.text = place.formattedAddress.components(separatedBy: ", ").joined(separator: "\n")
                 self.placeDetails.text = place.types.description
                 self.placeCoordiantes.text = "Latitude: Longitude = \n" + String(format:"%f",place.coordinate.latitude) + ": " + String(format:"%f", place.coordinate.longitude)
                 self.coords = String(format:"%f",place.coordinate.latitude) + " : " + String(format:"%f", place.coordinate.longitude)
@@ -97,8 +97,8 @@ class PlacePickerViewController: UIViewController, UITextViewDelegate {
             }
         })
     }
-    func textView(textView: UITextView, shouldInteractWithURL URL: NSURL,
-        inRange characterRange: NSRange) -> Bool {
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL,
+        in characterRange: NSRange) -> Bool {
             // Make links clickable.
             return true
     }
@@ -107,17 +107,17 @@ class PlacePickerViewController: UIViewController, UITextViewDelegate {
     
     
     
-    @IBAction func newNearbyRTapped(sender: UIButton) {
+    @IBAction func newNearbyRTapped(_ sender: UIButton) {
         self.vc.programVar = self.addressLabel.text
         self.vc.location = self.coords
-        self.presentViewController(vc, animated: true, completion: nil)
+        self.present(vc, animated: true, completion: nil)
 
         
     }
     
  
-    @IBAction func onBackTapped(sender: UIButton) {
-        self.dismissViewControllerAnimated(true, completion: nil)
+    @IBAction func onBackTapped(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
     }
     
     /*

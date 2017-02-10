@@ -15,7 +15,7 @@ class NotificationNode: Comparable {
     var notif:Bool!
     var rendezCount: Int!
     var chatCount:Int!
-    var maxtime:NSDate!
+    var maxtime:Date!
     var isGroup: Bool!
     
     init(username:String, showname:String){
@@ -24,10 +24,10 @@ class NotificationNode: Comparable {
         self.notif = false
         self.rendezCount = 0
         self.chatCount = 0
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-        var date1 = dateFormatter.dateFromString("2000-01-01 01:01:01")
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
+        let date1 = dateFormatter.date(from: "2000-01-01 01:01:01")
         self.isGroup = false
         self.maxtime = date1
     }
@@ -38,10 +38,10 @@ class NotificationNode: Comparable {
         self.notif = false
         self.rendezCount = 0
         self.chatCount = 0
-        let dateFormatter = NSDateFormatter()
+        let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
-        var date1 = dateFormatter.dateFromString("2000-01-01 01:01:01")
+        dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
+        let date1 = dateFormatter.date(from: "2000-01-01 01:01:01")
         self.isGroup = true
         self.maxtime = date1
     }
@@ -49,7 +49,7 @@ class NotificationNode: Comparable {
 
 func <(lhs: NotificationNode, rhs: NotificationNode) -> Bool {
     let notifFlag = lhs.maxtime.compare(rhs.maxtime)
-    if notifFlag == .OrderedAscending{
+    if notifFlag == .orderedAscending{
         return true
     }else{
         return false
@@ -58,7 +58,7 @@ func <(lhs: NotificationNode, rhs: NotificationNode) -> Bool {
 
 func >(lhs: NotificationNode, rhs: NotificationNode) -> Bool {
     let notifFlag = lhs.maxtime.compare(rhs.maxtime)    //print(notifFlag)
-    if notifFlag == .OrderedDescending{
+    if notifFlag == .orderedDescending{
         return true
     }else{
         return false
@@ -67,7 +67,7 @@ func >(lhs: NotificationNode, rhs: NotificationNode) -> Bool {
 
 func ==(lhs: NotificationNode, rhs: NotificationNode) -> Bool {
     let notifFlag = lhs.maxtime.compare(rhs.maxtime)    //print(notifFlag)
-    if notifFlag == .OrderedSame{
+    if notifFlag == .orderedSame{
         return true
     }else{
         return false

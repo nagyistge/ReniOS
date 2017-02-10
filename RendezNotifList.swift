@@ -31,12 +31,12 @@ class RendezNotifList: UIViewController ,UITableViewDelegate, UITableViewDataSou
     
 
     //TABLE STUFF-----TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------TABLE STUFF--------
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         // 1
         return 1
     }
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 2
         if(listType == 0){
             return someStatus.count
@@ -48,31 +48,31 @@ class RendezNotifList: UIViewController ,UITableViewDelegate, UITableViewDataSou
     }
     
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         //let cell:UITableViewCell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "cell")
         //f(!self.someInts[indexPath.row].isGroup){
         
         if(listType == 0){//status
-            let cell = tableView.dequeueReusableCellWithIdentifier("sCell", forIndexPath: indexPath) as! sCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "sCell", for: indexPath) as! sCell
             cell.textLabel?.text = self.someStatus[indexPath.row].username + " did some sorta something with a status."
             
             
             return cell
         }else if(listType == 1){//rendezes
-            let cell = tableView.dequeueReusableCellWithIdentifier("rCell", forIndexPath: indexPath) as! rCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "rCell", for: indexPath) as! rCell
              //cell.textLabel?.text = self.someRendez[indexPath.row].username + " sent ya a Rendez at " + self.someRendez[indexPath.row].timeset
             cell.time.text = self.someRendez[indexPath.row].timeset
             cell.rTitle.text = self.someRendez[indexPath.row].username + " sent ya a Rendez!"
             
             return cell
         }else{//chat
-            let cell = tableView.dequeueReusableCellWithIdentifier("cCell", forIndexPath: indexPath) as! cCell
-            let dateFormatter = NSDateFormatter()
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cCell", for: indexPath) as! cCell
+            let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-            dateFormatter.timeZone = NSTimeZone(abbreviation: "GMT+0:00")
+            dateFormatter.timeZone = TimeZone(abbreviation: "GMT+0:00")
             
-            var timefor = dateFormatter.stringFromDate(self.someChat[indexPath.row].time)
+            let timefor = dateFormatter.string(from: self.someChat[indexPath.row].time as Date)
             
             //cell.textLabel?.text = self.someChat[indexPath.row].username + " sent ya a message at " + timefor
 
@@ -85,7 +85,7 @@ class RendezNotifList: UIViewController ,UITableViewDelegate, UITableViewDataSou
         //return cell
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("You selected cell #\(indexPath.row)!")
         //let storyboard = UIStoryboard(name: "Main", bundle: nil)
         
