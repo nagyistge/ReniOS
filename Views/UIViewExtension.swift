@@ -11,7 +11,7 @@ import UIKit
 extension UIView {
   
   func lock() {
-    if let lockView = viewWithTag(10) {
+    if viewWithTag(10) != nil {
       //View is already locked
     }
     else {
@@ -19,43 +19,43 @@ extension UIView {
       lockView.backgroundColor = UIColor(white: 0.0, alpha: 0.75)
       lockView.tag = 10
       lockView.alpha = 0.0
-      let activity = UIActivityIndicatorView(activityIndicatorStyle: .White)
+      let activity = UIActivityIndicatorView(activityIndicatorStyle: .white)
       activity.hidesWhenStopped = true
       activity.center = lockView.center
       lockView.addSubview(activity)
       activity.startAnimating()
       addSubview(lockView)
       
-      UIView.animateWithDuration(0.2) {
+      UIView.animate(withDuration: 0.2, animations: {
         lockView.alpha = 1.0
-      }
+      }) 
     }
   }
   
   func unlock() {
     if let lockView = self.viewWithTag(10) {
-      UIView.animateWithDuration(0.2, animations: {
+      UIView.animate(withDuration: 0.2, animations: {
         lockView.alpha = 0.0
-        }) { finished in
+        }, completion: { finished in
           lockView.removeFromSuperview()
-      }
+      }) 
     }
   }
   
-  func fadeOut(duration: NSTimeInterval) {
-    UIView.animateWithDuration(duration) {
+  func fadeOut(_ duration: TimeInterval) {
+    UIView.animate(withDuration: duration, animations: {
       self.alpha = 0.0
-    }
+    }) 
   }
   
-  func fadeIn(duration: NSTimeInterval) {
-    UIView.animateWithDuration(duration) {
+  func fadeIn(_ duration: TimeInterval) {
+    UIView.animate(withDuration: duration, animations: {
       self.alpha = 1.0
-    }
+    }) 
   }
   
-  class func viewFromNibName(name: String) -> UIView? {
-    let views = NSBundle.mainBundle().loadNibNamed(name, owner: nil, options: nil)
-    return views.first as? UIView
+  class func viewFromNibName(_ name: String) -> UIView? {
+    let views = Bundle.main.loadNibNamed(name, owner: nil, options: nil)
+    return views?.first as? UIView
   }
 }
