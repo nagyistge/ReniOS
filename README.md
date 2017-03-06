@@ -4,8 +4,7 @@ Just an extension of work from a startup that went south
 Doing mostly experimental features on it on the fly
 
 - see pictures in issues ^
-- Made a demo video!!
-- https://youtu.be/E2w-edxic3E
+MainControllers: https://youtu.be/dt_zR0Shgb8
 -----------------------------------
 3rd party Frameworks used:
 - GoogleMaps.framework
