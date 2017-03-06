@@ -10,9 +10,12 @@ import UIKit
 
 class ContentViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, showRDelegate{
 
+    @IBOutlet weak var bSend: UIButton!
+    @IBOutlet weak var bNewRendez: UIButton!
     @IBOutlet weak var friendTableView: UITableView!
-    @IBOutlet weak var imageView: UIImageView!
-    @IBOutlet weak var titleLabel: UILabel!
+
+    @IBOutlet weak var topLabel: UILabel!
+    @IBOutlet weak var midLabel: UILabel!
     var items: [String] = ["We", "Heart", "Swift"]
     var someInts = [Status]()
     var someFriendInts = [Status]()
@@ -23,8 +26,6 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
     var onsend:onSendRendezList!
     
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var txtUsername: UILabel!
-    
     let delegate = UIApplication.shared.delegate as! AppDelegate
     
     override func viewDidLoad()
@@ -40,18 +41,14 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
         username = prefs.value(forKey: "USERNAME") as! String
         if (self.delegate.theWozMap[username] == nil){
             self.delegate.starting()
-            
         }
-        if let a = prefs.value(forKey: "SHOWNAME") as? String{
-            self.txtUsername.text = prefs.value(forKey: "SHOWNAME") as? String
-        }else{
-            self.txtUsername.text = prefs.value(forKey: "USERNAME") as? String
 
-        }
-         //let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         self.someInts.append( contentsOf: self.delegate.theWozMap[username]!.allDeesStatus )
         self.someFriendInts.append(contentsOf: self.delegate.newfeed)
-
+        self.view.backgroundColor = UIColor.rgb(235, green: 235, blue: 235)
+        print("")
+        print("ContentViewController:: viewDidLoad()")
+        print("")
     }
     
     override func didReceiveMemoryWarning() {
@@ -61,12 +58,37 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        
+        print("")
+        print("")
+        print("ContentViewController:: viewDidAppear()")
+        print("  ", self.view.frame)
+        print("")
+        print("")
         let prefs:UserDefaults = UserDefaults.standard
         let username:String = prefs.value(forKey: "USERNAME") as! String
-        
+        let width = UIScreen.main.bounds.size.width
         let delegate1 = UIApplication.shared.delegate as! AppDelegate
-        print("IS THIS BEING CALLED???")
+        // top label + offset + midlabel + buttonoffset + button height
+        //  30 + 5 + 30 + 10 + 16 + 60
+        let tableViewTotalHeight = self.view.frame.size.height-151
+        let topheight = tableViewTotalHeight*(3/5) as CGFloat
+        let botheight = tableViewTotalHeight*(2/5) as CGFloat
+        // top label height = 30
+        self.tableView.frame = CGRect(origin: CGPoint(x: 5, y: 35 ), size: CGSize(width: width-10, height: topheight ))
+        //   35 + 5 because top label height is 30 and 5 for a bit of buffer
+        self.midLabel.frame = CGRect(origin: CGPoint(x: 0, y: (35)+self.tableView.frame.size.height ), size: CGSize(width: self.midLabel.frame.size.width, height: 30 ))
+        
+        // topheight+65 since origin needs to be below top tableview+labels
+        self.friendTableView.frame = CGRect(x: 5, y: topheight+(65), width: width-10, height: botheight)
+        
+        self.tableView.layer.cornerRadius = 10
+        self.friendTableView.layer.cornerRadius = 10
+        // 10px buffer between buttons and friendTableView, currently at view.height-180
+        
+        // height 60 width 150/ origin height = view.height-170
+        self.bNewRendez.frame = CGRect(origin: CGPoint(x: 20 , y: self.view.frame.size.height-80 ) , size: CGSize(width: 150, height: 60 ))
+        self.bSend.frame = CGRect(origin: CGPoint(x: self.view.frame.size.width-170 , y: self.view.frame.size.height-80 ) , size: CGSize(width: 150, height: 60 ))
+        
         self.someInts.removeAll()
         self.someFriendInts.removeAll()
         self.someInts.append( contentsOf: delegate1.theWozMap[username]!.allDeesStatus )
@@ -88,11 +110,6 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
         }else{
             return self.someFriendInts.count
         }
-    }
-    
-    func friendTableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 2
-        return self.someFriendInts.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -121,6 +138,7 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
             }else if(status.type == 3){
                 cell.imageView?.image = UIImage(named: "idle")
             }
+            //cell.backgroundColor = UIColor.rgb(235, green: 235, blue: 235)
         return cell
         }
         else{
@@ -141,6 +159,7 @@ class ContentViewController: UIViewController, UITableViewDelegate, UITableViewD
             }else if(status.type == 3){
                 friendcell.imageView?.image = UIImage(named: "idle")
             }
+            //friendcell.backgroundColor = UIColor.rgb(235, green: 235, blue: 235)
             return friendcell
         }
     }
