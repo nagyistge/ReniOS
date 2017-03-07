@@ -1,10 +1,3 @@
-//
-//  MapViewController.swift
-//  Feed Me
-//
-//  Created by Ron Kliffer on 8/30/14.
-//  Copyright (c) 2014 Ron Kliffer. All rights reserved.
-//
 
 import UIKit
 import GoogleMaps
@@ -35,7 +28,7 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
     
     var vc: newRsearched!
     let gpaViewController = GooglePlacesAutocomplete(
-        apiKey: "AIzaSyCC5rs4zMNmKNYOsEIuQ86kY6VBzTU1sZQ",
+        apiKey: "--my-key--",
         placeType: .Address
     )
   override func viewDidLoad() {
