@@ -31,8 +31,13 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
     var username:String!// = prefs.valueForKey("USERNAME") as! String
     var mainMarker: GMSMarker!
     var toViewController:mapRendez!
-
-  
+    var viewController: ViewController?
+    
+    var vc: newRsearched!
+    let gpaViewController = GooglePlacesAutocomplete(
+        apiKey: "AIzaSyCC5rs4zMNmKNYOsEIuQ86kY6VBzTU1sZQ",
+        placeType: .Address
+    )
   override func viewDidLoad() {
     super.viewDidLoad()
     username = prefs.value(forKey: "USERNAME") as! String
@@ -155,8 +160,8 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
             self.addressLabel.unlock()
             if response != nil{
             if let address = response?.firstResult() {
-                let lines = address.lines as! [String]
-                self.addressLabel.text = lines.joined(separator: "\n")
+                let lines = address.lines
+                self.addressLabel.text = lines?.joined(separator: "\n")
                 
                 let labelHeight = self.addressLabel.intrinsicContentSize.height
                 self.mapView.padding = UIEdgeInsets(top: self.topLayoutGuide.length, left: 0, bottom: labelHeight, right: 0)
@@ -173,8 +178,15 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
 
 
     @IBAction func autocompleteTapped(_ sender: UIButton) {
-        self.performSegue(withIdentifier: "goto_autocompleteR", sender: self)
-        //let vc = autoCompleteR()
+        //self.performSegue(withIdentifier: "goto_autocompleteR", sender: self)
+        
+        //let vc = self.storyboard?.instantiateViewController(withIdentifier: "autoCompleteR")
+        
+        gpaViewController.placeDelegate = self
+        //gpaViewController.gpaViewController.delegate = self
+        //present(gpaViewController , animated: true, completion: nil)
+        self.viewController?.present(gpaViewController, animated: true, completion: nil)
+        
         //self.presentViewController(vc, animated: true, completion: nil)
     }
     
@@ -267,7 +279,7 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
                     
                     let position = CLLocationCoordinate2DMake(lat, long)
                     let marker = GMSMarker(position: position)
-                    marker?.title = title1 as String
+                    marker.title = title1 as String
                     var snippet = "" as String
                     if user == username{
                         snippet += "Sent From You \r\n"
@@ -275,8 +287,8 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
                         snippet += "From " + user + "\r\n"
                     }
                     snippet += detail
-                    marker?.snippet = snippet
-                    marker?.map = mapView
+                    marker.snippet = snippet
+                    marker.map = mapView
                     //marker.map = mapView
                         }
                     }
@@ -314,7 +326,51 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
         
         self.present(toViewController, animated: true, completion: nil)
     }
-
-    
 }
 
+extension MapViewController: GooglePlacesAutocompleteDelegate {
+    
+    func placeSelected(place: Place) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        vc = storyboard.instantiateViewController(withIdentifier: "newRsearched") as! newRsearched
+        print(place.description)
+        let stringDetails = place.description
+        
+        //self.dismiss(animated: false, completion: nil)
+        place.getDetails{ details in
+            let lat = details.latitude
+            let long = details.longitude
+            let coords: String = String(format:"%f", lat)+" : "+String(format:"%f", long)
+            self.vc.location = coords
+            
+            
+        }
+        vc.programVar = stringDetails
+        
+        gpaViewController.present(vc, animated: true, completion: nil)
+        
+        place.getDetails { details in
+            print(details)
+        }
+        
+    }
+    
+    func placeViewClosed() {
+        //toViewController.dismiss(animated: true, completion: {
+        //    self.dismiss(animated: true, completion: nil)
+        //})
+        
+        //self.performSegue(withIdentifier: "goto_mainactivity", sender: self)
+        gpaViewController.dismiss(animated: true, completion: nil)
+    }
+    
+    func placesFound(places: [Place]) {
+        print(places)
+        if gpaViewController.gpaViewController.places.count != 0{
+            gpaViewController.gpaViewController.places.removeAll()
+        }
+        gpaViewController.gpaViewController.places.append(contentsOf: places)
+        gpaViewController.gpaViewController.tableView.reloadData()
+    }
+    
+}
