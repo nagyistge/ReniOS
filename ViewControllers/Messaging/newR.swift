@@ -51,15 +51,16 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
         txtLocation.frame = CGRect(origin: CGPoint(x: 20, y: 200 ), size: CGSize(width: width-40, height: txtTitle.frame.size.height ))
         
         buttonLabel.frame = CGRect(x: ((width/2)-(buttonLabel.frame.size.width/2)), y: txtLocation.frame.origin.y+50, width: buttonLabel.frame.size.width, height: buttonLabel.frame.size.height)
-        workButton.frame = CGRect(x: (width/2)-(65), y: buttonLabel.frame.origin.y + 20.0, width: 60, height: 60)
-        eatButton.frame = CGRect(x: workButton.frame.origin.x, y: workButton.frame.origin.y + 65, width: 60, height: 60)
-        partyButton.frame = CGRect(x: (width/2)+5, y: workButton.frame.origin.y, width: 60, height: 60)
-        boredButton.frame = CGRect(x: (width/2)+5, y: eatButton.frame.origin.y, width: 60, height: 60)
+        workButton.frame = CGRect(x: (width/2)-(80), y: buttonLabel.frame.origin.y + 20.0, width: 75, height: 75)
+        eatButton.frame = CGRect(x: workButton.frame.origin.x, y: workButton.frame.origin.y + 80, width: 75, height: 75)
+        partyButton.frame = CGRect(x: (width/2)+5, y: workButton.frame.origin.y, width: 75, height: 75)
+        boredButton.frame = CGRect(x: (width/2)+5, y: eatButton.frame.origin.y, width: 75, height: 75)
         
-        dateLabel.frame = CGRect(x: (width/2)-(dateLabel.frame.size.width/2), y: boredButton.frame.origin.y+70, width: dateLabel.frame.size.width, height: dateLabel.frame.size.height)
-        datePicker.frame = CGRect(x: 0, y: dateLabel.frame.origin.y+20, width: width, height: datePicker.frame.size.height+20 )
+        dateLabel.frame = CGRect(x: (width/2)-(dateLabel.frame.size.width/2), y: boredButton.frame.origin.y+boredButton.frame.size.height+5, width: dateLabel.frame.size.width, height: dateLabel.frame.size.height)
+        datePicker.frame = CGRect(x: 0, y: dateLabel.frame.origin.y+50, width: width, height: datePicker.frame.size.height+20 )
         
-        bCreate.frame = CGRect(x: (width-300)/2, y: height-75, width: 300, height: 60)
+        bCreate.layer.cornerRadius = 10
+        bCreate.frame = CGRect(x: (width-300)/2, y: height-95, width: 300, height: 60)
     }
 
     override func didReceiveMemoryWarning() {
@@ -171,81 +172,73 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
         
         if(flag == -1){
             print(flag)
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Pick a type!"
-            alertView.message = "Are you working, eating, going out having a blast, or bored??"
-            alertView.delegate = self
-            alertView.addButton(withTitle: "OK")
-            alertView.show()
+            let alert = UIAlertController(title: "Pick a type!", message: "Are you working, eating, going out, or bored?", preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                // perhaps use action.title here
+            })
+            self.present(alert, animated: true, completion: nil)
         }
         else if(title.isEmpty || detail.isEmpty){
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Fill it out!!"
-            alertView.message = "Be as descriptive or non-descriptive as you'd like, but put something!"
-            alertView.delegate = self
-            alertView.addButton(withTitle: "OK")
-            alertView.show()
-        }
-        else{
-        let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)" as NSString
-        NSLog("PostData: %@",post);
-        
-        let url:URL = URL(string: "http://www.jjkbashlord.com/newStatus.php")!
-        
-        let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
-        
-        let postLength:NSString = String( postData.count ) as NSString
-        
-        let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = postData
-        request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        request.setValue("application/json", forHTTPHeaderField: "Accept")
-        var reponseError: NSError?
-        var response: URLResponse?
-        
-        var urlData: Data?
-        do {
-            urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
-        } catch let error as NSError {
-            reponseError = error
-            urlData = nil
-        }
-        
-        if ( urlData != nil ) {
-            let res = response as! HTTPURLResponse!;
             
-            //NSLog("Response code: %ld", res?.statusCode);
+            let alert = UIAlertController(title: "Fill it out!", message: "Be as detailed as possible!", preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                // perhaps use action.title here
+            })
+            self.present(alert, animated: true, completion: nil)
+        
+        }else{
+            let post:NSString = "username=\(username)&title=\(title)&detail=\(detail)&location=\(location)&timefor=\(timefor)&type=\(flag)" as NSString
+            NSLog("PostData: %@",post);
+        
+            let url:URL = URL(string: "http://www.jjkbashlord.com/newStatus.php")!
+        
+            let postData:Data = post.data(using: String.Encoding.ascii.rawValue)!
+        
+            let postLength:NSString = String( postData.count ) as NSString
+        
+            let request:NSMutableURLRequest = NSMutableURLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = postData
+            request.setValue(postLength as String, forHTTPHeaderField: "Content-Length")
+            request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+            request.setValue("application/json", forHTTPHeaderField: "Accept")
+            var reponseError: NSError?
+            var response: URLResponse?
+        
+            var urlData: Data?
+            do {
+                urlData = try NSURLConnection.sendSynchronousRequest(request as URLRequest, returning:&response)
+            } catch let error as NSError {
+                reponseError = error
+                urlData = nil
+            }
+        
+            if ( urlData != nil ) {
+                let res = response as! HTTPURLResponse!;
             
-            if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300)
-            {
-                let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
-                
-                NSLog("Response ==> %@", responseData);
-                
-             //   var error: NSError?
-                
-                self.dismiss(animated: true, completion: nil)
+                if ((res?.statusCode)! >= 200 && (res?.statusCode)! < 300){
+                    let responseData:NSString  = NSString(data:urlData!, encoding:String.Encoding.utf8.rawValue)!
+                    NSLog("Response ==> %@", responseData);
+                    self.dismiss(animated: true, completion: nil)
+                } else {
+                    let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+                    alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                            // perhaps use action.title here
+                    })
+                    self.present(alert, animated: true, completion: nil)
+                }
             } else {
-                let alertView:UIAlertView = UIAlertView()
-                alertView.title = "Sign in Failed!"
-                alertView.message = "Connection Failed"
-                alertView.delegate = self
-                alertView.addButton(withTitle: "OK")
-                alertView.show()
+                let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+                alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                        // perhaps use action.title here
+                })
+                
+                if let error = reponseError {
+                    alert.message = (error.localizedDescription)
+                }
+                self.present(alert, animated: true, completion: nil)
+            
             }
-        } else {
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Sign in Failed!"
-            alertView.message = "Connection Failure"
-            if let error = reponseError {
-                alertView.message = (error.localizedDescription)
-            }
-            alertView.delegate = self
-            alertView.addButton(withTitle: "OK")
-            alertView.show()
-        }
         }
         self.dismiss(animated: true, completion: nil)
     }
