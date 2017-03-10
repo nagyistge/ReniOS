@@ -5,6 +5,7 @@ Doing mostly experimental features on it on the fly
 
 - see pictures in issues ^
 MainControllers: https://youtu.be/dt_zR0Shgb8
+New layout to replace the old drag-drop to send one: https://youtu.be/vcJZTdlyk3E
 -----------------------------------
 3rd party Frameworks used:
 - GoogleMaps.framework
