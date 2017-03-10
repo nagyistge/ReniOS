@@ -20,7 +20,6 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     //pickerview spinner for seeing your response and being able to change it
     @IBOutlet weak var responsePicker: UIPickerView!
     //send button that should not show unless it is a status by you
-    @IBOutlet weak var sendB: UIButton!
     
     var programVar : Status!
     var programVar1 : RendezStatus!
@@ -30,15 +29,20 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
     //@IBOutlet weak var friendScroll: UIScrollView!
     @IBOutlet weak var timeTxt: UILabel!
     @IBOutlet weak var typeImg: UIImageView!
+    
     @IBOutlet weak var txtTitle: UILabel!
     @IBOutlet weak var txtDetail: UILabel!
     @IBOutlet weak var txtLocation: UILabel!
-    var vc: sendToFriends!
+    @IBOutlet weak var locL: UILabel!
+    @IBOutlet weak var detailL: UILabel!
+    @IBOutlet weak var titleL: UILabel!
     
+    @IBOutlet weak var topLabel: UILabel!
+    @IBOutlet weak var bBack: UIButton!
+    @IBOutlet weak var bDelete: UIButton!
+    @IBOutlet weak var bMap: UIButton!
     var returnDelegate: showRDelegate!
-    
-     let delegate = UIApplication.shared.delegate as! AppDelegate
-
+    let delegate = UIApplication.shared.delegate as! AppDelegate
     var vm: showRMap!
     
     var username: String!
@@ -51,14 +55,15 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
 
     @IBOutlet weak var visableIndicator: UISwitch!
     var switchBool:Bool!
-
     @IBOutlet weak var visabl: UILabel!
 
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         self.friendResponses.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-
+        self.view.backgroundColor = UIColor.rgb(240, green: 240, blue: 240)
+        if topLabel.frame.origin.x < 0{
+            setupViews()
+        }
         // Do any additional setup after loading the view.
     }
 
@@ -102,18 +107,19 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 self.visableIndicator.removeFromSuperview()
                 self.friendResponses.removeFromSuperview()
                 self.responsePicker.selectRow(self.programVar.response, inComponent: 0, animated: true)
-                self.sendB.removeFromSuperview()
                     self.labelForResponseNames.text = "You have "
 
                 }
             }else{
                 if(self.responsePicker != nil){
-                self.responsePicker.removeFromSuperview()
-                if self.programVar.visable == 1{
-                    self.visableIndicator.setOn(true, animated: true)
-                }else{
-                    self.visableIndicator.setOn(false, animated: true)
-                }
+                    self.responsePicker.removeFromSuperview()
+                    if self.programVar.visable == 1{
+                        self.visableIndicator.setOn(true, animated: true)
+                        self.visabl.text = "Visability: Public"
+                    }else{
+                        self.visableIndicator.setOn(false, animated: true)
+                        self.visabl.text = "Visability: Private"
+                    }
                 }
             }
         }
@@ -121,7 +127,6 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
             txtTitle.text = self.programVar1.title as NSString as String
             txtDetail.text = self.programVar1.details as NSString as String
             txtLocation.text = self.programVar1.location as NSString as String
-        
         }
     }
     
@@ -198,29 +203,6 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
         }
     }
     
-    
-
-    
-    
-    @IBAction func sendRTapped(_ sender: UIButton) {
-        let prefs:UserDefaults = UserDefaults.standard
-        let username:String = prefs.value(forKey: "USERNAME") as! String
-        let showname:String = prefs.value(forKey: "SHOWNAME") as! String
-        
-        let title:String = txtTitle.text!
-        let detail:String = txtDetail.text!
-        let location:String = txtLocation.text!
-        
-        
-        vc = self.storyboard?.instantiateViewController(withIdentifier: "sendToFriends") as! sendToFriends
-        vc.username = username
-        vc.showname = showname
-        vc.title1 = title
-        vc.detail1 = detail
-        vc.location1 = location
-        vc.progVar = self.programVar
-        self.present(vc, animated: true, completion: nil)
-    }
     
     @IBAction func showOnMapTapped(_ sender: UIButton) {
         vm = self.storyboard?.instantiateViewController(withIdentifier: "showRMap") as! showRMap
@@ -386,28 +368,57 @@ class showR: UIViewController, UITableViewDelegate, UITableViewDataSource, UIPic
                 
                 self.dismiss(animated: true, completion: nil)
             } else {
-                let alertView:UIAlertView = UIAlertView()
-                alertView.title = "Sign in Failed!"
-                alertView.message = "Connection Failed"
-                alertView.delegate = self
-                alertView.addButton(withTitle: "OK")
-                alertView.show()
+                let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+                alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                    // perhaps use action.title here
+                })
+                self.present(alert, animated: true, completion: nil)
             }
         } else {
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Sign in Failed!"
-            alertView.message = "Connection Failure"
-            if let error = reponseError {
-                alertView.message = (error.localizedDescription)
-            }
-            alertView.delegate = self
-            alertView.addButton(withTitle: "OK")
-            alertView.show()
+            let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                // perhaps use action.title here
+            })
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
     
+    @IBAction func onVisChange(_ sender: UISwitch) {
+        if visableIndicator.isOn{
+            visabl.text = "Visability: Public"
+        }else{
+            visabl.text = "Visability: Private"
+        }
+    }
+    
 
+    func setupViews(){
+        view.addConstraintsWithFormat("V:|-20-[v0(40)]", views: topLabel)
+        view.addConstraintsWithFormat("H:|[v0]|", views: topLabel)
+        view.addConstraintsWithFormat("H:|[v0(60)]", views: bBack)
+        view.addConstraintsWithFormat("V:|-20-[v0]", views: bBack)
+        //currently after status bar and top label ending at 60px height
+        
+        view.addConstraintsWithFormat("V:|-65-[v0(25)]-5-[v1(30)]-5-[v2(25)]-5-[v3(60)]-5-[v4(25)]-5-[v5(30)]-20-[v6(60)]-30-[v7]-15-[v8]", views: titleL, txtTitle, detailL, txtDetail, locL, txtLocation, typeImg, visabl, friendResponses)
+        view.addConstraintsWithFormat("V:[v0(60)]-16-|", views: bMap)
+        view.addConstraintsWithFormat("V:[v0(60)]-16-|", views: bDelete)
+        
+        view.addConstraint(NSLayoutConstraint(item: timeTxt, attribute: .top, relatedBy: .equal, toItem: typeImg, attribute: .top, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: visableIndicator, attribute: .top, relatedBy: .equal, toItem: visabl, attribute: .top, multiplier: 1, constant: 0))
 
+        
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: titleL)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: detailL)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: locL)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtTitle)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtDetail)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtLocation)
+        view.addConstraintsWithFormat("H:|-26-[v0(60)]", views: typeImg)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: visabl)
+        view.addConstraintsWithFormat("H:|-16-[v0(130)]", views: bMap)
+        view.addConstraintsWithFormat("H:[v0(130)]-16-|", views: bDelete)
+
+    }
 
 }

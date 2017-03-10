@@ -27,9 +27,20 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     @IBOutlet weak var sendLocButton: UIButton!
     @IBOutlet weak var timeTxt: UILabel!
     @IBOutlet weak var typeImg: UIImageView!
+    
     @IBOutlet weak var txtTitle: UILabel!
     @IBOutlet weak var txtDetail: UILabel!
     @IBOutlet weak var txtLocation: UILabel!
+    @IBOutlet weak var titleL: UILabel!
+    @IBOutlet weak var locL: UILabel!
+    @IBOutlet weak var detailL: UILabel!
+    
+    @IBOutlet weak var topLabel: UILabel!
+    @IBOutlet weak var bBack: UIButton!
+    @IBOutlet weak var bMap: UIButton!
+    @IBOutlet weak var bLoc: UIButton!
+    @IBOutlet weak var bDelete: UIButton!
+    
     var vc: sendToFriends!
     let delegate = UIApplication.shared.delegate as! AppDelegate
     
@@ -47,8 +58,12 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     var id:Int!
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = UIColor.rgb(240, green: 240, blue: 240)
         self.friendResponses.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         // Do any additional setup after loading the view.
+        if topLabel.frame.origin.x < 0{
+            setupViews()
+        }
     }
     
     override func didReceiveMemoryWarning() {
@@ -58,7 +73,6 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(true)
-        
         
             txtTitle.text = self.programVar1.title as NSString as String
             txtDetail.text = self.programVar1.details as NSString as String
@@ -90,6 +104,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
                 responsePicker.delegate = nil
                 if(friendResponses != nil){
                     //friendResponses.removeFromSuperview()
+                    print("responsePicker removed from superview")
                     responsePicker.removeFromSuperview()
                 }
             }else{
@@ -106,7 +121,7 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
         }
         let delegate1 = UIApplication.shared.delegate as! AppDelegate
         print("id: " + String(id))
-        if let a = delegate1.groupResponses[id]{
+        if delegate1.groupResponses[id] != nil{
             print("succ")
             friendRespArray.append(contentsOf: delegate1.groupResponses[id]!)
             print(friendRespArray.count)
@@ -293,5 +308,43 @@ class showRRendez: UIViewController, UITableViewDelegate, UITableViewDataSource,
             alertView.addButton(withTitle: "OK")
             alertView.show()
         }
+    }
+    
+    func setupViews(){
+        view.addConstraintsWithFormat("V:|-20-[v0(40)]", views: topLabel)
+        view.addConstraintsWithFormat("H:|[v0]|", views: topLabel)
+        view.addConstraintsWithFormat("H:|[v0(60)]", views: bBack)
+        view.addConstraintsWithFormat("V:|-20-[v0]", views: bBack)
+        //currently after status bar and top label ending at 60px height
+        
+        view.addConstraintsWithFormat("V:|-65-[v0(25)]-5-[v1(30)]-5-[v2(25)]-5-[v3(80)]-5-[v4(25)]-5-[v5(30)]-20-[v6(60)]-30-[v7(40)]-15-[v8]-80-|", views: titleL, txtTitle, detailL, txtDetail, locL, txtLocation, typeImg, responseName, friendResponses)
+        view.addConstraintsWithFormat("V:[v0(60)]-16-|", views: bMap)
+        view.addConstraintsWithFormat("V:[v0(60)]-16-|", views: bDelete)
+        view.addConstraintsWithFormat("V:[v0(60)]-16-|", views: bLoc)
+        
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: titleL)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: detailL)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: locL)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtTitle)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtDetail)
+        view.addConstraintsWithFormat("H:|-10-[v0]-10-|", views: txtLocation)
+        view.addConstraintsWithFormat("H:|-26-[v0(60)]", views: typeImg)
+        view.addConstraintsWithFormat("H:|-16-[v0]", views: responseName)
+        timeTxt.translatesAutoresizingMaskIntoConstraints = false
+        responsePicker.translatesAutoresizingMaskIntoConstraints = false
+        let bWidth = (UIScreen.main.bounds.size.width-112)/3
+        view.addConstraintsWithFormat("H:|-16-[v0(\(bWidth))]-40-[v1(\(bWidth))]-40-[v2(\(bWidth))]-16-|", views: bMap, bDelete, bLoc)
+        
+        view.addConstraint(NSLayoutConstraint(item: timeTxt, attribute: .left, relatedBy: .equal, toItem: typeImg, attribute: .right, multiplier: 1, constant: 8))
+        view.addConstraint(NSLayoutConstraint(item: responsePicker, attribute: .left, relatedBy: .equal, toItem:responseName, attribute: .right, multiplier: 1, constant: 8))
+        
+        view.addConstraint(NSLayoutConstraint(item: timeTxt, attribute: .top, relatedBy: .equal, toItem: typeImg, attribute: .top, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: responsePicker , attribute: .centerY, relatedBy: .equal, toItem: responseName, attribute: .top, multiplier: 1, constant: 0))
+        
+        print("responsePicker frame ", responsePicker.frame)
+        
+        
+        //view.addConstraintsWithFormat("H:[v0(130)]-16-|", views: bDelete)
+        
     }
 }
