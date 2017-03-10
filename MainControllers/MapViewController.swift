@@ -1,3 +1,10 @@
+//
+//  MapViewController.swift
+//  Feed Me
+//
+//  Created by Ron Kliffer on 8/30/14.
+//  Copyright (c) 2014 Ron Kliffer. All rights reserved.
+//
 
 import UIKit
 import GoogleMaps
@@ -28,7 +35,7 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
     
     var vc: newRsearched!
     let gpaViewController = GooglePlacesAutocomplete(
-        apiKey: "--my-key--",
+        apiKey: "AIzaSyCC5rs4zMNmKNYOsEIuQ86kY6VBzTU1sZQ",
         placeType: .Address
     )
   override func viewDidLoad() {
@@ -97,7 +104,7 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
     }
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         if let location = locations.first {
-            print(locations.first)
+            print(locations.first ?? "")
             print(location)
             print(location.coordinate.latitude)
             // 6
@@ -137,11 +144,11 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
         mapView.animate(toZoom: 17)
     }
     
-    func mapView(_ mapView: GMSMapView!, idleAt position: GMSCameraPosition!) {
+    func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
         reverseGeocodeCoordinate(position.target)
     }
     
-    func mapView(_ mapView: GMSMapView!, willMove gesture: Bool) {
+    func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
         self.addressLabel.lock()
     }
     func reverseGeocodeCoordinate(_ coordinate: CLLocationCoordinate2D) {
@@ -287,23 +294,18 @@ class MapViewController: UIViewController,  CLLocationManagerDelegate, GMSMapVie
                     }
                 }
             } else {
-                let alertView:UIAlertView = UIAlertView()
-                alertView.title = "Sign in Failed!"
-                alertView.message = "Connection Failed"
-                alertView.delegate = self
-                alertView.addButton(withTitle: "OK")
-                alertView.show()
+                let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+                alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                    // perhaps use action.title here
+                })
+                self.present(alert, animated: true, completion: nil)
             }
         } else {
-            let alertView:UIAlertView = UIAlertView()
-            alertView.title = "Sign in Failed!"
-            alertView.message = "Connection Failure"
-            if let error = reponseError {
-                alertView.message = (error.localizedDescription)
-            }
-            alertView.delegate = self
-            alertView.addButton(withTitle: "OK")
-            alertView.show()
+            let alert = UIAlertController(title: "Sign in Failed!", message: "Connection Failed", preferredStyle: .actionSheet)
+            alert.addAction(UIAlertAction(title:  "OK", style: .default) { action in
+                // perhaps use action.title here
+            })
+            self.present(alert, animated: true, completion: nil)
         }
         
     }

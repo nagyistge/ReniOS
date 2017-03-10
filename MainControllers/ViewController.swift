@@ -64,12 +64,15 @@ import UIKit
                 self.vcMe?.view.frame = CGRect(x: 0, y: 0, width: w, height: pageHeight)
                 self.vcMap?.view.frame = CGRect(x: 0, y: 0, width: w, height: pageHeight)
                 self.vcFriends?.view.frame = CGRect(x: 0,y: 0, width: w, height: pageHeight)
-            print("ViewController:: self.vcMe(AKA ContentViewController) frame resized smaller.", self.vcMe?.view.frame)
+            print("ViewController:: self.vcMe(AKA ContentViewController) frame resized smaller.", self.vcMe?.view.frame ?? "")
         
             self.pageViewController = self.storyboard?.instantiateViewController(withIdentifier: "PageViewController") as! UIPageViewController
             
             self.pageViewController.view.frame = CGRect(x: 0, y: 60+self.segmentIndex.frame.size.height, width: self.view.frame.width, height: self.view.frame.size.height-(60+self.segmentIndex.frame.size.height))
+            // set viewControllers for presents
             self.vcFriends?.viewController = self
+            self.vcMe?.viewController = self
+            self.vcMap?.viewController = self
             
             self.view.addSubview(self.pageViewController.view)
             print("ViewController:: viewDidLoad() finish")
@@ -83,8 +86,7 @@ import UIKit
                 let delegate = UIApplication.shared.delegate as! AppDelegate
                 let username:String = prefs.value(forKey: "USERNAME") as! String
                 delegate.window?.rootViewController = self
-            // Re-frame all the views because storyboard sucks
-                let w = UIScreen.main.bounds.size.width
+            // R_me all the views because storyboard sucks
             
                 print("ViewController:: viewDidAppear()")
                 print("")
@@ -160,23 +162,26 @@ import UIKit
         }
 
         @IBAction func indexChanged(_ sender: UISegmentedControl) {
-            
+            //var direction:UIPageViewControllerNavigationDirection = .
+            let direction = getDirection(old: self.index, new: segmentIndex.selectedSegmentIndex)
+            var viewControllers = [UIViewController]()
             switch segmentIndex.selectedSegmentIndex{
             case 0:
-                let viewControllers = NSArray(object: self.vcMe)
-                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
+                //let viewControllers = NSArray(object: self.vcMe)
+                viewControllers.append(self.vcMe!)
                 self.index = 0
             case 1:
-                let viewControllers = NSArray(object: self.vcMap)
-                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
+                //let viewControllers = NSArray(object: self.vcMap)
+                viewControllers.append(self.vcMap!)
                 self.index = 1
             case 2:
-                let viewControllers = NSArray(object: self.vcFriends)
-                self.pageViewController.setViewControllers(viewControllers as? [UIViewController],direction: .forward, animated: true, completion: nil)
+                //let viewControllers = NSArray(object: self.vcFriends)
+                viewControllers.append(self.vcFriends!)
                 self.index = 2
             default:
                 break
             }
+            self.pageViewController.setViewControllers(viewControllers,direction: direction, animated: true, completion: nil)
         }
 
         func presentationCountForPageViewController(_ pageViewController: UIPageViewController) -> Int
@@ -204,6 +209,15 @@ import UIKit
             vcInRanges.statuses = delegate.r_status
             self.present(vcInRanges, animated: true, completion: nil)
             
+        }
+        
+        func getDirection(old:Int,new:Int ) -> UIPageViewControllerNavigationDirection{
+            if old < new{
+                return UIPageViewControllerNavigationDirection.forward
+            }else{
+                return UIPageViewControllerNavigationDirection.reverse
+            }
+            //return UIPageViewControllerNavigationDirection.forward
         }
     }
     
