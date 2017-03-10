@@ -14,6 +14,9 @@ import GoogleMaps
 class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
 {
 
+    @IBOutlet weak var bBack: UIButton!
+    @IBOutlet weak var topLabel: UILabel!
+    @IBOutlet weak var bCreate: UIButton!
 
     @IBOutlet weak var txtTitle: UITextField!
     @IBOutlet weak var txtDetails: UITextField!
@@ -32,19 +35,31 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
     @IBOutlet weak var datePicker: UIDatePicker!
     @IBOutlet weak var dateLabel: UILabel!
     
-    
-    
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         locationManager.delegate = self
-        
+        let width = UIScreen.main.bounds.size.width
+        let height = UIScreen.main.bounds.size.height
         // Do any additional setup after loading the view.
         workButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
         eatButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
         partyButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
         boredButton.addTarget(self, action: #selector(newR.buttonClicked(_:)), for: .touchUpInside)
+        topLabel.frame = CGRect(x: 0, y: 20, width: width, height: 45)
+        txtTitle.frame = CGRect(origin: CGPoint(x: 20, y: 100 ), size: CGSize(width: width-40, height: txtTitle.frame.size.height ))
+        txtDetails.frame = CGRect(origin: CGPoint(x: 20, y: 150 ), size: CGSize(width: width-40, height: txtTitle.frame.size.height ))
+        txtLocation.frame = CGRect(origin: CGPoint(x: 20, y: 200 ), size: CGSize(width: width-40, height: txtTitle.frame.size.height ))
+        
+        buttonLabel.frame = CGRect(x: ((width/2)-(buttonLabel.frame.size.width/2)), y: txtLocation.frame.origin.y+50, width: buttonLabel.frame.size.width, height: buttonLabel.frame.size.height)
+        workButton.frame = CGRect(x: (width/2)-(65), y: buttonLabel.frame.origin.y + 20.0, width: 60, height: 60)
+        eatButton.frame = CGRect(x: workButton.frame.origin.x, y: workButton.frame.origin.y + 65, width: 60, height: 60)
+        partyButton.frame = CGRect(x: (width/2)+5, y: workButton.frame.origin.y, width: 60, height: 60)
+        boredButton.frame = CGRect(x: (width/2)+5, y: eatButton.frame.origin.y, width: 60, height: 60)
+        
+        dateLabel.frame = CGRect(x: (width/2)-(dateLabel.frame.size.width/2), y: boredButton.frame.origin.y+70, width: dateLabel.frame.size.width, height: dateLabel.frame.size.height)
+        datePicker.frame = CGRect(x: 0, y: dateLabel.frame.origin.y+20, width: width, height: datePicker.frame.size.height+20 )
+        
+        bCreate.frame = CGRect(x: (width-300)/2, y: height-75, width: 300, height: 60)
     }
 
     override func didReceiveMemoryWarning() {
@@ -139,6 +154,11 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
     
     
     
+    @IBAction func backTapped(_ sender: UIButton) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    
 
     @IBAction func newRTapped(_ sender: UIButton) {
         let prefs:UserDefaults = UserDefaults.standard
@@ -229,6 +249,10 @@ class newR: UIViewController, CLLocationManagerDelegate, GMSMapViewDelegate
         }
         self.dismiss(animated: true, completion: nil)
     }
+    
+    
+    
+    
     /*
     // MARK: - Navigation
 
